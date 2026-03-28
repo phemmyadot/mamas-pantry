@@ -1,48 +1,181 @@
 # Mama's Pantry — Build Todo
+> Aligned to webapp_spec.pdf (v1.0). Spec defines 6 phases; we track by feature area.
 
-## Foundation
+---
 
-- [x] Read Next.js 16 docs in `node_modules/next/dist/docs/` before writing any code (required by AGENTS.md)
-- [x] Configure Tailwind v4 with brand tokens (Forest Deep `#1B4332`, Harvest Gold `#D4A017`, Market Spice `#C4622D`, Warm Cream `#FEFAE0`) and Google Fonts (Playfair Display, Lora, DM Sans)
-- [x] Create API client — typed fetch wrapper with JWT bearer header, automatic token refresh via `/auth/refresh`, and RFC 7807 error handling
-- [x] Create auth context/store — persist access + refresh tokens, expose user state, login/logout helpers, `isAuthenticated` flag
+## Phase 1 — Foundation ✅ COMPLETE
 
-## Auth UI — Standard / Phone OTP
+- [x] Tailwind v4 brand tokens (Forest Deep, Gold, Cream, Spice) + Google Fonts (Playfair Display, Lora, DM Sans)
+- [x] API client — typed fetch wrapper, JWT bearer, auto-refresh on 401, RFC 7807 errors
+- [x] Auth context — access/refresh token cookies, user state, login/logout, `isAuthenticated`
+- [x] Route middleware — protect `/account`, `/checkout`, `/admin`; bounce authenticated users from auth pages
+- [x] Auth UI — Register, Login, Password Reset (request + confirm) pages
+- [x] Verify-phone page (built for OTP; switched to email verification — page still exists)
 
-- [x] Build Register page — email + password form, `POST /auth/register`, redirect to phone verification
-- [x] Build Login page — email + password form, `POST /auth/login`, store tokens, redirect to home (or `/verify-phone` if unverified)
-- [x] Build Phone OTP pages — (1) enter phone + send OTP via `POST /auth/phone/send-otp`; (2) enter 6-digit code + verify via `POST /auth/phone/verify-otp`; show resend countdown (3/hr limit)
-- [x] Build Password Reset pages — (1) request form (`POST /auth/password-reset/request`); (2) confirm form with token from email link (`POST /auth/password-reset/confirm`)
-- [x] Implement route middleware — redirect unauthenticated users to `/login`; redirect verified users away from auth pages
+---
 
-## Backend Extensions
+## Phase 2 — Backend Schema Revisions (needed before continuing)
 
-- [x] Add `Product` model (name, description, price_ngn, category enum [`mums_pick`, `local`, `imported`], badge, image_url, stock_qty, is_active) + Alembic migration
-- [x] Add Products API — `GET /products` (filterable by category, search), `GET /products/{id}`, `POST`/`PATCH`/`DELETE /admin/products` (admin only)
-- [x] Add `Order` + `OrderItem` models (order: user_id, status enum [`pending`, `packed`, `out_for_delivery`, `delivered`, `cancelled`], total_ngn, delivery_address; items: product_id, qty, unit_price) + migration
-- [x] Add Orders API — `POST /orders`, `GET /orders/me`, `GET /admin/orders` (paginated, filterable by status), `PATCH /admin/orders/{id}/status`
+> Spec defines different categories and additional fields/tables vs what was built in phase 2.
 
-## Public Storefront
+### Products model changes
+- [ ] Change `ProductCategory` enum from `mums_pick|local|imported` → `imported|local|chilled|household`
+- [ ] Add `is_mums_pick` boolean field (independent of category — a product can be `imported` AND `is_mums_pick=true`)
+- [ ] Add `slug` field (unique, URL-safe, used for routing: `/shop/[slug]`)
+- [ ] Add `compare_price` field (Numeric, nullable — for strikethrough pricing)
+- [ ] Add `origin` field (string, e.g. "USA", "Nigeria")
+- [ ] Add `images` field (array of URLs, replaces single `image_url`)
+- [ ] Write and run Alembic migration for all product changes
 
-- [ ] Build storefront layout — header (logo, nav: Shop / Mum's Picks / Local / Delivery, cart icon with item count), footer (Magodo Phase 1 Lagos, tagline)
-- [ ] Build Homepage — hero ("From our hands to your table"), "Just landed" 4-up product grid, category chips, CTA button
-- [ ] Build Shop / product listing page — category filter tabs, product cards (image, badge [Mum's Pick / Local / New Arrival], name, ₦ price, add-to-cart), search bar
-- [ ] Build Product detail page — image, name, badge, ₦ price, description, qty selector, add-to-cart button
-- [ ] Build Cart — slide-out drawer, line items with qty stepper, order total in ₦, checkout CTA (requires auth)
-- [ ] Build Checkout flow — delivery address form, order summary, `POST /orders`; show confirmation with order number
-- [ ] Build customer Account pages — profile (`GET`/`PATCH /users/me`), order history list, order detail with status badge
+### Orders model changes
+- [ ] Add `CONFIRMED` to `OrderStatus` enum (full set: PENDING → CONFIRMED → PACKED → OUT_FOR_DELIVERY → DELIVERED | CANCELLED)
+- [ ] Add `delivery_fee` field (Numeric)
+- [ ] Add `payment_status` field (enum: unpaid | paid | failed)
+- [ ] Add `payment_ref` field (Paystack reference, nullable string)
+- [ ] Add `rider_id` FK (nullable, links to riders table)
+- [ ] Add `notes` field (nullable text)
+- [ ] Write and run Alembic migration for order changes
 
-## Admin Dashboard
+### New tables
+- [ ] `addresses` — user saved delivery addresses (id, user_id, label, street, area, city, is_default). Magodo Phase 1 pre-filled as default on register
+- [ ] `shipments` — US import shipment tracker (id, name, origin_country, departure_date, arrival_date, status, notes)
+- [ ] `pre_orders` — customer pre-orders (id, user_id, product_id, shipment_id, quantity, status)
+- [ ] `riders` — dispatch riders (id, name, phone, is_active, current_lat, current_lng)
+- [ ] `loyalty_transactions` — points earned/redeemed (id, user_id, order_id, points, type [EARN|REDEEM|EXPIRE], description)
+- [ ] `promo_codes` — discount codes (id, code, discount_type [PERCENTAGE|FIXED], discount_value, min_order, max_uses, used_count, expires_at)
+- [ ] Write and run Alembic migration for all new tables
 
-- [ ] Build Admin layout — dark-green sidebar (Dashboard, Orders, Inventory, Customers, Analytics, Settings), top bar with date
-- [ ] Build Admin Dashboard overview — stat cards (Today's Revenue ₦, Orders count, Low Stock alert), Recent Orders table, Weekly Sales bar chart
-- [ ] Build Admin Orders page — paginated table, status filter, inline status update (Packed / Out for Delivery / Delivered / Cancelled)
-- [ ] Build Admin Inventory page — product table with stock qty, add/edit product form (name, ₦ price, category, badge, image, stock), low-stock highlight
-- [ ] Build Admin Customers page — `GET /admin/users`, paginated table, ban/unban actions
-- [ ] Build Admin Audit Logs page — `GET /admin/audit-logs`, filterable by event type and date range
+### New API endpoints
+- [ ] `GET /api/v1/products/featured` — returns `is_mums_pick=true` products (for homepage)
+- [ ] `GET /api/v1/products?mums_pick=true` — add `mums_pick` boolean filter to existing list endpoint
+- [ ] `GET /api/v1/categories` — returns 4 categories with product count each
+- [ ] `GET /api/v1/shipments` — upcoming and recent shipments (public)
+- [ ] `GET /api/v1/shipments/{id}/products` — products available for pre-order on this shipment (public)
+- [ ] `POST /api/v1/pre-orders` — place a pre-order (auth)
+- [ ] `GET /api/v1/pre-orders/mine` — customer's active pre-orders (auth)
+- [ ] `POST /api/v1/admin/shipments` — create shipment record (admin)
+- [ ] `PATCH /api/v1/admin/shipments/{id}` — update shipment status and arrival date (admin)
+- [ ] `POST /api/v1/admin/orders/{id}/assign-rider` — assign rider to order (staff)
+- [ ] `POST /api/v1/orders/webhook/paystack` — Paystack payment webhook, verify HMAC-SHA512 signature, update payment_status
+- [ ] `GET /api/v1/admin/dashboard` — KPI summary: today's revenue, order counts, low-stock alerts, weekly chart data (single call, no waterfall)
+- [ ] `GET /api/v1/admin/customers` — paginated customer list with order count and total spend
+- [ ] `GET /api/v1/admin/analytics` — revenue by date range, top products, category breakdown
+- [ ] `POST /api/v1/admin/promo-codes` — create promo code
+- [ ] `GET /api/v1/admin/inventory/low-stock` — products below reorder threshold
 
-## Config & Data
+---
 
-- [ ] Wire backend `.env` — set `CORS_ORIGINS` to Next.js dev URL, confirm Twilio credentials for OTP, set `JWT_SECRET`
-- [ ] Run Alembic migrations (initial auth + products + orders) against local PostgreSQL
-- [ ] Seed product catalogue — sample products across Mum's Picks, Local Staples, and Imported categories with ₦ prices
+## Phase 2 — Customer MVP (storefront pages)
+
+> Partially built in phase 3 of previous work. Several pages need revisions per spec.
+
+### Already built (may need revision)
+- [x] Storefront layout — sticky header, footer (Magodo Phase 1), cart drawer
+- [x] Cart context — localStorage, addItem/removeItem/updateQty, drawer open/close state
+- [x] ProductCard component — image, badge, price, add-to-cart
+- [x] `/shop` — product grid, category filter, search bar *(needs: Chilled/Household categories, Mum's Pick toggle filter, sort by price/newest/popular)*
+- [x] `/products/[id]` — product detail with qty selector, add-to-cart *(needs: route by slug → `/shop/[slug]`, image gallery, related products, origin badge)*
+- [x] `/checkout` — delivery form, order summary, POST /orders *(needs: 3-step flow, Paystack, time slot picker)*
+- [x] `/checkout/confirmation` — order confirmation
+
+### Homepage revisions needed
+- [ ] Update hero headline to "From our hands to your table" with shipment teaser banner ("Mum just landed — new stock in") when active shipment exists
+- [ ] Add Mum's Picks horizontal scroll section (5-6 cards, gold badge, "View all" → `/mums-picks`)
+- [ ] Replace category chips with 4-tile category grid (Imported, Local, Chilled, Household) with icon and product count from `GET /categories`
+- [ ] Add "Local Staples" strip — 4 featured local products, visually distinct from imported section
+- [ ] Add delivery zone section — list of covered areas (Magodo Phase 1, Phase 2, Alapere, Ketu, Ojota)
+- [ ] Add "How it works" strip — 3 steps: Browse → Order → Delivered to your gate
+
+### New storefront pages
+- [ ] `/cart` — dedicated cart page: line items, qty controls, promo code input field, delivery fee calculation, order summary, Paystack CTA
+- [ ] `/orders` — customer order history: list of past and active orders with status timeline badges
+- [ ] `/orders/[id]` — order detail: items, rider tracking link, status timeline, receipt download
+- [ ] `/mums-picks` — dedicated Mum's Pick page: `GET /products?mums_pick=true`, shipment countdown widget (days until next US arrival)
+- [ ] `/pre-order` — browse upcoming shipment products (`GET /shipments` + `GET /shipments/{id}/products`), place pre-order (`POST /pre-orders`)
+- [ ] `/track/[id]` — public order tracking (no login): verify by order ID + phone number, show status timeline
+- [ ] `/delivery` — delivery info static page (zones, cut-off times, fees) *(referenced in header nav)*
+
+### Account pages
+- [ ] `/account` — profile overview: name, email, loyalty points balance (with ₦ conversion), notification preferences
+- [ ] `/account/addresses` — manage saved delivery addresses (list, add new, set default, delete)
+- [ ] `/account/orders` — order history list (mirrors `/orders` but scoped to account section)
+- [ ] `/account/pre-orders` — customer's active pre-orders (`GET /pre-orders/mine`)
+
+### Checkout revisions (3-step flow per spec)
+- [ ] Step 1: Address selector (saved addresses from `/account/addresses` or new address form). Validate Magodo-area for same-day eligibility
+- [ ] Step 2: Delivery time slot picker (Today 2–6 pm, Today 6–9 pm, Tomorrow AM, Tomorrow PM). Disable Today slots after cut-off time
+- [ ] Step 3: Order summary + promo code field + Paystack inline payment button
+- [ ] On Paystack success: redirect to `/orders/[id]`. Backend processes webhook independently
+- [ ] On Paystack failure: stay on checkout, show error, allow retry
+
+### Paystack integration
+- [ ] Install `@paystack/inline-js` (or use script tag). Build `PaystackButton` component accepting `amount`, `email`, `metadata`, emitting `onSuccess` / `onClose`
+- [ ] Wire Paystack public key from `NEXT_PUBLIC_PAYSTACK_KEY` env var
+
+---
+
+## Phase 3 — Admin Dashboard MVP
+
+> Builds inside `app/(admin)/` route group in the Next.js app. Full sidebar layout.
+
+### Layout & auth
+- [ ] Admin layout — collapsible left sidebar (forest-deep), top bar with store name + logged-in user. Nav: Dashboard, Orders, Inventory, Shipments, Customers, Riders, Promos, Analytics, Settings
+- [ ] Admin auth guard — redirect non-admin/staff users to `/login`; STAFF role cannot access Analytics, Settings, or Customers pages
+
+### Admin pages
+- [ ] `/admin` / `/admin/dashboard` — KPI cards (Today's Revenue ₦, Active Orders count, Low Stock alert count, New Customers count), Weekly Revenue bar chart (Recharts, Saturday bar in Harvest Gold), Recent Orders table (last 10, click row → order detail drawer)
+- [ ] `/admin/orders` — paginated, filterable orders table (status, date, rider). Bulk status update. Pulsing badge on nav item for PENDING orders
+- [ ] `/admin/orders/[id]` — full order: status update dropdown (CONFIRMED → PACKED → OUT_FOR_DELIVERY → DELIVERED), rider assign, customer info, item list, payment status badge
+- [ ] `/admin/inventory` — product table: stock qty, price, active toggle. Low-stock rows highlighted red
+- [ ] `/admin/inventory/new` — product creation form: name, slug (auto-generated), description, price, compare_price, images, category (Imported/Local/Chilled/Household), origin, `is_mums_pick` toggle (independent of category), stock_qty
+- [ ] `/admin/inventory/[id]` — edit product (same form, pre-filled) + stock adjustment field
+- [ ] `/admin/shipments` — US import shipment tracker: create shipments, attach products, update arrival status + date
+- [ ] `/admin/customers` — paginated customer table: name, email, phone, orders count, total spend, loyalty points
+- [ ] `/admin/customers/[id]` — customer detail: order history, saved addresses, loyalty transactions, contact info
+- [ ] `/admin/analytics` — revenue chart (daily/weekly/monthly toggle), top 10 products table, category breakdown
+- [ ] `/admin/riders` — active riders list, current order assignments, performance stats (deliveries, on-time rate)
+- [ ] `/admin/promos` — active and expired promo codes, create new code (type, value, min order, max uses, expiry), usage stats per code
+- [ ] `/admin/settings` — store info (name, address, phone, WhatsApp), delivery zones + cut-off times, notification templates, staff account management
+
+---
+
+## Phase 4 — Mum's Picks & Pre-Order
+
+- [ ] `ShipmentCountdown` component — calculates days until `arrival_date` of next active shipment. Shown on `/mums-picks` and homepage hero
+- [ ] Mum's Picks page fully wired to `GET /products?mums_pick=true` + shipment countdown
+- [ ] Pre-order flow — browse shipment products, place pre-order, show confirmation; admin can manage via `/admin/shipments`
+- [ ] Homepage shipment teaser — fetch active shipment, show banner if `arrival_date` within 7 days
+
+---
+
+## Phase 5 — Growth Features
+
+- [ ] Loyalty points — credit points on order DELIVERED (backend), display balance in account, `LoyaltyPointsDisplay` component (shows pts + ₦ equivalent)
+- [ ] Promo codes — apply at checkout step 3, validate via backend, show discount line in order summary
+- [ ] Push notifications — FCM web push opt-in, send from admin broadcast tool; notify customer on order status change
+- [ ] Public order tracking — `/track/[id]` page (no auth), verify by order ID + phone number
+- [ ] Rider assignment — assign rider in admin order detail; rider location tracking (lat/lng updated via WhatsApp bot or mobile)
+
+---
+
+## Phase 6 — Polish & Launch
+
+- [ ] SEO — `generateMetadata` on all product pages (title, description, OG image via Cloudinary). Homepage structured data: `LocalBusiness` schema (address, hours, delivery areas)
+- [ ] Product pages: `Product` structured data schema (price, availability, image)
+- [ ] `sitemap.xml` — auto-generated via `next-sitemap`. Includes all products and category pages. Exclude `/checkout`, `/cart`, `/account`, `/admin`
+- [ ] `robots.txt` — disallow `/admin`, `/api`, `/checkout`, `/cart`, `/account`
+- [ ] Performance — convert `<img>` tags to `next/image` with explicit width/height (CLS). LCP target < 2.5s. Lighthouse ≥ 90 on mobile homepage
+- [ ] Cloudinary integration — upload product images to Cloudinary, store only CDN URLs in DB, use Cloudinary transformations for responsive sizes
+- [ ] Analytics — Vercel Analytics enabled; Mixpanel events for add-to-cart, checkout start, order placed
+
+---
+
+## Config & Data (ongoing)
+
+- [x] Backend `.env` — CORS origins, JWT secret, Gmail SMTP for email verification
+- [x] Alembic migrations run (initial auth schema + products + orders)
+- [x] Seed roles (super_admin, admin, user)
+- [ ] Run new Alembic migrations after schema changes above
+- [ ] Seed product catalogue — sample products across all 4 categories (Imported, Local, Chilled, Household), some with `is_mums_pick=true`, with ₦ prices, slugs, and origin fields
+- [ ] Create at least one test shipment record for pre-order/countdown UI development
+- [ ] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
