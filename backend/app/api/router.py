@@ -8,6 +8,8 @@ from app.api.v1.shipments.router import router as shipments_router
 from app.api.v1.pre_orders.router import router as pre_orders_router
 from app.api.v1.addresses.router import router as addresses_router
 from app.api.v1.dashboard.router import router as dashboard_router
+from app.api.v1.loyalty.router import router as loyalty_router
+from app.api.v1.notifications.router import router as notifications_router
 from app.core.config import settings
 
 api_router = APIRouter(prefix="/api/v1")
@@ -19,6 +21,8 @@ api_router.include_router(shipments_router)
 api_router.include_router(pre_orders_router)
 api_router.include_router(addresses_router)
 api_router.include_router(dashboard_router)
+api_router.include_router(loyalty_router)
+api_router.include_router(notifications_router)
 
 if settings.ENABLE_RBAC:
     from app.api.v1.admin.router import router as admin_router

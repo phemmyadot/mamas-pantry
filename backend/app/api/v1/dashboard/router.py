@@ -364,3 +364,33 @@ async def update_rider(
     await db.flush()
     await db.refresh(rider)
     return rider
+
+
+class LocationUpdate(BaseModel):
+    lat: float
+    lng: float
+
+
+@router.patch(
+    "/admin/riders/{rider_id}/location",
+    response_model=RiderResponse,
+    summary="Update rider location",
+    description="Updates a rider's current GPS coordinates. Can be called by a WhatsApp bot or mobile app.",
+)
+async def update_rider_location(
+    rider_id: str,
+    body: LocationUpdate,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    import uuid as _uuid
+    result = await db.execute(select(Rider).where(Rider.id == _uuid.UUID(rider_id)))
+    rider = result.scalar_one_or_none()
+    if not rider:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Rider not found")
+    rider.current_lat = body.lat
+    rider.current_lng = body.lng
+    await db.flush()
+    await db.refresh(rider)
+    return rider

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import LoyaltyPointsDisplay from "../_components/LoyaltyPointsDisplay";
+import PushNotificationToggle from "../_components/PushNotificationToggle";
 
 const NAV_ITEMS = [
   { href: "/account/orders", icon: "📦", label: "Order history", desc: "View all past and active orders" },
@@ -41,6 +43,11 @@ export default function AccountPage() {
         </div>
       </div>
 
+      {/* Loyalty points */}
+      <div className="mb-4">
+        <LoyaltyPointsDisplay />
+      </div>
+
       {/* Nav cards */}
       <div className="space-y-3 mb-6">
         {NAV_ITEMS.map(({ href, icon, label, desc }) => (
@@ -59,6 +66,11 @@ export default function AccountPage() {
             </svg>
           </Link>
         ))}
+      </div>
+
+      {/* Push notifications opt-in */}
+      <div className="mb-4">
+        <PushNotificationToggle />
       </div>
 
       <button

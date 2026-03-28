@@ -127,12 +127,33 @@ class OrderService:
         return list(result.scalars().all())
 
     async def update_status(self, order_id: uuid.UUID, data: OrderStatusUpdate) -> Order:
+        from decimal import Decimal
         result = await self.db.execute(select(Order).where(Order.id == order_id))
         order = result.scalar_one_or_none()
         if not order:
             raise NotFoundError("Order not found")
+        prev_status = order.status
         order.status = data.status
         await self.db.flush()
+
+        # Credit loyalty points when order is delivered
+        if data.status == OrderStatus.delivered and prev_status != OrderStatus.delivered:
+            from app.services.loyalty_service import LoyaltyService
+            loyalty = LoyaltyService(self.db)
+            await loyalty.earn(
+                user_id=order.user_id,
+                order_id=order.id,
+                total_ngn=Decimal(str(order.total_ngn)),
+            )
+
+        # Send push notification on status change
+        try:
+            from app.services.notification_service import NotificationService
+            ns = NotificationService(self.db)
+            await ns.notify_order_status(order)
+        except Exception:
+            pass  # Notifications are best-effort
+
         await self.db.refresh(order)
         return order
 

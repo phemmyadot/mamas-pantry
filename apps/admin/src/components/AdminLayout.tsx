@@ -18,8 +18,9 @@ const NAV: NavItem[] = [
   { to: "/shipments", label: "Shipments", icon: "✈️" },
   { to: "/customers", label: "Customers", icon: "👤", adminOnly: true },
   { to: "/riders",    label: "Riders",    icon: "🛵" },
-  { to: "/promos",    label: "Promos",    icon: "🏷" },
-  { to: "/analytics", label: "Analytics", icon: "📊", adminOnly: true },
+  { to: "/promos",        label: "Promos",        icon: "🏷" },
+  { to: "/analytics",    label: "Analytics",    icon: "📊", adminOnly: true },
+  { to: "/notifications", label: "Notifications", icon: "🔔", adminOnly: true },
 ];
 
 export default function AdminLayout() {

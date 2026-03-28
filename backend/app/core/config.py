@@ -65,6 +65,9 @@ class Settings(BaseSettings):
     # Paystack
     PAYSTACK_SECRET_KEY: str = ""
 
+    # Firebase Cloud Messaging (push notifications)
+    FCM_SERVER_KEY: str = ""
+
     # OAuth2 (ENABLE_OAUTH2)
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""

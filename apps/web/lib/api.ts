@@ -300,3 +300,38 @@ export const addresses = {
   delete: (id: string) => apiFetch<void>(`/api/v1/addresses/${id}`, { method: "DELETE" }),
 };
 
+// ---------------------------------------------------------------------------
+// Loyalty
+// ---------------------------------------------------------------------------
+
+export interface LoyaltyTransaction {
+  id: string;
+  order_id: string | null;
+  points: number;
+  type: "EARN" | "REDEEM" | "EXPIRE";
+  description: string;
+  created_at: string;
+}
+
+export interface LoyaltyBalance {
+  points: number;
+  ngn_value: number;
+  transactions: LoyaltyTransaction[];
+}
+
+export const loyalty = {
+  me: () => apiFetch<LoyaltyBalance>("/api/v1/loyalty/me"),
+};
+
+// ---------------------------------------------------------------------------
+// Push notifications
+// ---------------------------------------------------------------------------
+
+export const notifications = {
+  subscribe: (token: string) =>
+    apiFetch<void>("/api/v1/notifications/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    }),
+};
+

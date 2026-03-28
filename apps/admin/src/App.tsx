@@ -13,6 +13,7 @@ import CustomersPage from "@/pages/CustomersPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import RidersPage from "@/pages/RidersPage";
 import PromosPage from "@/pages/PromosPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="riders" element={<RidersPage />} />
             <Route path="promos" element={<PromosPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -171,13 +171,13 @@
 
 ---
 
-## Phase 6 — Growth Features
+## Phase 6 — Growth Features ✅ COMPLETE
 
-- [ ] Loyalty points — credit points on order DELIVERED (backend), display balance in account, `LoyaltyPointsDisplay` component (shows pts + ₦ equivalent)
-- [ ] Promo codes — apply at checkout step 3, validate via backend, show discount line in order summary
-- [ ] Push notifications — FCM web push opt-in, send from admin broadcast tool; notify customer on order status change
-- [ ] Public order tracking — `/track/[id]` page (no auth), verify by order ID + phone number
-- [ ] Rider assignment — assign rider in admin order detail; rider location tracking (lat/lng updated via WhatsApp bot or mobile)
+- [x] Loyalty points — `LoyaltyService`: earn 1 pt per ₦100 on delivery, `GET /loyalty/me` balance endpoint. `LoyaltyPointsDisplay` component in `/account` shows pts + ₦ value + transaction history
+- [x] Promo codes — checkout already sends promo code to `POST /orders`; backend validates and applies discount inline; total_ngn reflects discount
+- [x] Push notifications — `FcmToken` model + migration 0003; `NotificationService` (FCM legacy HTTP); `POST /notifications/subscribe`; `POST /admin/notifications/broadcast`; auto-notify on order status change; `PushNotificationToggle` in `/account`; `firebase-messaging-sw.js` service worker; admin `/notifications` page; requires `FCM_SERVER_KEY` + `NEXT_PUBLIC_FIREBASE_*` env vars
+- [x] Public order tracking — `GET /api/v1/orders/track/{id}?phone=` (Phase 3); `/track/[id]` storefront page (Phase 3)
+- [x] Rider assignment — admin order detail has rider dropdown (Phase 4); `PATCH /admin/riders/{id}/location` endpoint for bot/mobile location updates
 
 ---
 
