@@ -17,10 +17,10 @@
 
 ## Backend Extensions
 
-- [ ] Add `Product` model (name, description, price_ngn, category enum [`mums_pick`, `local`, `imported`], badge, image_url, stock_qty, is_active) + Alembic migration
-- [ ] Add Products API — `GET /products` (filterable by category, search), `GET /products/{id}`, `POST`/`PATCH`/`DELETE /admin/products` (admin only)
-- [ ] Add `Order` + `OrderItem` models (order: user_id, status enum [`pending`, `packed`, `out_for_delivery`, `delivered`, `cancelled`], total_ngn, delivery_address; items: product_id, qty, unit_price) + migration
-- [ ] Add Orders API — `POST /orders`, `GET /orders/me`, `GET /admin/orders` (paginated, filterable by status), `PATCH /admin/orders/{id}/status`
+- [x] Add `Product` model (name, description, price_ngn, category enum [`mums_pick`, `local`, `imported`], badge, image_url, stock_qty, is_active) + Alembic migration
+- [x] Add Products API — `GET /products` (filterable by category, search), `GET /products/{id}`, `POST`/`PATCH`/`DELETE /admin/products` (admin only)
+- [x] Add `Order` + `OrderItem` models (order: user_id, status enum [`pending`, `packed`, `out_for_delivery`, `delivered`, `cancelled`], total_ngn, delivery_address; items: product_id, qty, unit_price) + migration
+- [x] Add Orders API — `POST /orders`, `GET /orders/me`, `GET /admin/orders` (paginated, filterable by status), `PATCH /admin/orders/{id}/status`
 
 ## Public Storefront
 

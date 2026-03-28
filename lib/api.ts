@@ -158,3 +158,113 @@ export const auth = {
       body: JSON.stringify({ token, new_password: newPassword }),
     }),
 };
+
+// ---------------------------------------------------------------------------
+// Products
+// ---------------------------------------------------------------------------
+
+export type ProductCategory = "mums_pick" | "local" | "imported";
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price_ngn: number;
+  category: ProductCategory;
+  badge: string | null;
+  image_url: string | null;
+  stock_qty: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductCreate {
+  name: string;
+  description?: string;
+  price_ngn: number;
+  category: ProductCategory;
+  badge?: string;
+  image_url?: string;
+  stock_qty?: number;
+  is_active?: boolean;
+}
+
+export const products = {
+  list: (params?: { category?: ProductCategory; search?: string; offset?: number; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.category) qs.set("category", params.category);
+    if (params?.search) qs.set("search", params.search);
+    if (params?.offset != null) qs.set("offset", String(params.offset));
+    if (params?.limit != null) qs.set("limit", String(params.limit));
+    return apiFetch<Product[]>(`/api/v1/products?${qs}`);
+  },
+
+  get: (id: string) => apiFetch<Product>(`/api/v1/products/${id}`),
+
+  create: (data: ProductCreate) =>
+    apiFetch<Product>("/api/v1/admin/products", { method: "POST", body: JSON.stringify(data) }),
+
+  update: (id: string, data: Partial<ProductCreate>) =>
+    apiFetch<Product>(`/api/v1/admin/products/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+
+  delete: (id: string) => apiFetch<void>(`/api/v1/admin/products/${id}`, { method: "DELETE" }),
+};
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+export type OrderStatus = "pending" | "packed" | "out_for_delivery" | "delivered" | "cancelled";
+
+export interface DeliveryAddress {
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+}
+
+export interface OrderItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  qty: number;
+  unit_price_ngn: number;
+}
+
+export interface Order {
+  id: string;
+  user_id: string;
+  status: OrderStatus;
+  total_ngn: number;
+  delivery_address: DeliveryAddress;
+  items: OrderItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export const orders = {
+  create: (items: { product_id: string; qty: number }[], delivery_address: DeliveryAddress) =>
+    apiFetch<Order>("/api/v1/orders", {
+      method: "POST",
+      body: JSON.stringify({ items, delivery_address }),
+    }),
+
+  myOrders: (offset = 0, limit = 20) =>
+    apiFetch<Order[]>(`/api/v1/orders/me?offset=${offset}&limit=${limit}`),
+
+  myOrder: (id: string) => apiFetch<Order>(`/api/v1/orders/me/${id}`),
+
+  // Admin
+  adminList: (status?: OrderStatus, offset = 0, limit = 50) => {
+    const qs = new URLSearchParams({ offset: String(offset), limit: String(limit) });
+    if (status) qs.set("status", status);
+    return apiFetch<Order[]>(`/api/v1/admin/orders?${qs}`);
+  },
+
+  adminUpdateStatus: (id: string, status: OrderStatus) =>
+    apiFetch<Order>(`/api/v1/admin/orders/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+};

@@ -1,7 +1,9 @@
 from app.db.models.user import User
 from app.db.models.token import RefreshToken
+from app.db.models.product import Product, ProductCategory
+from app.db.models.order import Order, OrderItem, OrderStatus
 
-__all__ = ["User", "RefreshToken"]
+__all__ = ["User", "RefreshToken", "Product", "ProductCategory", "Order", "OrderItem", "OrderStatus"]
 
 # Conditional model imports based on feature flags
 from app.core.config import settings
