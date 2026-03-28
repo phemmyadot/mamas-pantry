@@ -1,7 +1,6 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
@@ -63,7 +62,6 @@ export default function CheckoutPage({
   searchParams: Promise<{ promo?: string }>;
 }) {
   const { promo: initialPromo = "" } = use(searchParams);
-  const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
 
@@ -142,7 +140,7 @@ export default function CheckoutPage({
 
   // ─── Step 1: validate address ────────────────────────────────────────────────
   function handleStep1Next() {
-    if (isAuthenticated && !useNewAddress) {
+    if (isAuthenticated && !useNewAddress && savedAddresses.length > 0) {
       if (!selectedAddressId) { setError("Please select a delivery address."); return; }
       if (!addressForm.phone) { setError("Please enter your phone number."); return; }
     } else {
@@ -185,8 +183,8 @@ export default function CheckoutPage({
         promoCode || undefined
       );
       orderId = order.id;
-      totalNgn = order.total_ngn;
-      setDiscount(order.subtotal_ngn + order.delivery_fee_ngn - order.total_ngn);
+      totalNgn = Number(order.total_ngn);
+      setDiscount(Number(order.subtotal_ngn) + Number(order.delivery_fee_ngn) - Number(order.total_ngn));
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Failed to place order. Please try again.");
       if (err instanceof ApiError && err.detail.toLowerCase().includes("promo")) {
@@ -201,7 +199,7 @@ export default function CheckoutPage({
     // If no Paystack key configured, skip payment and go straight to confirmation
     if (!paystackKey || !window.PaystackPop) {
       clearCart();
-      router.push(`/checkout/confirmation?order=${orderId}`);
+      window.location.href = `/checkout/confirmation?order=${orderId}`;
       return;
     }
 
@@ -212,15 +210,15 @@ export default function CheckoutPage({
       currency: "NGN",
       ref: orderId,
       metadata: { order_id: orderId, slot },
-      onSuccess: () => {
+      onSuccess: async () => {
         track(Events.ORDER_PLACED, { order_id: orderId, total_ngn: totalNgn });
+        try { await orders.confirmPayment(orderId); } catch { /* webhook will handle it */ }
         clearCart();
-        router.push(`/checkout/confirmation?order=${orderId}`);
+        window.location.href = `/checkout/confirmation?order=${orderId}`;
       },
       onCancel: () => {
         setPlacing(false);
         setError("Payment was cancelled. Your order has been saved — you can retry payment from your order history.");
-        router.push(`/checkout/confirmation?order=${orderId}`);
       },
     });
 

@@ -203,3 +203,18 @@ EMAIL_FROM=no-reply@yourdomain.com
   - Emails lowercased and stripped on all input paths ✓
   - Global exception handler strips internal detail; RFC 7807 only ✓
   - `.env.example` contains all variables, no real secrets ✓
+
+
+BUGS
+
+[ ] on payment success, app stays in checkout. should go home/my orders
+[ ] on payment success, order status wasnt updated
+[ ] cart wasnt cleared on payment success
+[ ] when i update status of order in admin, i have to refresh page to show new status in list.
+[ ] customer list and count in admin shouldn't include admin and staffs
+[ ] when i uncheck active on admin inventor, it disappears from list. 
+[ ] amin inventory image should allow uploading. Create plan for uploading images.
+
+Features
+[ ] allow admin create staff account for users and manage staffs
+[ ] send order status change email to customer

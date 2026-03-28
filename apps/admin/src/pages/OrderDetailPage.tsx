@@ -28,12 +28,18 @@ export default function OrderDetailPage() {
 
   const statusMutation = useMutation({
     mutationFn: (status: string) => orders.updateStatus(id!, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["order", id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["order", id] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
+    },
   });
 
   const riderMutation = useMutation({
     mutationFn: (riderId: string) => orders.assignRider(id!, riderId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["order", id] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["order", id] });
+      qc.invalidateQueries({ queryKey: ["orders"] });
+    },
   });
 
   if (isLoading) return <div className="flex justify-center py-20"><Spinner className="w-8 h-8" /></div>;

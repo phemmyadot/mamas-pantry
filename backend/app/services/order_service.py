@@ -178,6 +178,41 @@ class OrderService:
             raise NotFoundError("Order not found")
         return order
 
+    async def confirm_payment(self, order_id: uuid.UUID, user_id: uuid.UUID) -> Order:
+        """Verify payment with Paystack API and mark order paid. Called client-side after onSuccess."""
+        result = await self.db.execute(
+            select(Order).where(Order.id == order_id, Order.user_id == user_id)
+        )
+        order = result.scalar_one_or_none()
+        if not order:
+            raise NotFoundError("Order not found")
+
+        if order.payment_status == PaymentStatus.paid:
+            return order  # idempotent
+
+        secret = getattr(settings, "PAYSTACK_SECRET_KEY", "")
+        ref = order.payment_ref or str(order_id)
+
+        if secret:
+            import httpx
+            try:
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get(
+                        f"https://api.paystack.co/transaction/verify/{ref}",
+                        headers={"Authorization": f"Bearer {secret}"},
+                        timeout=10,
+                    )
+                if resp.status_code == 200:
+                    data = resp.json().get("data", {})
+                    if data.get("status") == "success":
+                        order.payment_status = PaymentStatus.paid
+                        order.status = OrderStatus.confirmed
+                        await self.db.flush()
+            except Exception:
+                pass  # best-effort; webhook will catch it if API call fails
+
+        return order
+
     async def process_paystack_webhook(self, payload: bytes, signature: str) -> None:
         """Verify HMAC-SHA512 signature and update payment status."""
         secret = getattr(settings, "PAYSTACK_SECRET_KEY", "")

@@ -12,6 +12,7 @@ from app.db.models.order import Order, OrderStatus, PaymentStatus
 from app.db.models.product import Product
 from app.db.models.promo_code import PromoCode
 from app.db.models.rider import Rider
+from app.db.models.role import Role, UserRole
 from app.db.models.user import User
 from app.schemas.promo_code import PromoCodeCreate, PromoCodeResponse
 from app.schemas.rider import RiderCreate, RiderResponse, RiderUpdate
@@ -140,6 +141,11 @@ async def list_customers(
     _current_user: User = Depends(require_role("admin")),
     db: AsyncSession = Depends(get_db),
 ):
+    # Exclude users that have any staff/admin role
+    staff_user_ids = select(UserRole.c.user_id).join(
+        Role, Role.id == UserRole.c.role_id
+    ).where(Role.name.in_(["admin", "super_admin", "staff"]))
+
     rows = await db.execute(
         select(
             User.id,
@@ -150,6 +156,7 @@ async def list_customers(
             func.coalesce(func.sum(Order.total_ngn), 0).label("total_spend"),
         )
         .outerjoin(Order, Order.user_id == User.id)
+        .where(User.id.not_in(staff_user_ids))
         .group_by(User.id)
         .order_by(User.created_at.desc())
         .offset(offset)

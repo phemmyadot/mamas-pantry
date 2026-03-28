@@ -76,6 +76,21 @@ async def track_order(
 
 
 @router.post(
+    "/orders/{order_id}/confirm-payment",
+    response_model=OrderResponse,
+    summary="Confirm payment (client-side)",
+    description="Called by the client after Paystack onSuccess. Verifies with Paystack API and marks order paid.",
+)
+async def confirm_payment(
+    order_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    return await service.confirm_payment(order_id=order_id, user_id=current_user.id)
+
+
+@router.post(
     "/orders/webhook/paystack",
     status_code=status.HTTP_200_OK,
     summary="Paystack webhook",

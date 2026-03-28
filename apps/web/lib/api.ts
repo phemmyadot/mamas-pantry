@@ -220,6 +220,9 @@ export const orders = {
       body: JSON.stringify({ items, delivery_address, promo_code }),
     }),
 
+  confirmPayment: (orderId: string) =>
+    apiFetch<Order>(`/api/v1/orders/${orderId}/confirm-payment`, { method: "POST" }),
+
   myOrders: (offset = 0, limit = 20) =>
     apiFetch<Order[]>(`/api/v1/orders/me?offset=${offset}&limit=${limit}`),
 

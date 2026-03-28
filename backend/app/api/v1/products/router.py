@@ -78,6 +78,27 @@ async def get_product(
 # ── Admin endpoints ────────────────────────────────────────────────────────────
 
 @router.get(
+    "/admin/products",
+    response_model=list[ProductResponse],
+    summary="List all products (admin)",
+    description="Returns all products including inactive ones. Admin only.",
+)
+async def admin_list_products(
+    category: ProductCategory | None = Query(default=None),
+    search: str | None = Query(default=None, max_length=100),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=200),
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = ProductService(db)
+    products, _ = await service.list(
+        category=category, search=search, active_only=False, offset=offset, limit=limit
+    )
+    return products
+
+
+@router.get(
     "/admin/inventory/low-stock",
     response_model=list[ProductResponse],
     summary="Low-stock products (admin)",

@@ -140,7 +140,7 @@ export const products = {
     if (params?.search) qs.set("search", params.search);
     if (params?.offset != null) qs.set("offset", String(params.offset));
     if (params?.limit != null) qs.set("limit", String(params.limit));
-    return apiFetch<Product[]>(`/products?${qs}`);
+    return apiFetch<Product[]>(`/admin/products?${qs}`);
   },
   get: (id: string) => apiFetch<Product>(`/products/${id}`),
   create: (data: ProductCreate) =>
