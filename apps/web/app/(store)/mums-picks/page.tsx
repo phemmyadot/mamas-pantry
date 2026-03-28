@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { Product, Shipment } from "@/lib/api";
 import ProductCard from "../_components/ProductCard";
+import ShipmentCountdown from "../_components/ShipmentCountdown";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -21,10 +21,6 @@ async function getNextShipment(): Promise<Shipment | null> {
   } catch { return null; }
 }
 
-function daysUntil(dateStr: string) {
-  return Math.max(0, Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86_400_000));
-}
-
 export default async function MumsPicksPage() {
   const [picks, shipment] = await Promise.all([getMumsPicks(), getNextShipment()]);
 
@@ -42,26 +38,13 @@ export default async function MumsPicksPage() {
 
       {/* Shipment countdown widget */}
       {shipment && (
-        <div className="bg-forest-deep rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div>
-            <p className="font-ui text-xs uppercase tracking-widest text-forest-pale opacity-70 mb-1">Next shipment</p>
-            <p className="font-display text-xl font-bold text-cream">{shipment.name}</p>
-            <p className="font-body text-sm italic text-forest-pale opacity-80 mt-0.5">
-              From {shipment.origin_country} · arriving {new Date(shipment.arrival_date).toLocaleDateString("en-NG", { day: "numeric", month: "long" })}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <p className="font-display text-4xl font-bold text-gold">{daysUntil(shipment.arrival_date)}</p>
-              <p className="font-ui text-xs text-forest-pale opacity-70">days away</p>
-            </div>
-            <Link
-              href="/pre-order"
-              className="bg-gold text-forest-deep font-ui text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-gold-light transition-colors"
-            >
-              Pre-order →
-            </Link>
-          </div>
+        <div className="mb-10">
+          <ShipmentCountdown
+            name={shipment.name}
+            originCountry={shipment.origin_country}
+            arrivalDate={shipment.arrival_date}
+            status={shipment.status}
+          />
         </div>
       )}
 

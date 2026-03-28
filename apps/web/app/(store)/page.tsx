@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Product, Shipment } from "@/lib/api";
 import ProductCard from "./_components/ProductCard";
+import ShipmentCountdown from "./_components/ShipmentCountdown";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -61,13 +62,13 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Shipment teaser banner */}
-      {activeShipment && (
+      {/* Shipment teaser banner — show when arriving within 7 days or already in transit */}
+      {activeShipment && (activeShipment.status === "in_transit" || daysUntil(activeShipment.arrival_date) <= 7) && (
         <div className="bg-gold text-forest-deep text-center py-2 px-4">
           <p className="font-ui text-sm font-semibold">
             {activeShipment.status === "in_transit"
               ? `✈️ Mum just landed — new stock arriving in ${daysUntil(activeShipment.arrival_date)} days`
-              : `📦 New shipment from ${activeShipment.origin_country} on its way`}
+              : `📦 Shipment from ${activeShipment.origin_country} arriving in ${daysUntil(activeShipment.arrival_date)} days`}
             {" · "}
             <Link href="/pre-order" className="underline hover:text-forest-mid">Pre-order now</Link>
           </p>
@@ -110,6 +111,18 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Shipment countdown — shown in hero area when shipment is upcoming (> 7 days out) */}
+      {activeShipment && activeShipment.status !== "in_transit" && daysUntil(activeShipment.arrival_date) > 7 && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+          <ShipmentCountdown
+            name={activeShipment.name}
+            originCountry={activeShipment.origin_country}
+            arrivalDate={activeShipment.arrival_date}
+            status={activeShipment.status}
+          />
+        </div>
+      )}
 
       {/* 4-tile category grid */}
       <section className="bg-white border-b border-cream-dark">

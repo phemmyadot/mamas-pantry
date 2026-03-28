@@ -161,12 +161,13 @@
 
 ---
 
-## Phase 5 — Mum's Picks & Pre-Order
+## Phase 5 — Mum's Picks & Pre-Order ✅ COMPLETE
 
-- [ ] `ShipmentCountdown` component — calculates days until `arrival_date` of next active shipment. Shown on `/mums-picks` and homepage hero
-- [ ] Mum's Picks page fully wired to `GET /products?mums_pick=true` + shipment countdown
-- [ ] Pre-order flow — browse shipment products, place pre-order, show confirmation; admin can manage via `/admin/shipments`
-- [ ] Homepage shipment teaser — fetch active shipment, show banner if `arrival_date` within 7 days
+- [x] `ShipmentCountdown` component — reusable server component, shows days until arrival, "Pre-order →" CTA. Used on `/mums-picks` and homepage
+- [x] Mum's Picks page fully wired to `GET /products/featured` + `ShipmentCountdown`
+- [x] Pre-order flow — browse shipment products by selector tab, place pre-order, inline success confirmation; admin manages via `/shipments`
+- [x] Homepage shipment teaser banner — shown when `status === "in_transit"` OR `arrival_date` within 7 days
+- [x] Homepage countdown widget — shown in hero area when active shipment is upcoming (> 7 days out)
 
 ---
 
