@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Lora, DM_Sans } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
+import { CartProvider } from "@/lib/cart-context";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -39,7 +40,7 @@ export default function RootLayout({
       className={`${playfair.variable} ${lora.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider><CartProvider>{children}</CartProvider></AuthProvider>
         </body>
     </html>
   );
