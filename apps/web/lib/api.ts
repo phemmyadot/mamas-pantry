@@ -253,3 +253,50 @@ export const preOrders = {
     }),
   mine: () => apiFetch<PreOrder[]>("/api/v1/pre-orders/mine"),
 };
+
+// ---------------------------------------------------------------------------
+// Categories
+// ---------------------------------------------------------------------------
+
+export interface CategoryStat {
+  category: ProductCategory;
+  product_count: number;
+}
+
+export const categories = {
+  list: () => apiFetch<CategoryStat[]>("/api/v1/categories"),
+};
+
+// ---------------------------------------------------------------------------
+// Addresses
+// ---------------------------------------------------------------------------
+
+export interface Address {
+  id: string;
+  user_id: string;
+  label: string;
+  street: string;
+  area: string;
+  city: string;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AddressCreate {
+  label: string;
+  street: string;
+  area: string;
+  city: string;
+  is_default?: boolean;
+}
+
+export const addresses = {
+  list: () => apiFetch<Address[]>("/api/v1/addresses"),
+  create: (data: AddressCreate) =>
+    apiFetch<Address>("/api/v1/addresses", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: string, data: Partial<AddressCreate>) =>
+    apiFetch<Address>(`/api/v1/addresses/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  delete: (id: string) => apiFetch<void>(`/api/v1/addresses/${id}`, { method: "DELETE" }),
+};
+

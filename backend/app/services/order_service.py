@@ -143,6 +143,20 @@ class OrderService:
         await self.db.refresh(order)
         return order
 
+    async def track_order(self, order_id: uuid.UUID, phone: str) -> Order:
+        """Public tracking: verify order exists and phone matches delivery address."""
+        result = await self.db.execute(select(Order).where(Order.id == order_id))
+        order = result.scalar_one_or_none()
+        if not order:
+            raise NotFoundError("Order not found")
+        stored_phone = (order.delivery_address or {}).get("phone", "")
+        # Normalise both sides: strip spaces, leading zeros etc.
+        def _norm(p: str) -> str:
+            return "".join(filter(str.isdigit, p))[-10:]
+        if _norm(stored_phone) != _norm(phone):
+            raise NotFoundError("Order not found")
+        return order
+
     async def process_paystack_webhook(self, payload: bytes, signature: str) -> None:
         """Verify HMAC-SHA512 signature and update payment status."""
         secret = getattr(settings, "PAYSTACK_SECRET_KEY", "")

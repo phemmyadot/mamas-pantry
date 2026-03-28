@@ -7,8 +7,8 @@ import { useAuth } from "@/lib/auth-context";
 
 const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
-  { label: "Mum's Picks", href: "/shop?category=mums_pick" },
-  { label: "Local", href: "/shop?category=local" },
+  { label: "Mum's Picks", href: "/mums-picks" },
+  { label: "Pre-Order", href: "/pre-order" },
   { label: "Delivery", href: "/delivery" },
 ];
 
@@ -30,11 +30,7 @@ export default function StorefrontHeader() {
         {/* Nav */}
         <nav className="hidden sm:flex items-center gap-5">
           {NAV_LINKS.map(({ label, href }) => {
-            const isActive =
-              href === "/shop"
-                ? pathname === "/shop"
-                : pathname.startsWith(href.split("?")[0]) &&
-                  (href.includes("?") ? pathname + "" === href.split("?")[0] || true : true);
+            const isActive = pathname === href.split("?")[0];
             return (
               <Link
                 key={href}

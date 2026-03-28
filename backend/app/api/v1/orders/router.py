@@ -60,6 +60,21 @@ async def get_my_order(
     return await service.get_order(order_id=order_id, user_id=current_user.id)
 
 
+@router.get(
+    "/orders/track/{order_id}",
+    response_model=OrderResponse,
+    summary="Public order tracking",
+    description="Lets anyone track an order by ID + phone number. No auth required.",
+)
+async def track_order(
+    order_id: uuid.UUID,
+    phone: str = Query(..., description="Phone number used on the order"),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    return await service.track_order(order_id=order_id, phone=phone)
+
+
 @router.post(
     "/orders/webhook/paystack",
     status_code=status.HTTP_200_OK,

@@ -5,15 +5,10 @@ import type { Product } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  mums_pick: "Mum's Pick",
-  local: "Local",
   imported: "Imported",
-};
-
-const BADGE_COLORS: Record<string, string> = {
-  mums_pick: "bg-gold text-amber-900",
-  local: "bg-forest-light text-forest-deep",
-  imported: "bg-forest-pale text-forest-deep",
+  local: "Local",
+  chilled: "Chilled",
+  household: "Household",
 };
 
 function formatNGN(amount: number) {
@@ -33,13 +28,12 @@ export default function ProductCard({ product }: { product: Product }) {
   }
 
   const isOutOfStock = product.stock_qty === 0;
-  const badgeLabel = product.badge ?? CATEGORY_LABELS[product.category];
-  const badgeColor = BADGE_COLORS[product.category] ?? "bg-forest-pale text-forest-deep";
+  const href = `/shop/${product.slug}`;
 
   return (
     <div className="group bg-white rounded-2xl border border-cream-dark overflow-hidden hover:shadow-md transition-shadow flex flex-col">
       {/* Image */}
-      <Link href={`/products/${product.id}`} className="block relative aspect-[4/3] bg-forest-mist overflow-hidden">
+      <Link href={href} className="block relative aspect-[4/3] bg-forest-mist overflow-hidden">
         {product.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -52,12 +46,27 @@ export default function ProductCard({ product }: { product: Product }) {
             🛒
           </div>
         )}
-        {/* Badge */}
-        {badgeLabel && (
-          <span className={`absolute top-2 left-2 text-[10px] font-ui font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide ${badgeColor}`}>
-            {badgeLabel}
+
+        {/* Mum's Pick badge (gold, top-left) */}
+        {product.is_mums_pick && (
+          <span className="absolute top-2 left-2 text-[10px] font-ui font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide bg-gold text-amber-900">
+            Mum&apos;s Pick ✨
           </span>
         )}
+
+        {/* Category badge when no mums_pick */}
+        {!product.is_mums_pick && product.badge && (
+          <span className="absolute top-2 left-2 text-[10px] font-ui font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide bg-forest-pale text-forest-deep">
+            {product.badge}
+          </span>
+        )}
+
+        {!product.is_mums_pick && !product.badge && (
+          <span className="absolute top-2 left-2 text-[10px] font-ui font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide bg-forest-mist text-forest-mid">
+            {CATEGORY_LABELS[product.category] ?? product.category}
+          </span>
+        )}
+
         {isOutOfStock && (
           <div className="absolute inset-0 bg-ink/30 flex items-center justify-center">
             <span className="font-ui text-xs font-semibold text-white bg-ink/60 px-2 py-1 rounded-full">
@@ -69,14 +78,24 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Info */}
       <div className="flex flex-col flex-1 p-3 gap-2">
-        <Link href={`/products/${product.id}`}>
+        <Link href={href}>
           <h3 className="font-ui text-sm font-medium text-ink leading-snug line-clamp-2 hover:text-forest-mid transition-colors">
             {product.name}
           </h3>
         </Link>
-        <p className="font-ui text-base font-semibold text-forest-mid mt-auto">
-          {formatNGN(product.price_ngn)}
-        </p>
+        {product.origin && (
+          <p className="font-body text-xs italic text-muted">From {product.origin}</p>
+        )}
+        <div className="flex items-baseline gap-2 mt-auto">
+          <p className="font-ui text-base font-semibold text-forest-mid">
+            {formatNGN(product.price_ngn)}
+          </p>
+          {product.compare_price_ngn && product.compare_price_ngn > product.price_ngn && (
+            <p className="font-ui text-xs text-muted line-through">
+              {formatNGN(product.compare_price_ngn)}
+            </p>
+          )}
+        </div>
         <button
           onClick={handleAdd}
           disabled={isOutOfStock}

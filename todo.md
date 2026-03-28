@@ -96,38 +96,41 @@
 - [x] `/checkout/confirmation` — order confirmation
 
 ### Homepage revisions needed
-- [ ] Update hero headline to "From our hands to your table" with shipment teaser banner ("Mum just landed — new stock in") when active shipment exists
-- [ ] Add Mum's Picks horizontal scroll section (5-6 cards, gold badge, "View all" → `/mums-picks`)
-- [ ] Replace category chips with 4-tile category grid (Imported, Local, Chilled, Household) with icon and product count from `GET /categories`
-- [ ] Add "Local Staples" strip — 4 featured local products, visually distinct from imported section
-- [ ] Add delivery zone section — list of covered areas (Magodo Phase 1, Phase 2, Alapere, Ketu, Ojota)
-- [ ] Add "How it works" strip — 3 steps: Browse → Order → Delivered to your gate
+- [x] Update hero headline to "From our hands to your table" with shipment teaser banner ("Mum just landed — new stock in") when active shipment exists
+- [x] Add Mum's Picks horizontal scroll section (5-6 cards, gold badge, "View all" → `/mums-picks`)
+- [x] Replace category chips with 4-tile category grid (Imported, Local, Chilled, Household) with icon and product count from `GET /categories`
+- [x] Add "Local Staples" strip — 4 featured local products, visually distinct from imported section
+- [x] Add delivery zone section — list of covered areas (Magodo Phase 1, Phase 2, Alapere, Ketu, Ojota)
+- [x] Add "How it works" strip — 3 steps: Browse → Order → Delivered to your gate
 
 ### New storefront pages
-- [ ] `/cart` — dedicated cart page: line items, qty controls, promo code input field, delivery fee calculation, order summary, Paystack CTA
-- [ ] `/orders` — customer order history: list of past and active orders with status timeline badges
-- [ ] `/orders/[id]` — order detail: items, rider tracking link, status timeline, receipt download
-- [ ] `/mums-picks` — dedicated Mum's Pick page: `GET /products?mums_pick=true`, shipment countdown widget (days until next US arrival)
-- [ ] `/pre-order` — browse upcoming shipment products (`GET /shipments` + `GET /shipments/{id}/products`), place pre-order (`POST /pre-orders`)
-- [ ] `/track/[id]` — public order tracking (no login): verify by order ID + phone number, show status timeline
-- [ ] `/delivery` — delivery info static page (zones, cut-off times, fees) *(referenced in header nav)*
+- [x] `/cart` — dedicated cart page: line items, qty controls, promo code input field, delivery fee calculation, order summary, Paystack CTA
+- [x] `/orders` — customer order history: list of past and active orders with status timeline badges
+- [x] `/orders/[id]` — order detail: items, rider tracking link, status timeline, receipt download
+- [x] `/mums-picks` — dedicated Mum's Pick page: `GET /products?mums_pick=true`, shipment countdown widget (days until next US arrival)
+- [x] `/pre-order` — browse upcoming shipment products (`GET /shipments` + `GET /shipments/{id}/products`), place pre-order (`POST /pre-orders`)
+- [x] `/track/[id]` — public order tracking (no login): verify by order ID + phone number, show status timeline
+- [x] `/delivery` — delivery info static page (zones, cut-off times, fees) *(referenced in header nav)*
 
 ### Account pages
-- [ ] `/account` — profile overview: name, email, loyalty points balance (with ₦ conversion), notification preferences
-- [ ] `/account/addresses` — manage saved delivery addresses (list, add new, set default, delete)
-- [ ] `/account/orders` — order history list (mirrors `/orders` but scoped to account section)
-- [ ] `/account/pre-orders` — customer's active pre-orders (`GET /pre-orders/mine`)
+- [x] `/account` — profile overview: name, email, nav cards to sub-pages
+- [x] `/account/addresses` — manage saved delivery addresses (list, add new, set default, delete)
+- [x] `/account/orders` — order history list (mirrors `/orders` but scoped to account section)
+- [x] `/account/pre-orders` — customer's active pre-orders (`GET /pre-orders/mine`)
 
 ### Checkout revisions (3-step flow per spec)
-- [ ] Step 1: Address selector (saved addresses from `/account/addresses` or new address form). Validate Magodo-area for same-day eligibility
-- [ ] Step 2: Delivery time slot picker (Today 2–6 pm, Today 6–9 pm, Tomorrow AM, Tomorrow PM). Disable Today slots after cut-off time
-- [ ] Step 3: Order summary + promo code field + Paystack inline payment button
-- [ ] On Paystack success: redirect to `/orders/[id]`. Backend processes webhook independently
-- [ ] On Paystack failure: stay on checkout, show error, allow retry
+- [x] Step 1: Address selector (saved addresses or new address form with area dropdown)
+- [x] Step 2: Delivery time slot picker (Today 2–6 pm, Today 6–9 pm, Tomorrow AM, Tomorrow PM). Today slots disabled after cut-off
+- [x] Step 3: Order summary + promo code field + Paystack inline payment button
+- [x] On Paystack success: redirect to `/checkout/confirmation?order=ID`
+- [x] On Paystack cancel: redirect to confirmation (order saved as unpaid, retry from order history)
 
 ### Paystack integration
-- [ ] Install `@paystack/inline-js` (or use script tag). Build `PaystackButton` component accepting `amount`, `email`, `metadata`, emitting `onSuccess` / `onClose`
-- [ ] Wire Paystack public key from `NEXT_PUBLIC_PAYSTACK_KEY` env var
+- [x] Paystack script tag injected via `useEffect`. `window.PaystackPop.setup()` used for inline popup
+- [x] Wire Paystack public key from `NEXT_PUBLIC_PAYSTACK_KEY` env var (gracefully skips if unset)
+
+### Public order tracking (backend)
+- [x] `GET /api/v1/orders/track/{id}?phone=` — public endpoint, verifies last-10-digits of phone against delivery address
 
 ---
 

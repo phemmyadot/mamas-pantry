@@ -1,25 +1,25 @@
 import { Suspense } from "react";
-import type { Product, ProductCategory } from "@/lib/api";
+import type { Product } from "@/lib/api";
 import ProductCard from "../_components/ProductCard";
 import ShopFilters from "./_components/ShopFilters";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const CATEGORY_NAMES: Record<string, string> = {
-  mums_pick: "Mum's Picks",
-  local: "Local Favourites",
   imported: "Imported Goods",
+  local: "Local Favourites",
+  chilled: "Chilled",
+  household: "Household",
 };
 
-async function getProducts(category?: string, search?: string): Promise<Product[]> {
+async function getProducts(category?: string, mumsPick?: string, search?: string): Promise<Product[]> {
   try {
     const qs = new URLSearchParams();
     if (category) qs.set("category", category);
+    if (mumsPick === "true") qs.set("mums_pick", "true");
     if (search) qs.set("search", search);
     qs.set("limit", "48");
-    const res = await fetch(`${API_BASE}/api/v1/products?${qs}`, {
-      cache: "no-store",
-    });
+    const res = await fetch(`${API_BASE}/api/v1/products?${qs}`, { cache: "no-store" });
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -30,12 +30,14 @@ async function getProducts(category?: string, search?: string): Promise<Product[
 export default async function ShopPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; search?: string }>;
+  searchParams: Promise<{ category?: string; mums_pick?: string; search?: string }>;
 }) {
-  const { category, search } = await searchParams;
-  const products = await getProducts(category, search);
+  const { category, mums_pick, search } = await searchParams;
+  const products = await getProducts(category, mums_pick, search);
 
-  const heading = search
+  const heading = mums_pick === "true"
+    ? "Mum's Picks ✨"
+    : search
     ? `Results for "${search}"`
     : category
     ? (CATEGORY_NAMES[category] ?? "Products")
@@ -52,7 +54,6 @@ export default async function ShopPage({
         )}
       </div>
 
-      {/* Filters — needs Suspense because useSearchParams() is inside */}
       <Suspense fallback={null}>
         <ShopFilters />
       </Suspense>
