@@ -68,6 +68,11 @@ class Settings(BaseSettings):
     # Firebase Cloud Messaging (push notifications)
     FCM_SERVER_KEY: str = ""
 
+    # Seed admin (app/scripts/seed_admin.py)
+    ADMIN_EMAIL: str = "admin@mamaspantry.ng"
+    ADMIN_PASSWORD: str = "Admin1234!"
+    ADMIN_USERNAME: str = "admin"
+
     # OAuth2 (ENABLE_OAUTH2)
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
