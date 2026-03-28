@@ -1,0 +1,427 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g1:#1B4332;--g2:#2D6A4F;--g3:#40916C;--g4:#B7E4C7;--g5:#D8F3DC;
+  --gold:#D4A017;--goldi:#F0C040;--cream:#FEFAE0;--creamd:#F4EAC8;
+  --terra:#C4622D;--ink:#1B1B1B;--muted:#5C5C5C;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--color-background-tertiary,#f5f4f0);}
+.sep{height:2px;background:rgba(0,0,0,0.06);}
+.hero{background:var(--g1);padding:48px 32px 40px;display:flex;flex-direction:column;align-items:center;}
+.hero-wordmark{font-family:'Playfair Display',serif;font-size:46px;font-weight:700;color:var(--cream);letter-spacing:-0.01em;line-height:1;text-align:center;margin-top:18px;}
+.hero-wordmark em{font-style:italic;color:var(--goldi);}
+.hero-divider{width:44px;height:1.5px;background:var(--gold);margin:14px auto;opacity:0.6;}
+.hero-tag{font-family:'Lora',serif;font-size:12px;font-style:italic;color:var(--g4);letter-spacing:0.07em;text-align:center;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(0,0,0,0.06);}
+.panel{background:var(--color-background-primary,#fff);padding:24px 24px 28px;}
+.panel.full{grid-column:1/-1;}
+.panel.cream-bg{background:var(--cream);}
+.sec{font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.pal-row{display:flex;gap:0;border-radius:10px;overflow:hidden;margin-bottom:10px;}
+.pal-swatch{flex:1;height:52px;}
+.pal-row2{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.pal-card{border-radius:8px;overflow:hidden;}
+.pal-color{height:38px;}
+.pal-info{padding:5px 7px;background:var(--color-background-secondary,#f8f7f5);font-size:10px;}
+.pal-name{font-weight:500;font-size:11px;color:var(--color-text-primary);display:block;}
+.pal-hex{color:var(--color-text-secondary);font-size:10px;}
+.type-col{display:flex;flex-direction:column;gap:16px;margin-top:14px;}
+.type-block{border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:14px;}
+.type-block:last-child{border-bottom:none;padding-bottom:0;}
+.type-tag{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--g3);margin-bottom:4px;}
+.t-disp{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--g1);line-height:1.1;}
+.t-italic{font-family:'Playfair Display',serif;font-size:20px;font-style:italic;color:var(--g2);line-height:1.3;}
+.t-body{font-family:'Lora',serif;font-size:13px;line-height:1.7;color:var(--ink);}
+.t-ui{font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);line-height:1.5;}
+.t-cap{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--g3);}
+.var-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.var-box{border-radius:10px;padding:18px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.var-dark{background:var(--g1);}
+.var-cream{background:var(--cream);border:0.5px solid var(--creamd);}
+.var-white{background:#fff;border:0.5px solid #e8e8e8;}
+.var-lbl{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;}
+.badge{display:inline-block;background:var(--gold);color:#7a5500;font-size:9px;font-weight:500;padding:2px 5px;border-radius:4px;letter-spacing:0.06em;text-transform:uppercase;}
+.badge-local{background:var(--g3);color:#0a3320;}
+
+/* ── THREE-DEVICE ROW ── */
+.device-row{display:grid;grid-template-columns:1fr 1fr 200px;gap:16px;align-items:start;margin-top:14px;}
+.dev-label{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+
+/* WEB (browser) */
+.web-frame{border-radius:8px;overflow:hidden;border:0.5px solid var(--color-border-tertiary);}
+.web-chrome{background:#f0f0f0;padding:7px 10px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid #ddd;}
+.web-dots{display:flex;gap:4px;}
+.web-dot{width:8px;height:8px;border-radius:50%;}
+.web-url{flex:1;background:#fff;border-radius:4px;padding:3px 8px;font-size:10px;color:#888;border:0.5px solid #ddd;}
+.web-topbar{background:var(--g1);padding:9px 12px;display:flex;align-items:center;justify-content:space-between;}
+.web-logo-txt{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--cream);}
+.web-logo-txt em{font-style:italic;color:var(--goldi);}
+.web-nav{display:flex;gap:12px;}
+.web-nav a{font-size:10px;color:var(--g4);text-decoration:none;font-weight:500;}
+.web-nav a.on{color:var(--goldi);}
+.web-hero{background:var(--cream);padding:16px 12px;display:flex;gap:12px;align-items:center;border-bottom:0.5px solid var(--creamd);}
+.web-hero h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--g1);line-height:1.2;margin-bottom:3px;}
+.web-hero h2 em{font-style:italic;color:var(--g2);}
+.web-hero p{font-family:'Lora',serif;font-size:10px;color:var(--muted);font-style:italic;margin-bottom:8px;}
+.web-cta{background:var(--g1);color:var(--cream);font-size:10px;font-weight:500;padding:6px 11px;border-radius:5px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.web-body{background:#fff;padding:12px;}
+.web-sec-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--g1);margin-bottom:8px;}
+.web-pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.web-pcard{border-radius:6px;border:0.5px solid #eee;overflow:hidden;}
+.web-pcard-img{height:40px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.web-pcard-info{padding:5px 6px 6px;}
+.web-pcard-name{font-size:9px;font-weight:500;color:var(--ink);line-height:1.3;margin-bottom:2px;}
+.web-pcard-price{font-size:10px;font-weight:600;color:var(--g2);}
+.web-footer{background:var(--g1);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}
+.web-ftxt{font-size:9px;color:var(--g4);}
+
+/* WEB APP (dashboard) */
+.wa-frame{border-radius:8px;overflow:hidden;border:0.5px solid var(--color-border-tertiary);}
+.wa-chrome{background:#f0f0f0;padding:7px 10px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid #ddd;}
+.wa-url{flex:1;background:#fff;border-radius:4px;padding:3px 8px;font-size:10px;color:#888;border:0.5px solid #ddd;}
+.wa-shell{display:flex;min-height:320px;}
+.wa-sidebar{background:var(--g1);width:120px;flex-shrink:0;padding:12px 0;}
+.wa-side-logo{font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:var(--cream);padding:0 12px 12px;border-bottom:0.5px solid rgba(255,255,255,0.1);margin-bottom:8px;line-height:1.3;}
+.wa-side-logo em{font-style:italic;color:var(--goldi);}
+.wa-nav-item{display:flex;align-items:center;gap:7px;padding:7px 12px;font-size:10px;color:rgba(255,255,255,0.6);cursor:pointer;}
+.wa-nav-item.on{color:var(--cream);background:rgba(255,255,255,0.1);}
+.wa-nav-item svg{width:12px;height:12px;flex-shrink:0;}
+.wa-main{flex:1;background:var(--color-background-secondary,#f8f7f5);padding:12px;overflow:hidden;}
+.wa-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.wa-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--g1);}
+.wa-date{font-size:10px;color:var(--muted);}
+.wa-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.wa-stat{background:var(--color-background-primary,#fff);border-radius:6px;padding:8px 9px;border:0.5px solid var(--color-border-tertiary);}
+.wa-stat-lbl{font-size:9px;color:var(--muted);margin-bottom:3px;}
+.wa-stat-val{font-size:15px;font-weight:500;color:var(--g1);}
+.wa-stat-sub{font-size:9px;color:var(--g3);margin-top:1px;}
+.wa-orders-title{font-size:10px;font-weight:500;color:var(--g1);margin-bottom:6px;}
+.wa-order-row{background:var(--color-background-primary,#fff);border-radius:5px;padding:6px 8px;margin-bottom:4px;display:flex;align-items:center;gap:8px;border:0.5px solid var(--color-border-tertiary);}
+.wa-order-id{font-size:9px;font-weight:500;color:var(--g2);min-width:36px;}
+.wa-order-name{font-size:9px;color:var(--color-text-primary);flex:1;}
+.wa-order-amt{font-size:9px;font-weight:500;color:var(--ink);}
+.wa-order-status{font-size:8px;font-weight:500;padding:2px 5px;border-radius:3px;}
+.st-delivered{background:#D8F3DC;color:#1B4332;}
+.st-out{background:#FEFAE0;color:#7a5500;}
+.st-packed{background:#EAF3DE;color:#27500A;}
+.wa-chart-bar-row{display:flex;gap:4px;align-items:flex-end;height:48px;margin-top:8px;}
+.wa-bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;}
+.wa-bar{background:var(--g2);border-radius:2px 2px 0 0;width:100%;}
+.wa-bar-lbl{font-size:8px;color:var(--muted);}
+
+/* PHONE */
+.phone-frame{border-radius:26px;overflow:hidden;border:2.5px solid #2a2a2a;background:#2a2a2a;}
+.phone-notch{background:#1a1a1a;height:22px;display:flex;align-items:center;justify-content:center;}
+.phone-notch-pill{width:52px;height:7px;background:#111;border-radius:4px;}
+.ph-bar{background:var(--g1);padding:8px 12px;}
+.ph-top{display:flex;justify-content:space-between;align-items:center;}
+.ph-greeting{font-size:8px;color:var(--g4);}
+.ph-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--cream);}
+.ph-name em{font-style:italic;color:var(--goldi);}
+.ph-search{background:rgba(255,255,255,0.12);border-radius:7px;padding:6px 9px;margin-top:7px;font-size:9px;color:rgba(255,255,255,0.45);display:flex;align-items:center;gap:5px;}
+.ph-body{background:var(--cream);padding:10px;}
+.ph-cats{display:flex;gap:5px;margin-bottom:10px;overflow:hidden;}
+.ph-cat{background:#fff;border:0.5px solid var(--creamd);border-radius:12px;padding:3px 9px;font-size:8.5px;font-weight:500;color:var(--muted);white-space:nowrap;}
+.ph-cat.on{background:var(--g1);color:var(--cream);border-color:var(--g1);}
+.ph-sec{font-family:'Playfair Display',serif;font-size:10px;font-weight:700;color:var(--g1);margin-bottom:7px;}
+.ph-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;}
+.ph-card{background:#fff;border-radius:7px;border:0.5px solid var(--creamd);overflow:hidden;}
+.ph-card-img{height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.ph-card-body{padding:3px 5px 5px;}
+.ph-card-name{font-size:8px;font-weight:500;color:var(--ink);line-height:1.3;margin-bottom:2px;}
+.ph-card-price{font-size:8.5px;font-weight:600;color:var(--g2);}
+.ph-pbadge{display:block;width:fit-content;background:var(--gold);color:#7a5500;font-size:7px;font-weight:500;padding:1px 4px;border-radius:3px;margin-bottom:2px;}
+.ph-nav{background:#fff;border-top:0.5px solid var(--creamd);padding:6px 0 3px;display:flex;justify-content:space-around;}
+.ph-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:7.5px;color:var(--muted);}
+.ph-nav-item.on{color:var(--g2);}
+.ph-nav-dot{width:3px;height:3px;background:var(--g2);border-radius:50%;}
+
+/* VOICE */
+.voice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.voice-yes{background:var(--g5);border-radius:10px;padding:14px 16px;}
+.voice-no{background:#FEF2F2;border-radius:10px;padding:14px 16px;}
+.voice-ttl{font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.voice-yes .voice-ttl{color:var(--g1);}
+.voice-no .voice-ttl{color:#991B1B;}
+.voice-line{font-family:'Lora',serif;font-size:11.5px;font-style:italic;color:var(--ink);margin-bottom:5px;padding-left:12px;position:relative;line-height:1.5;}
+.voice-line::before{content:'';position:absolute;left:0;top:7px;width:5px;height:5px;border-radius:50%;}
+.voice-yes .voice-line::before{background:var(--g3);}
+.voice-no .voice-line::before{background:#EF4444;}
+
+/* RULES */
+.rules-col{display:flex;flex-direction:column;gap:7px;margin-top:14px;}
+.rule-row{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:7px;background:var(--color-background-secondary,#f8f7f5);border-left:3px solid var(--g3);}
+.rule-text{font-size:12px;line-height:1.6;color:var(--color-text-primary);}
+.rule-title{font-weight:500;color:var(--g1);display:block;margin-bottom:1px;}
+
+/* BAG SVG reusable */
+</style>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <svg width="96" height="96" viewBox="0 0 120 120" fill="none">
+    <path d="M25 48 L20 100 Q20 104 24 104 L96 104 Q100 104 100 100 L95 48 Z" fill="#2D6A4F"/>
+    <path d="M30 52 L26 98 L94 98 L90 52 Z" fill="#1B4332"/>
+    <path d="M44 48 Q44 28 60 28 Q76 28 76 48" stroke="#B7E4C7" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <rect x="50" y="56" width="7" height="22" rx="3.5" fill="#E8692A"/>
+    <path d="M53.5 56 Q50 48 48 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M53.5 56 Q53.5 46 53.5 44" stroke="#52B788" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M53.5 56 Q57 48 59 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <ellipse cx="72" cy="72" rx="11" ry="8" fill="#C4622D"/>
+    <ellipse cx="72" cy="70" rx="9" ry="6" fill="#D4812A"/>
+    <ellipse cx="60" cy="58" rx="8" ry="5" fill="#40916C" transform="rotate(-15 60 58)"/>
+    <circle cx="89" cy="58" r="5" fill="#D4A017"/>
+    <polygon points="89,53.5 90.2,56.8 93.8,56.8 91,58.9 92.2,62.2 89,60.1 85.8,62.2 87,58.9 84.2,56.8 87.8,56.8" fill="#FEFAE0"/>
+  </svg>
+  <div class="hero-wordmark">Mama<em>'s</em> Pantry</div>
+  <div class="hero-divider"></div>
+  <div class="hero-tag">Brand Guidelines — 2025</div>
+</div>
+<div class="sep"></div>
+
+<!-- ═══ COLOUR + TYPE ═══ -->
+<div class="grid2">
+<div class="panel">
+  <div class="sec">Colour Palette</div>
+  <div class="pal-row">
+    <div class="pal-swatch" style="background:#1B4332;"></div>
+    <div class="pal-swatch" style="background:#2D6A4F;"></div>
+    <div class="pal-swatch" style="background:#40916C;"></div>
+    <div class="pal-swatch" style="background:#B7E4C7;"></div>
+    <div class="pal-swatch" style="background:#FEFAE0;border:0.5px solid #e8dfb8;"></div>
+  </div>
+  <div class="pal-row2">
+    <div class="pal-card"><div class="pal-color" style="background:#1B4332;"></div><div class="pal-info"><span class="pal-name">Forest Deep</span><span class="pal-hex">#1B4332 — Primary</span></div></div>
+    <div class="pal-card"><div class="pal-color" style="background:#D4A017;"></div><div class="pal-info"><span class="pal-name">Harvest Gold</span><span class="pal-hex">#D4A017 — Accent</span></div></div>
+    <div class="pal-card"><div class="pal-color" style="background:#C4622D;"></div><div class="pal-info"><span class="pal-name">Market Spice</span><span class="pal-hex">#C4622D — Alerts</span></div></div>
+    <div class="pal-card"><div class="pal-color" style="background:#FEFAE0;border:0.5px solid #ccc;"></div><div class="pal-info"><span class="pal-name">Warm Cream</span><span class="pal-hex">#FEFAE0 — Bg</span></div></div>
+  </div>
+</div>
+<div class="panel">
+  <div class="sec">Typography</div>
+  <div class="type-col">
+    <div class="type-block"><div class="type-tag">Display — Playfair Display Bold</div><div class="t-disp">Mama<em style="font-style:italic;color:#2D6A4F;">'s</em> Pantry</div><div style="font-size:10px;color:var(--color-text-secondary);margin-top:3px;">Headlines, logo, campaign titles</div></div>
+    <div class="type-block"><div class="type-tag">Tagline — Playfair Italic</div><div class="t-italic">"Chosen with care. Stocked with love."</div></div>
+    <div class="type-block"><div class="type-tag">Body — Lora Regular</div><div class="t-body">Each item was chosen because someone in our family would bring it home.</div></div>
+    <div class="type-block"><div class="type-tag">UI — DM Sans</div><div class="t-ui">Add to cart · NGN 4,500 · Same-day delivery</div></div>
+    <div class="type-block"><div class="type-tag">Label — DM Sans Caps</div><div class="t-cap">Mum's Pick · Imported · Local · New Arrival</div></div>
+  </div>
+</div>
+</div>
+<div class="sep"></div>
+
+<!-- ═══ LOGO VARIANTS ═══ -->
+<div class="grid2">
+<div class="panel full">
+  <div class="sec">Logo Variants</div>
+  <div class="var-row">
+    <div class="var-box var-dark">
+      <svg width="42" height="42" viewBox="0 0 120 120" fill="none"><path d="M25 48 L20 100 Q20 104 24 104 L96 104 Q100 104 100 100 L95 48 Z" fill="#2D6A4F"/><path d="M30 52 L26 98 L94 98 L90 52 Z" fill="#1B4332"/><path d="M44 48 Q44 28 60 28 Q76 28 76 48" stroke="#B7E4C7" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="50" y="56" width="7" height="22" rx="3.5" fill="#E8692A"/><path d="M53.5 56 Q50 48 48 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q53.5 46 53.5 44" stroke="#52B788" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q57 48 59 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="72" cy="72" rx="11" ry="8" fill="#C4622D"/><ellipse cx="72" cy="70" rx="9" ry="6" fill="#D4812A"/><ellipse cx="60" cy="58" rx="8" ry="5" fill="#40916C" transform="rotate(-15 60 58)"/><circle cx="89" cy="58" r="5" fill="#D4A017"/><polygon points="89,53.5 90.2,56.8 93.8,56.8 91,58.9 92.2,62.2 89,60.1 85.8,62.2 87,58.9 84.2,56.8 87.8,56.8" fill="#FEFAE0"/></svg>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#FEFAE0;text-align:center;line-height:1.2;">Mama's<br><em style="color:#F0C040;">Pantry</em></div>
+      <div class="var-lbl" style="color:#B7E4C7;">Primary — Dark bg</div>
+    </div>
+    <div class="var-box var-cream">
+      <svg width="42" height="42" viewBox="0 0 120 120" fill="none"><path d="M25 48 L20 100 Q20 104 24 104 L96 104 Q100 104 100 100 L95 48 Z" fill="#2D6A4F"/><path d="M30 52 L26 98 L94 98 L90 52 Z" fill="#1B4332"/><path d="M44 48 Q44 28 60 28 Q76 28 76 48" stroke="#2D6A4F" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="50" y="56" width="7" height="22" rx="3.5" fill="#E8692A"/><path d="M53.5 56 Q50 48 48 44" stroke="#2D6A4F" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q53.5 46 53.5 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q57 48 59 44" stroke="#2D6A4F" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="72" cy="72" rx="11" ry="8" fill="#C4622D"/><ellipse cx="72" cy="70" rx="9" ry="6" fill="#D4812A"/><ellipse cx="60" cy="58" rx="8" ry="5" fill="#40916C" transform="rotate(-15 60 58)"/><circle cx="89" cy="58" r="5" fill="#D4A017"/><polygon points="89,53.5 90.2,56.8 93.8,56.8 91,58.9 92.2,62.2 89,60.1 85.8,62.2 87,58.9 84.2,56.8 87.8,56.8" fill="#1B4332"/></svg>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#1B4332;text-align:center;line-height:1.2;">Mama's<br><em style="color:#2D6A4F;">Pantry</em></div>
+      <div class="var-lbl" style="color:#5C5C5C;">Packaging — Cream</div>
+    </div>
+    <div class="var-box var-white">
+      <svg width="42" height="42" viewBox="0 0 120 120" fill="none"><path d="M25 48 L20 100 Q20 104 24 104 L96 104 Q100 104 100 100 L95 48 Z" fill="#40916C"/><path d="M30 52 L26 98 L94 98 L90 52 Z" fill="#2D6A4F"/><path d="M44 48 Q44 28 60 28 Q76 28 76 48" stroke="#1B4332" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="50" y="56" width="7" height="22" rx="3.5" fill="#E8692A"/><path d="M53.5 56 Q50 48 48 44" stroke="#2D6A4F" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q53.5 46 53.5 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q57 48 59 44" stroke="#2D6A4F" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="72" cy="72" rx="11" ry="8" fill="#C4622D"/><ellipse cx="72" cy="70" rx="9" ry="6" fill="#D4812A"/><ellipse cx="60" cy="58" rx="8" ry="5" fill="#40916C" transform="rotate(-15 60 58)"/><circle cx="89" cy="58" r="5" fill="#D4A017"/><polygon points="89,53.5 90.2,56.8 93.8,56.8 91,58.9 92.2,62.2 89,60.1 85.8,62.2 87,58.9 84.2,56.8 87.8,56.8" fill="#fff"/></svg>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#1B4332;text-align:center;line-height:1.2;">Mama's<br><em style="color:#40916C;">Pantry</em></div>
+      <div class="var-lbl" style="color:#5C5C5C;">Digital — White bg</div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="sep"></div>
+
+<!-- ═══ THREE DEVICES ═══ -->
+<div class="grid2">
+<div class="panel full cream-bg">
+  <div class="sec">Digital Touchpoints</div>
+  <div class="device-row">
+
+    <!-- WEBSITE -->
+    <div>
+      <div class="dev-label">Website — mamaspantry.com.ng</div>
+      <div class="web-frame">
+        <div class="web-chrome">
+          <div class="web-dots"><div class="web-dot" style="background:#FF5F57;"></div><div class="web-dot" style="background:#FEBC2E;"></div><div class="web-dot" style="background:#28C840;"></div></div>
+          <div class="web-url">mamaspantry.com.ng</div>
+        </div>
+        <div class="web-topbar">
+          <div class="web-logo-txt">Mama<em>'s</em> Pantry</div>
+          <div class="web-nav"><a href="#" class="on">Shop</a><a href="#">Mum's Picks</a><a href="#">Local</a><a href="#">Delivery</a></div>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 4h12l-1.5 9H5.5L4 4z" stroke="#B7E4C7" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="16.5" r="1" fill="#B7E4C7"/><circle cx="13" cy="16.5" r="1" fill="#B7E4C7"/></svg>
+        </div>
+        <div class="web-hero">
+          <div class="web-hero" style="padding:0;border:none;background:transparent;">
+            <div>
+              <h2>From our hands<br><em>to your table</em></h2>
+              <p>Mum just landed from Atlanta. New stock in.</p>
+              <button class="web-cta">Shop Mum's Picks</button>
+            </div>
+          </div>
+          <svg width="56" height="56" viewBox="0 0 120 120" fill="none" style="flex-shrink:0;margin-left:auto;"><path d="M25 48 L20 100 Q20 104 24 104 L96 104 Q100 104 100 100 L95 48 Z" fill="#2D6A4F"/><path d="M30 52 L26 98 L94 98 L90 52 Z" fill="#1B4332"/><path d="M44 48 Q44 28 60 28 Q76 28 76 48" stroke="#B7E4C7" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="50" y="56" width="7" height="22" rx="3.5" fill="#E8692A"/><path d="M53.5 56 Q50 48 48 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q53.5 46 53.5 44" stroke="#52B788" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M53.5 56 Q57 48 59 44" stroke="#40916C" stroke-width="1.8" fill="none" stroke-linecap="round"/><ellipse cx="72" cy="72" rx="11" ry="8" fill="#C4622D"/><ellipse cx="72" cy="70" rx="9" ry="6" fill="#D4812A"/><ellipse cx="60" cy="58" rx="8" ry="5" fill="#40916C" transform="rotate(-15 60 58)"/><circle cx="89" cy="58" r="5" fill="#D4A017"/><polygon points="89,53.5 90.2,56.8 93.8,56.8 91,58.9 92.2,62.2 89,60.1 85.8,62.2 87,58.9 84.2,56.8 87.8,56.8" fill="#FEFAE0"/></svg>
+        </div>
+        <div class="web-body">
+          <div class="web-sec-title">Just landed</div>
+          <div class="web-pgrid">
+            <div class="web-pcard"><div class="web-pcard-img" style="background:#FEF9E7;font-size:16px;">🧀</div><div class="web-pcard-info"><div style="margin-bottom:2px;"><span class="badge">Mum's Pick</span></div><div class="web-pcard-name">Tillamook Cheddar</div><div class="web-pcard-price">₦6,200</div></div></div>
+            <div class="web-pcard"><div class="web-pcard-img" style="background:#F0FDF4;font-size:16px;">🌾</div><div class="web-pcard-info"><div style="margin-bottom:2px;"><span class="badge badge-local">Local</span></div><div class="web-pcard-name">Ofada Rice 5kg</div><div class="web-pcard-price">₦8,500</div></div></div>
+            <div class="web-pcard"><div class="web-pcard-img" style="background:#FFF7ED;font-size:16px;">🥜</div><div class="web-pcard-info"><div style="margin-bottom:2px;"><span class="badge">Mum's Pick</span></div><div class="web-pcard-name">Justin's Almond Butter</div><div class="web-pcard-price">₦5,800</div></div></div>
+            <div class="web-pcard"><div class="web-pcard-img" style="background:#FDF2F8;font-size:16px;">🫒</div><div class="web-pcard-info"><div style="margin-bottom:2px;"><span class="badge badge-local">Local</span></div><div class="web-pcard-name">Palm Oil 2L</div><div class="web-pcard-price">₦4,200</div></div></div>
+          </div>
+        </div>
+        <div class="web-footer"><div class="web-ftxt">© 2025 Mama's Pantry · Magodo Phase 1, Lagos</div><div class="web-ftxt">mamaspantry.com.ng</div></div>
+      </div>
+    </div>
+
+    <!-- WEB APP / ADMIN DASHBOARD -->
+    <div>
+      <div class="dev-label">Web App — Admin Dashboard</div>
+      <div class="wa-frame">
+        <div class="wa-chrome">
+          <div class="web-dots"><div class="web-dot" style="background:#FF5F57;"></div><div class="web-dot" style="background:#FEBC2E;"></div><div class="web-dot" style="background:#28C840;"></div></div>
+          <div class="wa-url">admin.mamaspantry.com.ng</div>
+        </div>
+        <div class="wa-shell">
+          <div class="wa-sidebar">
+            <div class="wa-side-logo">Mama<em>'s</em><br>Pantry</div>
+            <div class="wa-nav-item on">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3l7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8v8h4v-4h2v4h4V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Dashboard
+            </div>
+            <div class="wa-nav-item">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12l-1.5 9H5.5L4 4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="16.5" r="1" fill="currentColor"/><circle cx="13" cy="16.5" r="1" fill="currentColor"/></svg>
+              Orders
+            </div>
+            <div class="wa-nav-item">
+              <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+              Inventory
+            </div>
+            <div class="wa-nav-item">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Customers
+            </div>
+            <div class="wa-nav-item">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M3 3h14v10H3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M7 17h6M10 13v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Analytics
+            </div>
+            <div class="wa-nav-item">
+              <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Settings
+            </div>
+          </div>
+          <div class="wa-main">
+            <div class="wa-topbar">
+              <div class="wa-title">Dashboard</div>
+              <div class="wa-date">Fri 27 Mar 2026</div>
+            </div>
+            <div class="wa-stats">
+              <div class="wa-stat"><div class="wa-stat-lbl">Today's Revenue</div><div class="wa-stat-val">₦184k</div><div class="wa-stat-sub">+12% vs yesterday</div></div>
+              <div class="wa-stat"><div class="wa-stat-lbl">Orders</div><div class="wa-stat-val">34</div><div class="wa-stat-sub">8 out for delivery</div></div>
+              <div class="wa-stat"><div class="wa-stat-lbl">Low Stock</div><div class="wa-stat-val" style="color:#C4622D;">6</div><div class="wa-stat-sub">items need reorder</div></div>
+            </div>
+            <div class="wa-orders-title">Recent Orders</div>
+            <div class="wa-order-row"><div class="wa-order-id">#1042</div><div class="wa-order-name">Temi Adeyemi</div><div class="wa-order-amt">₦24,500</div><span class="wa-order-status st-delivered">Delivered</span></div>
+            <div class="wa-order-row"><div class="wa-order-id">#1041</div><div class="wa-order-name">Funke Okafor</div><div class="wa-order-amt">₦18,200</div><span class="wa-order-status st-out">Out for delivery</span></div>
+            <div class="wa-order-row"><div class="wa-order-id">#1040</div><div class="wa-order-name">Biodun Lawal</div><div class="wa-order-amt">₦9,800</div><span class="wa-order-status st-packed">Packed</span></div>
+            <div class="wa-order-row"><div class="wa-order-id">#1039</div><div class="wa-order-name">Mrs Coker</div><div class="wa-order-amt">₦31,000</div><span class="wa-order-status st-delivered">Delivered</span></div>
+            <div class="wa-orders-title" style="margin-top:10px;">Weekly Sales</div>
+            <div class="wa-chart-bar-row">
+              <div class="wa-bar-col"><div class="wa-bar" style="height:22px;opacity:0.6;"></div><div class="wa-bar-lbl">Mon</div></div>
+              <div class="wa-bar-col"><div class="wa-bar" style="height:30px;opacity:0.7;"></div><div class="wa-bar-lbl">Tue</div></div>
+              <div class="wa-bar-col"><div class="wa-bar" style="height:26px;opacity:0.65;"></div><div class="wa-bar-lbl">Wed</div></div>
+              <div class="wa-bar-col"><div class="wa-bar" style="height:38px;opacity:0.8;"></div><div class="wa-bar-lbl">Thu</div></div>
+              <div class="wa-bar-col"><div class="wa-bar" style="height:48px;"></div><div class="wa-bar-lbl">Fri</div></div>
+              <div class="wa-bar-col"><div class="wa-bar" style="height:42px;opacity:0.9;background:#D4A017;"></div><div class="wa-bar-lbl">Sat</div></div>
+              <div class="wa-bar-col"><div class="wa-bar" style="height:34px;opacity:0.75;"></div><div class="wa-bar-lbl">Sun</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE APP -->
+    <div>
+      <div class="dev-label">Mobile App</div>
+      <div class="phone-frame">
+        <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+        <div class="ph-bar">
+          <div class="ph-top">
+            <div><div class="ph-greeting">Good morning, Temi</div><div class="ph-name">Mama<em>'s</em> Pantry</div></div>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M4 4h12l-1.5 9H5.5L4 4z" stroke="#B7E4C7" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="16.5" r="1" fill="#B7E4C7"/><circle cx="13" cy="16.5" r="1" fill="#B7E4C7"/></svg>
+          </div>
+          <div class="ph-search"><svg width="10" height="10" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="5.5" stroke="rgba(255,255,255,0.4)" stroke-width="1.4"/><path d="M13.5 13.5L17 17" stroke="rgba(255,255,255,0.4)" stroke-width="1.4" stroke-linecap="round"/></svg> Search...</div>
+        </div>
+        <div class="ph-body">
+          <div class="ph-cats"><div class="ph-cat on">All</div><div class="ph-cat">Mum's Picks</div><div class="ph-cat">Local</div></div>
+          <div class="ph-sec">Mum's Picks</div>
+          <div class="ph-grid">
+            <div class="ph-card"><div class="ph-card-img" style="background:#FEF9E7;font-size:14px;">🧀</div><div class="ph-card-body"><span class="ph-pbadge">Mum's</span><div class="ph-card-name">Tillamook Cheddar</div><div class="ph-card-price">₦6,200</div></div></div>
+            <div class="ph-card"><div class="ph-card-img" style="background:#FFF7ED;font-size:14px;">🥜</div><div class="ph-card-body"><span class="ph-pbadge">Mum's</span><div class="ph-card-name">Justin's Almond Butter</div><div class="ph-card-price">₦5,800</div></div></div>
+            <div class="ph-card"><div class="ph-card-img" style="background:#FDF2F8;font-size:14px;">🫐</div><div class="ph-card-body"><span class="ph-pbadge">Mum's</span><div class="ph-card-name">Ocean Spray</div><div class="ph-card-price">₦3,400</div></div></div>
+          </div>
+          <div class="ph-sec">Local Staples</div>
+          <div class="ph-grid">
+            <div class="ph-card"><div class="ph-card-img" style="background:#F0FDF4;font-size:14px;">🌾</div><div class="ph-card-body"><div class="ph-card-name">Ofada Rice 5kg</div><div class="ph-card-price">₦8,500</div></div></div>
+            <div class="ph-card"><div class="ph-card-img" style="background:#FFF7ED;font-size:14px;">🫒</div><div class="ph-card-body"><div class="ph-card-name">Palm Oil 2L</div><div class="ph-card-price">₦4,200</div></div></div>
+            <div class="ph-card"><div class="ph-card-img" style="background:#FEF9E7;font-size:14px;">🌿</div><div class="ph-card-body"><div class="ph-card-name">Egusi 500g</div><div class="ph-card-price">₦2,800</div></div></div>
+          </div>
+        </div>
+        <div class="ph-nav">
+          <div class="ph-nav-item on"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M3 10L10 3l7 7" stroke="#2D6A4F" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8v8h4v-4h2v4h4V8" stroke="#2D6A4F" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="ph-nav-dot"></div><span>Home</span></div>
+          <div class="ph-nav-item"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="#9CA3AF" stroke-width="1.4"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="#9CA3AF" stroke-width="1.4"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="#9CA3AF" stroke-width="1.4"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="#9CA3AF" stroke-width="1.4"/></svg><span>Browse</span></div>
+          <div class="ph-nav-item"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M4 4h12l-1.5 9H5.5L4 4z" stroke="#9CA3AF" stroke-width="1.4" stroke-linejoin="round"/><circle cx="8" cy="16.5" r="1" fill="#9CA3AF"/><circle cx="13" cy="16.5" r="1" fill="#9CA3AF"/></svg><span>Cart</span></div>
+          <div class="ph-nav-item"><svg width="14" height="14" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="3.5" stroke="#9CA3AF" stroke-width="1.4"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="#9CA3AF" stroke-width="1.4" stroke-linecap="round"/></svg><span>Account</span></div>
+        </div>
+        <div style="background:#2a2a2a;height:9px;border-radius:0 0 20px 20px;display:flex;align-items:center;justify-content:center;"><div style="width:44px;height:3px;background:#444;border-radius:2px;"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+<div class="sep"></div>
+
+<!-- ═══ VOICE ═══ -->
+<div class="grid2">
+<div class="panel full">
+  <div class="sec">Brand Voice</div>
+  <div class="voice-row">
+    <div class="voice-yes">
+      <div class="voice-ttl">We say this</div>
+      <div class="voice-line">"Mum picked this up in Atlanta last week"</div>
+      <div class="voice-line">"Fresh Ofada in today — straight from the farm"</div>
+      <div class="voice-line">"Your usual Tillamook is back, Temi"</div>
+      <div class="voice-line">"Order before 2pm, it's at your gate tonight"</div>
+    </div>
+    <div class="voice-no">
+      <div class="voice-ttl">Not this</div>
+      <div class="voice-line">"Premium imported goods available now"</div>
+      <div class="voice-line">"High-quality provisions at competitive prices"</div>
+      <div class="voice-line">"Leveraging our global supply chain"</div>
+      <div class="voice-line">"Synergising local and international sourcing"</div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="sep"></div>
+
+<!-- ═══ RULES ═══ -->
+<div class="grid2">
+<div class="panel full">
+  <div class="sec">Usage Rules</div>
+  <div class="rules-col">
+    <div class="rule-row"><div class="rule-text"><span class="rule-title">Logo clear space</span>Leave space equal to the height of the bag handle on all sides. Never crowd the mark against another element or edge.</div></div>
+    <div class="rule-row"><div class="rule-text"><span class="rule-title">Minimum size</span>Digital: 120px wide. Print: 25mm. Below these sizes use the icon-only mark (bag without wordmark).</div></div>
+    <div class="rule-row"><div class="rule-text"><span class="rule-title">Approved backgrounds</span>Forest Deep (#1B4332), Warm Cream (#FEFAE0), and White (#FFFFFF) only. Never on a photographic background without a solid colour backing.</div></div>
+    <div class="rule-row"><div class="rule-text"><span class="rule-title">Always use the apostrophe</span>Public-facing materials always read Mama's Pantry. Never "Mamas Pantry", "MP", or "The Pantry" in any customer-facing materials.</div></div>
+    <div class="rule-row"><div class="rule-text"><span class="rule-title">Gold is an accent, not a primary</span>Harvest Gold appears on: the "Mum's Pick" badge, logo star, price highlights, and premium callouts only. It never dominates a layout.</div></div>
+    <div class="rule-row"><div class="rule-text"><span class="rule-title">Admin vs customer UI</span>The customer website and app use Warm Cream (#FEFAE0) as the primary background. The admin web app uses neutral system backgrounds to keep the dashboard feeling clinical and efficient, not warm and retail.</div></div>
+  </div>
+</div>
+</div>

@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mama's Pantry — Brand Guidelines</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-950: #0D2B1A;
+    --green-900: #1A3D26;
+    --green-800: #1F5C35;
+    --green-700: #237A42;
+    --green-600: #2A9150;
+    --green-500: #3BAD64;
+    --green-200: #A8DDB8;
+    --green-100: #D0EDD9;
+    --green-50:  #EEF8F1;
+
+    --gold-900:  #5C3A00;
+    --gold-800:  #7A4E00;
+    --gold-700:  #9C6600;
+    --gold-600:  #C28200;
+    --gold-500:  #E0A020;
+    --gold-400:  #EDB84A;
+    --gold-200:  #F7DFA0;
+    --gold-100:  #FBF0CC;
+    --gold-50:   #FEF9EE;
+
+    --cream:     #FAF6EE;
+    --warm-100:  #F2EBD9;
+    --warm-200:  #E8DCC4;
+    --warm-600:  #8C7A5E;
+    --warm-800:  #4A3C2A;
+    --warm-900:  #2C2215;
+
+    --ink:       #1C1814;
+    --ink-light: #5A4E3C;
+    --white:     #FFFFFF;
+
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans:  'DM Sans', system-ui, sans-serif;
+    --display: 'DM Serif Display', Georgia, serif;
+
+    --radius: 12px;
+    --radius-sm: 6px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: var(--green-900);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover-pattern {
+    position: absolute; inset: 0;
+    opacity: 0.07;
+    background-image:
+      repeating-linear-gradient(45deg, var(--white) 0, var(--white) 1px, transparent 0, transparent 50%),
+      repeating-linear-gradient(-45deg, var(--white) 0, var(--white) 1px, transparent 0, transparent 50%);
+    background-size: 32px 32px;
+  }
+
+  .cover-logo-ring {
+    width: 140px; height: 140px;
+    border: 2.5px solid var(--gold-400);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-logo-inner {
+    width: 110px; height: 110px;
+    background: var(--gold-500);
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+  }
+
+  .cover-logo-inner .basket-icon {
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  .cover-wordmark {
+    font-family: var(--serif);
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    position: relative; z-index: 1;
+  }
+
+  .cover-wordmark em {
+    font-style: italic;
+    color: var(--gold-400);
+  }
+
+  .cover-sub {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-200);
+    margin-top: 10px;
+    position: relative; z-index: 1;
+  }
+
+  .cover-tagline {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold-200);
+    margin-top: 28px;
+    position: relative; z-index: 1;
+    max-width: 400px;
+  }
+
+  .cover-meta {
+    position: absolute; bottom: 32px;
+    font-size: 12px;
+    color: var(--green-200);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    z-index: 1;
+    opacity: 0.6;
+  }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 960px; margin: 0 auto; padding: 0 40px; }
+
+  section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--warm-200);
+  }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green-600);
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-600);
+    margin-bottom: 20px;
+    margin-top: 48px;
+  }
+
+  h3:first-of-type { margin-top: 40px; }
+
+  .intro {
+    font-size: 17px;
+    color: var(--ink-light);
+    max-width: 640px;
+    margin-bottom: 48px;
+    line-height: 1.7;
+  }
+
+  /* ── LOGO ── */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .logo-card {
+    border-radius: var(--radius);
+    padding: 40px 24px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+    min-height: 220px;
+  }
+
+  .logo-card.on-light { background: var(--white); border: 1px solid var(--warm-200); }
+  .logo-card.on-dark  { background: var(--green-900); }
+  .logo-card.on-kraft { background: var(--warm-100); border: 1px solid var(--warm-200); }
+
+  .logo-card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-600);
+  }
+  .logo-card.on-dark .logo-card-label { color: var(--green-200); }
+
+  .logo-lockup {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+
+  .logo-circle {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+  }
+
+  .logo-circle.green { background: var(--green-800); }
+  .logo-circle.gold  { background: var(--gold-500); }
+  .logo-circle.mono  { background: var(--ink); }
+
+  .logo-name {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.15;
+    text-align: center;
+    letter-spacing: -0.3px;
+  }
+
+  .logo-name em { font-style: italic; }
+
+  .logo-name.light { color: var(--ink); }
+  .logo-name.on-dark-text { color: var(--white); }
+  .logo-name.mono-text { color: var(--ink); }
+
+  .logo-name span.apostrophe { color: var(--gold-500); }
+  .logo-name.on-dark-text span.apostrophe { color: var(--gold-400); }
+
+  .logo-sub-text {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+  .logo-sub-text.light { color: var(--green-600); }
+  .logo-sub-text.on-dark-text { color: var(--green-200); }
+  .logo-sub-text.mono-text { color: var(--ink-light); }
+
+  .logo-donts {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  .dont-card {
+    background: var(--white);
+    border: 1px solid var(--warm-200);
+    border-radius: var(--radius-sm);
+    padding: 20px 16px 14px;
+    position: relative;
+  }
+
+  .dont-card::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: var(--radius-sm);
+    background: rgba(200, 60, 60, 0.06);
+    pointer-events: none;
+  }
+
+  .dont-x {
+    position: absolute; top: 8px; right: 10px;
+    font-size: 18px;
+    color: #C83C3C;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .dont-preview {
+    height: 60px; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  .dont-label {
+    font-size: 11px; color: #C83C3C; font-weight: 600;
+    text-align: center; line-height: 1.3;
+  }
+
+  /* ── COLOURS ── */
+  .color-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .swatch {
+    height: 80px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .swatch:hover { transform: scaleY(1.06); z-index: 1; }
+
+  .swatch-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 4px 6px;
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .color-meta {
+    display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .color-block-large {
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 4px;
+    min-width: 180px;
+    box-shadow: var(--shadow);
+  }
+
+  .color-block-large .name { font-size: 15px; font-weight: 600; }
+  .color-block-large .hex  { font-size: 12px; font-family: monospace; opacity: 0.7; margin-top: 2px; }
+  .color-block-large .use  { font-size: 11px; opacity: 0.8; margin-top: 6px; line-height: 1.4; }
+
+  /* ── TYPOGRAPHY ── */
+  .type-specimen {
+    border: 1px solid var(--warm-200);
+    border-radius: var(--radius);
+    background: var(--white);
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .type-header {
+    background: var(--green-50);
+    border-bottom: 1px solid var(--warm-200);
+    padding: 12px 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .type-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--green-700);
+    background: var(--green-100); border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  .type-name {
+    font-size: 13px; font-weight: 600; color: var(--ink-light);
+  }
+
+  .type-role {
+    font-size: 12px; color: var(--warm-600); margin-left: auto;
+  }
+
+  .type-body {
+    padding: 28px 24px;
+  }
+
+  .font-display-1 {
+    font-family: var(--serif);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -1px;
+  }
+
+  .font-display-1 em { font-style: italic; color: var(--green-700); }
+
+  .font-display-2 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .font-heading {
+    font-family: var(--sans);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.3px;
+  }
+
+  .font-subheading {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green-600);
+  }
+
+  .font-body {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink-light);
+    line-height: 1.7;
+    max-width: 560px;
+  }
+
+  .font-caption {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--warm-600);
+    letter-spacing: 0.3px;
+  }
+
+  .font-price {
+    font-family: var(--sans);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--green-700);
+  }
+
+  .font-price span {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--warm-600);
+    text-decoration: line-through;
+    margin-left: 6px;
+  }
+
+  .type-meta { margin-top: 12px; }
+  .type-meta span {
+    display: inline-block;
+    font-size: 11px; color: var(--warm-600);
+    background: var(--warm-100); border-radius: 4px;
+    padding: 2px 8px; margin: 2px 4px 2px 0;
+    font-family: monospace;
+  }
+
+  /* ── BRAND VOICE ── */
+  .voice-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+
+  .voice-card {
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    background: var(--white);
+    border: 1px solid var(--warm-200);
+    box-shadow: var(--shadow);
+  }
+
+  .voice-card h4 {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--green-800);
+  }
+
+  .voice-card p {
+    font-size: 15px;
+    color: var(--ink-light);
+    line-height: 1.65;
+  }
+
+  .voice-example {
+    background: var(--green-50);
+    border-left: 3px solid var(--green-600);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 14px 18px;
+    margin-top: 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--green-900);
+    line-height: 1.5;
+  }
+
+  .do-dont-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;
+  }
+
+  .do-pill, .dont-pill {
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .do-pill {
+    background: var(--green-50);
+    border: 1px solid var(--green-200);
+    color: var(--green-900);
+  }
+
+  .do-pill::before { content: '✓  '; font-weight: 700; color: var(--green-600); }
+
+  .dont-pill {
+    background: #FFF5F5;
+    border: 1px solid #F5BFBF;
+    color: #7A2020;
+  }
+
+  .dont-pill::before { content: '✕  '; font-weight: 700; color: #C83C3C; }
+
+  /* ── APP UI PREVIEW ── */
+  .app-preview-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;
+  }
+
+  .phone-shell {
+    background: var(--ink);
+    border-radius: 40px;
+    padding: 14px;
+    box-shadow: var(--shadow-lg);
+    width: 280px;
+    margin: 0 auto;
+  }
+
+  .phone-screen {
+    background: var(--cream);
+    border-radius: 28px;
+    overflow: hidden;
+    min-height: 540px;
+  }
+
+  .app-topbar {
+    background: var(--green-900);
+    padding: 20px 18px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .app-brand {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.3px;
+  }
+
+  .app-brand em { font-style: italic; color: var(--gold-400); }
+
+  .app-cart-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gold-500);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+
+  .app-hero-banner {
+    background: linear-gradient(135deg, var(--green-800), var(--green-950));
+    padding: 16px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .app-hero-text h5 {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .app-hero-text p {
+    font-size: 11px; color: var(--green-200); margin-top: 4px; line-height: 1.3;
+  }
+
+  .app-hero-badge {
+    background: var(--gold-500); border-radius: 20px;
+    padding: 4px 10px; font-size: 10px; font-weight: 700;
+    color: var(--gold-900); margin-top: 6px; display: inline-block;
+  }
+
+  .app-hero-emoji { font-size: 36px; }
+
+  .app-section-label {
+    padding: 14px 18px 8px;
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--green-700);
+  }
+
+  .app-chip-row {
+    padding: 0 18px 12px;
+    display: flex; gap: 8px; overflow-x: auto;
+  }
+
+  .app-chip {
+    background: var(--green-100); border-radius: 20px;
+    padding: 5px 12px; font-size: 11px; font-weight: 600;
+    color: var(--green-800); white-space: nowrap;
+  }
+
+  .app-chip.active {
+    background: var(--green-700); color: var(--white);
+  }
+
+  .app-product-row {
+    padding: 0 18px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+
+  .app-product-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--warm-200);
+  }
+
+  .app-product-img {
+    height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+  }
+
+  .app-product-img.fresh { background: var(--green-50); }
+  .app-product-img.imported { background: var(--gold-50); }
+
+  .app-product-info {
+    padding: 8px 10px;
+  }
+
+  .app-product-info .p-name {
+    font-size: 11px; font-weight: 600; color: var(--ink);
+    line-height: 1.3; margin-bottom: 4px;
+  }
+
+  .app-product-info .p-origin {
+    font-size: 9px; color: var(--warm-600); margin-bottom: 4px;
+  }
+
+  .app-product-info .p-price {
+    font-size: 13px; font-weight: 700; color: var(--green-700);
+  }
+
+  .mums-pick-badge {
+    display: inline-block;
+    background: var(--gold-100); color: var(--gold-800);
+    font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+    border-radius: 3px; padding: 1px 5px; margin-left: 3px;
+    text-transform: uppercase;
+  }
+
+  .app-add-btn {
+    display: block; width: 22px; height: 22px;
+    background: var(--green-700); border-radius: 50%;
+    font-size: 16px; line-height: 22px;
+    color: var(--white); text-align: center;
+    font-weight: 300; margin-top: 4px;
+  }
+
+  /* ── STATIONERY ── */
+  .stationery-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+
+  .stationery-mock {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .biz-card {
+    background: var(--green-900);
+    padding: 28px 24px;
+    min-height: 160px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+
+  .biz-card-pattern {
+    position: absolute; inset: 0; opacity: 0.06;
+    background-image: repeating-linear-gradient(45deg, var(--white) 0, var(--white) 1px, transparent 0, transparent 50%),
+      repeating-linear-gradient(-45deg, var(--white) 0, var(--white) 1px, transparent 0, transparent 50%);
+    background-size: 20px 20px;
+  }
+
+  .biz-card-logo {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    position: relative; z-index: 1;
+  }
+
+  .biz-card-logo em { color: var(--gold-400); }
+
+  .biz-card-name {
+    font-size: 14px; font-weight: 600; color: var(--white);
+    position: relative; z-index: 1;
+  }
+
+  .biz-card-detail {
+    font-size: 11px; color: var(--green-200);
+    position: relative; z-index: 1; line-height: 1.6;
+  }
+
+  .biz-card-back {
+    background: var(--gold-500);
+    padding: 28px 24px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 160px;
+  }
+
+  .biz-card-back-text {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--gold-900);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .bag-mock {
+    background: var(--warm-100);
+    padding: 32px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 280px;
+    position: relative;
+  }
+
+  .bag-shape {
+    width: 140px;
+    background: var(--warm-200);
+    border-radius: 12px 12px 20px 20px;
+    padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  .bag-handle-left, .bag-handle-right {
+    position: absolute; top: -22px;
+    width: 28px; height: 28px;
+    border: 3px solid var(--warm-600);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+  }
+  .bag-handle-left  { left: 28px; }
+  .bag-handle-right { right: 28px; }
+
+  .bag-logo {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--green-800);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .bag-logo em { font-style: italic; color: var(--gold-600); }
+
+  .bag-tagline {
+    font-size: 7px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--warm-600);
+    margin-top: 6px; text-align: center;
+  }
+
+  .bag-leaf { font-size: 20px; margin-bottom: 6px; }
+
+  /* ── SPACING / GRID / USAGE ── */
+  .usage-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;
+  }
+
+  .usage-card {
+    background: var(--white);
+    border: 1px solid var(--warm-200);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .usage-card h4 {
+    font-size: 14px; font-weight: 600; color: var(--green-800);
+    margin-bottom: 10px;
+  }
+
+  .usage-card p {
+    font-size: 13px; color: var(--ink-light); line-height: 1.6;
+  }
+
+  .usage-icon { font-size: 24px; margin-bottom: 10px; }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    background: var(--green-950);
+    padding: 48px 40px;
+    text-align: center;
+    color: var(--green-200);
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .doc-footer strong {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .doc-footer em { color: var(--gold-400); font-style: italic; }
+
+  /* ── NAV ── */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250, 246, 238, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--warm-200);
+    padding: 0 40px;
+  }
+
+  .nav-inner {
+    max-width: 960px; margin: 0 auto;
+    display: flex; align-items: center; gap: 32px;
+    height: 52px; overflow-x: auto;
+  }
+
+  .nav-inner a {
+    font-size: 12px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--warm-600);
+    text-decoration: none; white-space: nowrap;
+    transition: color 0.15s;
+    padding: 4px 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .nav-inner a:hover { color: var(--green-700); border-color: var(--green-700); }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green-800);
+    text-decoration: none;
+    margin-right: 8px;
+    white-space: nowrap;
+  }
+
+  .nav-logo em { font-style: italic; color: var(--gold-600); }
+
+  /* ── SIGNAGE MOCK ── */
+  .signage-mock {
+    background: var(--warm-100);
+    border-radius: var(--radius);
+    padding: 40px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow);
+  }
+
+  .fascia-board {
+    background: var(--green-900);
+    border-radius: 8px;
+    padding: 24px 48px;
+    display: flex; align-items: center; gap: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    min-width: 360px;
+    position: relative; overflow: hidden;
+  }
+
+  .fascia-board::after {
+    content: '';
+    position: absolute; inset: 0; opacity: 0.05;
+    background-image: repeating-linear-gradient(45deg, var(--white) 0, var(--white) 1px, transparent 0, transparent 30px);
+  }
+
+  .fascia-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--gold-500);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0; position: relative; z-index: 1;
+  }
+
+  .fascia-text { position: relative; z-index: 1; }
+
+  .fascia-name {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .fascia-name em { font-style: italic; color: var(--gold-400); }
+
+  .fascia-tagline {
+    font-size: 10px; letter-spacing: 2px;
+    font-weight: 600; text-transform: uppercase;
+    color: var(--green-200); margin-top: 4px;
+  }
+
+  @media (max-width: 700px) {
+    .logo-grid, .stationery-row, .app-preview-wrap,
+    .usage-grid, .voice-grid, .do-dont-row { grid-template-columns: 1fr; }
+    .logo-donts { grid-template-columns: 1fr 1fr; }
+    h2 { font-size: 28px; }
+    .page { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-pattern"></div>
+  <div class="cover-logo-ring">
+    <div class="cover-logo-inner">
+      <span class="basket-icon">🧺</span>
+    </div>
+  </div>
+  <div class="cover-wordmark"><em>Mama's</em> Pantry</div>
+  <div class="cover-sub">Brand Identity Guidelines</div>
+  <div class="cover-tagline">"Chosen with care. Stocked with love."</div>
+  <div class="cover-meta">Magodo Phase 1, Lagos &nbsp;·&nbsp; Version 1.0 &nbsp;·&nbsp; 2025</div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo"><em>Mama's</em> Pantry</a>
+    <a href="#logo">Logo</a>
+    <a href="#colours">Colours</a>
+    <a href="#typography">Typography</a>
+    <a href="#voice">Brand Voice</a>
+    <a href="#app">App UI</a>
+    <a href="#stationery">Stationery</a>
+    <a href="#signage">Signage</a>
+    <a href="#usage">Usage</a>
+  </div>
+</nav>
+
+<!-- LOGO -->
+<div id="logo">
+<section>
+<div class="page">
+  <div class="section-label">01 — Logo System</div>
+  <h2>The Mark</h2>
+  <p class="intro">The Mama's Pantry logo is a wordmark paired with a circular emblem. The wordmark uses a warm serif with an italic "Mama's" to carry personality. The circle emblem uses a basket motif — simple, recognisable, domestic.</p>
+
+  <h3>Logo Variations</h3>
+  <div class="logo-grid">
+    <div class="logo-card on-light">
+      <div class="logo-lockup">
+        <div class="logo-circle green">🧺</div>
+        <div class="logo-name light"><em>Mama<span class="apostrophe">'</span>s</em> Pantry</div>
+        <div class="logo-sub-text light">Imported &amp; Local Provisions</div>
+      </div>
+      <div class="logo-card-label">Primary — On White</div>
+    </div>
+    <div class="logo-card on-dark">
+      <div class="logo-lockup">
+        <div class="logo-circle gold">🧺</div>
+        <div class="logo-name on-dark-text"><em>Mama<span class="apostrophe">'</span>s</em> Pantry</div>
+        <div class="logo-sub-text on-dark-text">Imported &amp; Local Provisions</div>
+      </div>
+      <div class="logo-card-label">Reversed — On Dark Green</div>
+    </div>
+    <div class="logo-card on-kraft">
+      <div class="logo-lockup">
+        <div class="logo-circle mono">🧺</div>
+        <div class="logo-name mono-text"><em>Mama<span class="apostrophe">'</span>s</em> Pantry</div>
+        <div class="logo-sub-text mono-text">Imported &amp; Local Provisions</div>
+      </div>
+      <div class="logo-card-label">On Kraft / Bag</div>
+    </div>
+  </div>
+
+  <h3>What Not To Do</h3>
+  <div class="logo-donts">
+    <div class="dont-card">
+      <div class="dont-x">✕</div>
+      <div class="dont-preview">
+        <span style="font-family:'Playfair Display',serif;font-size:16px;color:#888;letter-spacing:3px;font-weight:700;text-transform:uppercase">MAMA'S PANTRY</span>
+      </div>
+      <div class="dont-label">Don't use all caps on the wordmark</div>
+    </div>
+    <div class="dont-card">
+      <div class="dont-x">✕</div>
+      <div class="dont-preview">
+        <span style="font-family:'Playfair Display',serif;font-size:16px;color:#000;background:#E0A020;padding:6px 10px;border-radius:4px">Mama's Pantry</span>
+      </div>
+      <div class="dont-label">Don't place the logo on the gold background</div>
+    </div>
+    <div class="dont-card">
+      <div class="dont-x">✕</div>
+      <div class="dont-preview">
+        <span style="font-family:Arial,sans-serif;font-size:16px;color:#1A3D26;font-weight:700">Mama's Pantry</span>
+      </div>
+      <div class="dont-label">Don't swap the brand typeface for system fonts</div>
+    </div>
+    <div class="dont-card">
+      <div class="dont-x">✕</div>
+      <div class="dont-preview">
+        <span style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#aaa;filter:opacity(0.4)">Mama's Pantry</span>
+      </div>
+      <div class="dont-label">Don't use the logo at low opacity</div>
+    </div>
+  </div>
+
+  <h3>Clear Space &amp; Minimum Size</h3>
+  <div class="usage-grid" style="margin-top:16px">
+    <div class="usage-card">
+      <div class="usage-icon">⬜</div>
+      <h4>Clear Space</h4>
+      <p>Always maintain a minimum clear space of the height of the "M" in "Mama's" on all sides of the logo. No text, graphics, or other logos should intrude into this space.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">📏</div>
+      <h4>Minimum Size</h4>
+      <p>Digital: 120px wide minimum. Print: 30mm wide minimum. Below this, the sub-line "Imported &amp; Local Provisions" should be dropped, keeping only the wordmark and emblem.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">📄</div>
+      <h4>File Formats</h4>
+      <p>Always use SVG or PDF for digital and print. Use PNG (transparent background) only for social media profile images or where vector isn't supported. Never use JPG for the logo.</p>
+    </div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- COLOURS -->
+<div id="colours">
+<section>
+<div class="page">
+  <div class="section-label">02 — Colour Palette</div>
+  <h2>Colours</h2>
+  <p class="intro">Mama's Pantry is rooted in two families: Forest Green and Harvest Gold. Together they carry warmth, nature, quality, and Nigerian abundance. Cream and warm neutrals form the background world.</p>
+
+  <h3>Primary Palette</h3>
+  <div class="color-meta">
+    <div class="color-block-large" style="background:var(--green-900);color:var(--white)">
+      <div class="name">Forest Green</div>
+      <div class="hex">#1A3D26</div>
+      <div class="use">Primary brand colour. Used on headers, navbars, primary buttons, and store signage.</div>
+    </div>
+    <div class="color-block-large" style="background:var(--gold-500);color:var(--gold-900)">
+      <div class="name">Harvest Gold</div>
+      <div class="hex">#E0A020</div>
+      <div class="use">Accent and highlight colour. Used on apostrophe in logo, CTA buttons, "Mum's Pick" badges, and packaging accents.</div>
+    </div>
+    <div class="color-block-large" style="background:var(--cream);color:var(--ink);border:1px solid var(--warm-200)">
+      <div class="name">Pantry Cream</div>
+      <div class="hex">#FAF6EE</div>
+      <div class="use">Background colour for all surfaces. Warmer than white — feels like a handwritten recipe card.</div>
+    </div>
+    <div class="color-block-large" style="background:var(--warm-100);color:var(--ink);border:1px solid var(--warm-200)">
+      <div class="name">Kraft</div>
+      <div class="hex">#F2EBD9</div>
+      <div class="use">Secondary surface. Used on carrier bags, inner packaging, and secondary card backgrounds.</div>
+    </div>
+  </div>
+
+  <h3>Green Scale</h3>
+  <div class="color-row">
+    <div class="swatch" style="background:#EEF8F1"><div class="swatch-label" style="color:#1A3D26">50</div></div>
+    <div class="swatch" style="background:#D0EDD9"><div class="swatch-label" style="color:#1A3D26">100</div></div>
+    <div class="swatch" style="background:#A8DDB8"><div class="swatch-label" style="color:#1F5C35">200</div></div>
+    <div class="swatch" style="background:#3BAD64"><div class="swatch-label" style="color:#0D2B1A">500</div></div>
+    <div class="swatch" style="background:#2A9150"><div class="swatch-label" style="color:#EEF8F1">600</div></div>
+    <div class="swatch" style="background:#1A3D26"><div class="swatch-label" style="color:#D0EDD9">900</div></div>
+    <div class="swatch" style="background:#0D2B1A"><div class="swatch-label" style="color:#A8DDB8">950</div></div>
+  </div>
+
+  <h3>Gold Scale</h3>
+  <div class="color-row">
+    <div class="swatch" style="background:#FEF9EE"><div class="swatch-label" style="color:#5C3A00">50</div></div>
+    <div class="swatch" style="background:#FBF0CC"><div class="swatch-label" style="color:#5C3A00">100</div></div>
+    <div class="swatch" style="background:#F7DFA0"><div class="swatch-label" style="color:#7A4E00">200</div></div>
+    <div class="swatch" style="background:#EDB84A"><div class="swatch-label" style="color:#5C3A00">400</div></div>
+    <div class="swatch" style="background:#E0A020"><div class="swatch-label" style="color:#5C3A00">500</div></div>
+    <div class="swatch" style="background:#C28200"><div class="swatch-label" style="color:#FBF0CC">600</div></div>
+    <div class="swatch" style="background:#7A4E00"><div class="swatch-label" style="color:#F7DFA0">800</div></div>
+  </div>
+
+  <h3>Neutral / Text Scale</h3>
+  <div class="color-row">
+    <div class="swatch" style="background:#FAF6EE"><div class="swatch-label" style="color:#4A3C2A">Cream</div></div>
+    <div class="swatch" style="background:#F2EBD9"><div class="swatch-label" style="color:#4A3C2A">Kraft</div></div>
+    <div class="swatch" style="background:#E8DCC4"><div class="swatch-label" style="color:#4A3C2A">Warm 200</div></div>
+    <div class="swatch" style="background:#8C7A5E"><div class="swatch-label" style="color:#FAF6EE">Warm 600</div></div>
+    <div class="swatch" style="background:#4A3C2A"><div class="swatch-label" style="color:#E8DCC4">Warm 800</div></div>
+    <div class="swatch" style="background:#5A4E3C"><div class="swatch-label" style="color:#E8DCC4">Ink Light</div></div>
+    <div class="swatch" style="background:#1C1814"><div class="swatch-label" style="color:#E8DCC4">Ink</div></div>
+  </div>
+
+  <h3>Colour Usage Rules</h3>
+  <div class="usage-grid" style="margin-top:16px">
+    <div class="usage-card">
+      <h4>Green on Cream</h4>
+      <p>The primary combination. Forest Green (#1A3D26) on Pantry Cream (#FAF6EE). Use for all primary headings, navigation, and key UI elements.</p>
+      <div style="margin-top:14px;background:var(--cream);border:1px solid var(--warm-200);border-radius:8px;padding:12px;text-align:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--green-900);font-size:16px">Sample Text</div>
+    </div>
+    <div class="usage-card">
+      <h4>White on Dark Green</h4>
+      <p>For navigation bars, store signage, banners, and app headers. The gold accent is used only for the apostrophe mark and CTA highlights — not as a general text colour.</p>
+      <div style="margin-top:14px;background:var(--green-900);border-radius:8px;padding:12px;text-align:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--white);font-size:16px">Sample Text</div>
+    </div>
+    <div class="usage-card">
+      <h4>Gold Sparingly</h4>
+      <p>Gold (#E0A020) is a highlight colour only. Never use it as a large background fill except on the back of a business card or a special campaign element. It should always feel earned.</p>
+      <div style="margin-top:14px;background:var(--gold-500);border-radius:8px;padding:12px;text-align:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--gold-900);font-size:16px">Sample Text</div>
+    </div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div id="typography">
+<section>
+<div class="page">
+  <div class="section-label">03 — Typography</div>
+  <h2>Typefaces</h2>
+  <p class="intro">Two typefaces do all the work. Playfair Display carries warmth and personality in headlines and the logo. DM Sans handles all body copy, UI labels, prices, and captions with quiet clarity.</p>
+
+  <div class="type-specimen">
+    <div class="type-header">
+      <span class="type-tag">Display</span>
+      <span class="type-name">Playfair Display</span>
+      <span class="type-role">Headlines · Logo · Taglines · Pull quotes</span>
+    </div>
+    <div class="type-body">
+      <div class="font-display-1"><em>Mama's</em> Pantry</div>
+      <div style="margin-top:16px" class="font-display-2">Chosen with care.<br>Stocked with love.</div>
+      <div class="type-meta">
+        <span>Regular 400</span><span>Semi-Bold 600</span><span>Bold 700</span><span>Italic</span>
+        <span>Google Fonts: Playfair Display</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="type-specimen">
+    <div class="type-header">
+      <span class="type-tag">Body</span>
+      <span class="type-name">DM Sans</span>
+      <span class="type-role">Body copy · UI labels · Buttons · Prices · Navigation</span>
+    </div>
+    <div class="type-body">
+      <div class="font-heading">New arrivals from the US are in store now.</div>
+      <div style="height:14px"></div>
+      <div class="font-subheading">Mum's Picks — Personally Sourced</div>
+      <div style="height:10px"></div>
+      <div class="font-body">We don't source from catalogues. Every imported item at Mama's Pantry was personally selected in the United States by our founder's mother, who walks the aisles, reads the labels, and picks only what she would bring home for her own family.</div>
+      <div style="height:14px"></div>
+      <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap">
+        <div class="font-price">₦4,500 <span>₦5,200</span></div>
+        <div class="font-caption">US Import · Florida Crystals · 500g</div>
+      </div>
+      <div class="type-meta">
+        <span>Light 300</span><span>Regular 400</span><span>Medium 500</span><span>Semi-Bold 600</span>
+        <span>Google Fonts: DM Sans</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Type Hierarchy</h3>
+  <div style="background:var(--white);border:1px solid var(--warm-200);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:var(--green-50)">
+          <th style="padding:12px 20px;text-align:left;font-weight:600;color:var(--green-800);border-bottom:1px solid var(--warm-200)">Role</th>
+          <th style="padding:12px 20px;text-align:left;font-weight:600;color:var(--green-800);border-bottom:1px solid var(--warm-200)">Font</th>
+          <th style="padding:12px 20px;text-align:left;font-weight:600;color:var(--green-800);border-bottom:1px solid var(--warm-200)">Size</th>
+          <th style="padding:12px 20px;text-align:left;font-weight:600;color:var(--green-800);border-bottom:1px solid var(--warm-200)">Weight</th>
+          <th style="padding:12px 20px;text-align:left;font-weight:600;color:var(--green-800);border-bottom:1px solid var(--warm-200)">Colour</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">Hero Display</td><td style="padding:11px 20px;color:var(--ink-light)">Playfair Display</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">48–64px</td><td style="padding:11px 20px;color:var(--ink-light)">700 + Italic</td><td style="padding:11px 20px;color:var(--ink-light)">#1A3D26 or #FFF</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100);background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Section Heading</td><td style="padding:11px 20px;color:var(--ink-light)">Playfair Display</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">28–36px</td><td style="padding:11px 20px;color:var(--ink-light)">600</td><td style="padding:11px 20px;color:var(--ink-light)">#1C1814</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">UI Heading</td><td style="padding:11px 20px;color:var(--ink-light)">DM Sans</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">18–22px</td><td style="padding:11px 20px;color:var(--ink-light)">600</td><td style="padding:11px 20px;color:var(--ink-light)">#1C1814</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100);background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Section Label</td><td style="padding:11px 20px;color:var(--ink-light)">DM Sans</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">11–13px</td><td style="padding:11px 20px;color:var(--ink-light)">600 + Uppercase</td><td style="padding:11px 20px;color:var(--ink-light)">#2A9150</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">Body Copy</td><td style="padding:11px 20px;color:var(--ink-light)">DM Sans</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">15–17px</td><td style="padding:11px 20px;color:var(--ink-light)">400</td><td style="padding:11px 20px;color:var(--ink-light)">#5A4E3C</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100);background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Price</td><td style="padding:11px 20px;color:var(--ink-light)">DM Sans</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">18–26px</td><td style="padding:11px 20px;color:var(--ink-light)">600</td><td style="padding:11px 20px;color:var(--ink-light)">#237A42</td></tr>
+        <tr><td style="padding:11px 20px;font-weight:600">Caption / Label</td><td style="padding:11px 20px;color:var(--ink-light)">DM Sans</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">11–12px</td><td style="padding:11px 20px;color:var(--ink-light)">500</td><td style="padding:11px 20px;color:var(--ink-light)">#8C7A5E</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- BRAND VOICE -->
+<div id="voice">
+<section>
+<div class="page">
+  <div class="section-label">04 — Brand Voice &amp; Tone</div>
+  <h2>How We Speak</h2>
+  <p class="intro">Mama's Pantry speaks like a knowledgeable neighbour, not a corporate chain. Warm, direct, a little proud of what we stock, and always honest about where things come from.</p>
+
+  <div class="voice-grid">
+    <div class="voice-card">
+      <h4>Warm &amp; Personal</h4>
+      <p>We use "we", "our", and "your family" naturally. We're not a faceless store, we're a neighbour who happens to stock the best provisions in Magodo.</p>
+      <div class="voice-example">"Our mum picked this one herself in Atlanta last week. It sold out in three days last time — just saying."</div>
+    </div>
+    <div class="voice-card">
+      <h4>Honest &amp; Transparent</h4>
+      <p>We always say where a product came from. US-imported items carry their origin story. Local items carry their source region. No ambiguity, no vague "imported quality" claims.</p>
+      <div class="voice-example">"Locally grown in Plateau State. Packed fresh. No preservatives."</div>
+    </div>
+    <div class="voice-card">
+      <h4>Community-Rooted</h4>
+      <p>We know this neighbourhood. We reference Magodo naturally. We celebrate local celebrations and local seasons. We speak to the specific life of our community, not a generic Lagos audience.</p>
+      <div class="voice-example">"Happy New Year, Magodo! We're open from 8am on January 2nd. New shipment just landed."</div>
+    </div>
+    <div class="voice-card">
+      <h4>Quietly Knowledgeable</h4>
+      <p>We know food well. We share that knowledge without being preachy. A one-line tip on a shelf label. A storage note in the app. Small details that show we actually care about the product.</p>
+      <div class="voice-example">"Best used within 10 days of opening. Keep refrigerated. Pairs beautifully with agege bread."</div>
+    </div>
+  </div>
+
+  <h3>Language Do's and Don'ts</h3>
+  <div class="do-dont-row">
+    <div class="do-pill">Say "hand-picked in the US" not "imported goods"</div>
+    <div class="dont-pill">Don't say "premium quality" without evidence</div>
+  </div>
+  <div class="do-dont-row">
+    <div class="do-pill">Use first names on staff name tags — "Hi, I'm Tola"</div>
+    <div class="dont-pill">Don't say "valued customer" or "dear patron"</div>
+  </div>
+  <div class="do-dont-row">
+    <div class="do-pill">Write prices as ₦4,500 (not NGN 4500 or N4,500)</div>
+    <div class="dont-pill">Don't write in all caps on social media posts</div>
+  </div>
+  <div class="do-dont-row">
+    <div class="do-pill">Reference "Mum's Picks" as a specific named category</div>
+    <div class="dont-pill">Don't over-explain. Short sentences win.</div>
+  </div>
+  <div class="do-dont-row">
+    <div class="do-pill">Use Naira symbol ₦ always — this is a Lagos store</div>
+    <div class="dont-pill">Don't write "affordable" — let the prices speak</div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- APP UI -->
+<div id="app">
+<section>
+<div class="page">
+  <div class="section-label">05 — App UI Preview</div>
+  <h2>Mobile App</h2>
+  <p class="intro">The app carries the brand into every customer's phone. Forest Green stays dominant. The cream background keeps it warm. Gold is used only for "Mum's Pick" badges and primary CTAs.</p>
+
+  <div class="app-preview-wrap">
+    <div>
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <div class="app-topbar">
+            <div>
+              <div class="app-brand"><em>Mama's</em> Pantry</div>
+              <div style="font-size:10px;color:var(--green-200);margin-top:2px">Magodo Phase 1 Gate</div>
+            </div>
+            <div class="app-cart-btn">🛒</div>
+          </div>
+          <div class="app-hero-banner">
+            <div class="app-hero-emoji">✈️</div>
+            <div class="app-hero-text">
+              <h5>Mum's back from Atlanta</h5>
+              <p>New shipment lands Thursday.<br>Pre-order now to reserve yours.</p>
+              <div class="app-hero-badge">Pre-Order Open</div>
+            </div>
+          </div>
+          <div class="app-section-label">Browse Categories</div>
+          <div class="app-chip-row">
+            <div class="app-chip active">All</div>
+            <div class="app-chip">Mum's Picks</div>
+            <div class="app-chip">Grains</div>
+            <div class="app-chip">Dairy</div>
+            <div class="app-chip">Snacks</div>
+          </div>
+          <div class="app-product-row">
+            <div class="app-product-card">
+              <div class="app-product-img imported">🥣</div>
+              <div class="app-product-info">
+                <div class="p-name">Quaker Oats 1kg <span class="mums-pick-badge">Mum's Pick</span></div>
+                <div class="p-origin">🇺🇸 US Import</div>
+                <div class="p-price">₦3,800</div>
+                <div class="app-add-btn">+</div>
+              </div>
+            </div>
+            <div class="app-product-card">
+              <div class="app-product-img fresh">🌽</div>
+              <div class="app-product-info">
+                <div class="p-name">Sweet Corn — Fresh</div>
+                <div class="p-origin">🇳🇬 Plateau State</div>
+                <div class="p-price">₦650</div>
+                <div class="app-add-btn">+</div>
+              </div>
+            </div>
+            <div class="app-product-card">
+              <div class="app-product-img imported">🧀</div>
+              <div class="app-product-info">
+                <div class="p-name">Kraft Singles 24pk <span class="mums-pick-badge">Mum's Pick</span></div>
+                <div class="p-origin">🇺🇸 US Import</div>
+                <div class="p-price">₦6,200</div>
+                <div class="app-add-btn">+</div>
+              </div>
+            </div>
+            <div class="app-product-card">
+              <div class="app-product-img fresh">🫙</div>
+              <div class="app-product-info">
+                <div class="p-name">Palm Oil — 1L Pure</div>
+                <div class="p-origin">🇳🇬 Ondo State</div>
+                <div class="p-price">₦2,100</div>
+                <div class="app-add-btn">+</div>
+              </div>
+            </div>
+          </div>
+          <div style="height:16px"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">App Colour Mapping</h3>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--green-900);flex-shrink:0"></div>
+          <div><div style="font-size:13px;font-weight:600">Forest Green — #1A3D26</div><div style="font-size:12px;color:var(--ink-light)">Top bar, navigation, primary buttons</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--gold-500);flex-shrink:0"></div>
+          <div><div style="font-size:13px;font-weight:600">Harvest Gold — #E0A020</div><div style="font-size:12px;color:var(--ink-light)">Cart icon, "Mum's Pick" badges, CTA highlights</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--cream);border:1px solid var(--warm-200);flex-shrink:0"></div>
+          <div><div style="font-size:13px;font-weight:600">Pantry Cream — #FAF6EE</div><div style="font-size:12px;color:var(--ink-light)">App background, card backgrounds</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--green-50);border:1px solid var(--green-100);flex-shrink:0"></div>
+          <div><div style="font-size:13px;font-weight:600">Light Green — #EEF8F1</div><div style="font-size:12px;color:var(--ink-light)">Category chips, active filters, tag backgrounds</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--gold-50);border:1px solid var(--gold-100);flex-shrink:0"></div>
+          <div><div style="font-size:13px;font-weight:600">Light Gold — #FEF9EE</div><div style="font-size:12px;color:var(--ink-light)">"Mum's Pick" badge background</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:8px;background:var(--white);border:1px solid var(--warm-200);flex-shrink:0"></div>
+          <div><div style="font-size:13px;font-weight:600">White — #FFFFFF</div><div style="font-size:12px;color:var(--ink-light)">Product cards, modal surfaces</div></div>
+        </div>
+      </div>
+
+      <h3>Key App UI Rules</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="do-pill">Every imported product shows the 🇺🇸 flag and "US Import" label</div>
+        <div class="do-pill">Every local product shows 🇳🇬 and its Nigerian state of origin</div>
+        <div class="do-pill">"Mum's Pick" badge uses Gold 100 background with Gold 800 text</div>
+        <div class="do-pill">Primary CTA buttons: Forest Green background, white DM Sans text</div>
+        <div class="dont-pill">Don't use a pure white (#FFFFFF) app background — always use Pantry Cream</div>
+        <div class="dont-pill">Don't use more than one font family in the app</div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- STATIONERY -->
+<div id="stationery">
+<section>
+<div class="page">
+  <div class="section-label">06 — Stationery &amp; Packaging</div>
+  <h2>Stationery &amp; Packaging</h2>
+  <p class="intro">Every touchpoint reinforces the brand. Business cards, bags, and receipts should all feel like they came from the same warm, considered place.</p>
+
+  <div class="stationery-row">
+    <div>
+      <h3 style="margin-top:0">Business Card — Front</h3>
+      <div class="stationery-mock">
+        <div class="biz-card">
+          <div class="biz-card-pattern"></div>
+          <div class="biz-card-logo"><em>Mama's</em> Pantry</div>
+          <div>
+            <div class="biz-card-name">Adaeze Okonkwo</div>
+            <div class="biz-card-detail">
+              Founder &amp; Owner<br>
+              hello@mamaspantry.com.ng<br>
+              +234 801 234 5678<br>
+              Magodo Phase 1 Gate, Lagos
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Business Card — Back</h3>
+      <div class="stationery-mock">
+        <div class="biz-card-back">
+          <div class="biz-card-back-text">"Chosen with care.<br>Stocked with love."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stationery-row" style="margin-top:24px">
+    <div>
+      <h3 style="margin-top:0">Kraft Carrier Bag</h3>
+      <div class="bag-mock">
+        <div class="bag-shape">
+          <div class="bag-handle-left"></div>
+          <div class="bag-handle-right"></div>
+          <div class="bag-leaf">🧺</div>
+          <div class="bag-logo"><em>Mama's</em><br>Pantry</div>
+          <div class="bag-tagline">Magodo · Lagos</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Packaging Notes</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+        <div class="usage-card">
+          <h4>Carrier Bags</h4>
+          <p>Kraft paper (brown). Logo in Forest Green ink. Available in S, M, L. Tagline "Chosen with care. Stocked with love." printed on the reverse.</p>
+        </div>
+        <div class="usage-card">
+          <h4>Delivery Boxes</h4>
+          <p>Plain brown corrugated box with Forest Green branded tape. The tape reads "Mama's Pantry · Magodo" in repeat. Insulated liners for chilled items.</p>
+        </div>
+        <div class="usage-card">
+          <h4>Receipt / Invoice</h4>
+          <p>Header uses Forest Green with wordmark. Cream background. "Mum's Picks" items marked with a small ✦ symbol. Footer carries the tagline and WhatsApp number.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- SIGNAGE -->
+<div id="signage">
+<section>
+<div class="page">
+  <div class="section-label">07 — Signage</div>
+  <h2>Store Signage</h2>
+  <p class="intro">The gate location at Magodo Phase 1 means high daily visibility. The fascia board should be immediately legible from a moving vehicle and memorable on foot.</p>
+
+  <h3 style="margin-top:0">Exterior Fascia Board</h3>
+  <div class="signage-mock">
+    <div class="fascia-board">
+      <div class="fascia-icon">🧺</div>
+      <div class="fascia-text">
+        <div class="fascia-name"><em>Mama's</em> Pantry</div>
+        <div class="fascia-tagline">Imported &amp; Local Provisions &nbsp;·&nbsp; Magodo Phase 1</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Signage Specifications</h3>
+  <div class="usage-grid" style="margin-top:16px">
+    <div class="usage-card">
+      <div class="usage-icon">🎨</div>
+      <h4>Fascia Board</h4>
+      <p>Forest Green (#1A3D26) background. Wordmark in white with the gold apostrophe. Illuminated with warm LED backlight. Minimum letter height: 200mm for readability from 10m.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">🪟</div>
+      <h4>Window Graphics</h4>
+      <p>Frosted vinyl with Forest Green wordmark. Below: "Open 8am – 9pm Daily". One window reserved for rotating promotional graphics printed in the brand palette.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">🏷️</div>
+      <h4>In-Store Aisle Signs</h4>
+      <p>Hanging signs on white card, Forest Green background, white DM Sans category name. Section labels: Mum's Picks, Local Provisions, Dairy & Chilled, Beverages, Household.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">⭐</div>
+      <h4>Mum's Picks Display</h4>
+      <p>Small gold shelf talker cards: Forest Green text on Gold 100 (#FBF0CC) card stock. Label reads: "Mum's Pick — Hand-selected in the US" with a small basket icon.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">🪧</div>
+      <h4>Price Tags</h4>
+      <p>White card, Forest Green price in DM Sans 600. Origin flag + state/country in caption style. "US Import" tags have a gold underline. Local tags have a green underline.</p>
+    </div>
+    <div class="usage-card">
+      <div class="usage-icon">📖</div>
+      <h4>Story Wall</h4>
+      <p>At store entrance: 600x900mm printed panel on Pantry Cream stock. Forest Green headline: "How Mama's Pantry began." Body in DM Sans Regular 16pt. 3-4 sentences only.</p>
+    </div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- USAGE -->
+<div id="usage">
+<section>
+<div class="page">
+  <div class="section-label">08 — Usage &amp; Files</div>
+  <h2>Asset Usage Summary</h2>
+  <p class="intro">A quick reference for the design team, printer, and app developer.</p>
+
+  <div style="background:var(--white);border:1px solid var(--warm-200);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:var(--green-900)">
+          <th style="padding:13px 20px;text-align:left;font-weight:600;color:var(--white)">Asset</th>
+          <th style="padding:13px 20px;text-align:left;font-weight:600;color:var(--white)">Format</th>
+          <th style="padding:13px 20px;text-align:left;font-weight:600;color:var(--white)">Use For</th>
+          <th style="padding:13px 20px;text-align:left;font-weight:600;color:var(--white)">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">Primary Logo</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">SVG, PDF</td><td style="padding:11px 20px;color:var(--ink-light)">All print and large-format use</td><td style="padding:11px 20px;color:var(--ink-light)">Master file. Never compress.</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100);background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Logo PNG — White</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">PNG 2x</td><td style="padding:11px 20px;color:var(--ink-light)">App icon, social profile pic</td><td style="padding:11px 20px;color:var(--ink-light)">1024×1024px minimum</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">Logo PNG — Dark BG</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">PNG 2x</td><td style="padding:11px 20px;color:var(--ink-light)">Email headers, dark contexts</td><td style="padding:11px 20px;color:var(--ink-light)">Transparent background</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100);background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Colour Palette</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">.ASE, .clr</td><td style="padding:11px 20px;color:var(--ink-light)">Figma, Adobe, Canva</td><td style="padding:11px 20px;color:var(--ink-light)">Share with all designers</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">Font Files</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">TTF / WOFF2</td><td style="padding:11px 20px;color:var(--ink-light)">App, web, and print</td><td style="padding:11px 20px;color:var(--ink-light)">Google Fonts — free</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100);background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Social Templates</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">Canva / Figma</td><td style="padding:11px 20px;color:var(--ink-light)">Instagram posts and Stories</td><td style="padding:11px 20px;color:var(--ink-light)">1080×1080 and 1080×1920</td></tr>
+        <tr style="border-bottom:1px solid var(--warm-100)"><td style="padding:11px 20px;font-weight:600">Brand Guidelines PDF</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">PDF</td><td style="padding:11px 20px;color:var(--ink-light)">Share with printer, developer</td><td style="padding:11px 20px;color:var(--ink-light)">Export this document</td></tr>
+        <tr style="background:var(--cream)"><td style="padding:11px 20px;font-weight:600">Signage Artwork</td><td style="padding:11px 20px;font-family:monospace;color:var(--green-700)">PDF (CMYK)</td><td style="padding:11px 20px;color:var(--ink-light)">Fascia, window, price tags</td><td style="padding:11px 20px;color:var(--ink-light)">Send to signage vendor as PDF</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:32px;background:var(--green-50);border:1px solid var(--green-200);border-radius:var(--radius);padding:28px 24px">
+    <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--green-700);margin-bottom:8px">Brand Contact</div>
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--green-900);margin-bottom:4px">Questions about brand usage?</div>
+    <div style="font-size:14px;color:var(--ink-light);line-height:1.6">All external brand usage, co-branding requests, and design approvals should go through the store owner before any materials are produced or published. When in doubt — ask first, print later.</div>
+  </div>
+</div>
+</section>
+</div>
+
+<!-- FOOTER -->
+<footer class="doc-footer">
+  <strong><em>Mama's</em> Pantry</strong>
+  Magodo Phase 1 Gate, Lagos &nbsp;·&nbsp; mamaspantry.com.ng<br>
+  Brand Guidelines v1.0 &nbsp;·&nbsp; For internal use and approved vendors only
+</footer>
+
+</body>
+</html>
