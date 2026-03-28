@@ -13,14 +13,11 @@ slowapi>=0.1.9
 aiosmtplib>=3.0.2
 jinja2>=3.1.4
 
-# Conditional - ENABLE_PHONE_VERIFICATION
-twilio>=9.3.0
-
 # Conditional - ENABLE_TOTP_2FA
 pyotp>=2.9.0
 
 # Conditional - ENABLE_OAUTH2
-httpx>=0.28.0
+httpx>=0.28.1
 
 # Conditional - ENABLE_AUDIT_LOGGING
 structlog>=24.4.0
