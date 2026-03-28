@@ -1,9 +1,18 @@
 import uuid
 
 from sqlalchemy import select, update
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.db.models.user import User
+
+
+def _with_roles(stmt):
+    """Eagerly load the roles relationship when RBAC is enabled."""
+    if settings.ENABLE_RBAC:
+        stmt = stmt.options(selectinload("roles"))
+    return stmt
 
 
 class UserRepository:
@@ -14,18 +23,22 @@ class UserRepository:
         user = User(**kwargs)
         self.session.add(user)
         await self.session.flush()
+        if settings.ENABLE_RBAC:
+            await self.session.refresh(user, attribute_names=["roles"])
         return user
 
     async def get_by_id(self, user_id: uuid.UUID) -> User | None:
-        return await self.session.get(User, user_id)
+        stmt = _with_roles(select(User).where(User.id == user_id))
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> User | None:
-        stmt = select(User).where(User.email == email.lower().strip())
+        stmt = _with_roles(select(User).where(User.email == email.lower().strip()))
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def get_by_username(self, username: str) -> User | None:
-        stmt = select(User).where(User.username == username)
+        stmt = _with_roles(select(User).where(User.username == username))
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
