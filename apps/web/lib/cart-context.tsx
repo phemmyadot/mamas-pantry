@@ -18,6 +18,7 @@ interface CartContextValue {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
+  isHydrated: boolean;
   addItem: (product: Product, qty?: number) => void;
   removeItem: (productId: string) => void;
   updateQty: (productId: string, qty: number) => void;
@@ -92,7 +93,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, totalItems, totalPrice, addItem, removeItem, updateQty, clearCart, isCartOpen, openCart, closeCart }}
+      value={{ items, totalItems, totalPrice, isHydrated: hydrated, addItem, removeItem, updateQty, clearCart, isCartOpen, openCart, closeCart }}
     >
       {children}
     </CartContext.Provider>
