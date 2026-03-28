@@ -29,7 +29,7 @@ export default function StorefrontFooter() {
               <ul className="space-y-2">
                 {[
                   { label: "All products", href: "/shop" },
-                  { label: "Mum's Picks", href: "/shop?category=mums_pick" },
+                  { label: "Special Picks", href: "/mums-picks" },
                   { label: "Local favourites", href: "/shop?category=local" },
                   { label: "Imported goods", href: "/shop?category=imported" },
                 ].map(({ label, href }) => (

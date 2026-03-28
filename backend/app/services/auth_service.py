@@ -87,6 +87,9 @@ class AuthService:
         if not user.is_active:
             raise AuthError("Account is deactivated")
 
+        if settings.ENABLE_EMAIL_VERIFICATION and not user.is_verified:
+            raise AuthError("email_not_verified", status_code=403)
+
         _clear_failed_attempts(email)
 
         access_token = create_access_token(subject=str(user.id))

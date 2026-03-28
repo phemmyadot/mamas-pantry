@@ -54,9 +54,11 @@ class EmailVerificationService:
         if not user:
             raise AuthError("Invalid verification token")
 
-        if getattr(user, "email_verified_at", None):
-            return  # Already verified
+        if user.is_verified:
+            raise AuthError("This verification link has already been used. Please sign in.", status_code=400)
 
         await self.user_repo.update_by_id(
-            user_id, email_verified_at=datetime.now(timezone.utc)
+            user_id,
+            is_verified=True,
+            email_verified_at=datetime.now(timezone.utc),
         )

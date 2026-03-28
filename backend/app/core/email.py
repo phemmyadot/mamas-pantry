@@ -41,9 +41,10 @@ async def send_password_reset_email(to: str, reset_token: str) -> None:
 
 
 async def send_verification_email(to: str, verification_token: str) -> None:
+    verification_link = f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
     await send_email(
         to=to,
         subject="Verify Your Email",
         template_name="email_verification.html",
-        context={"verification_token": verification_token, "project_name": settings.PROJECT_NAME},
+        context={"verification_link": verification_link, "project_name": settings.PROJECT_NAME},
     )

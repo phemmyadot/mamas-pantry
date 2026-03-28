@@ -68,6 +68,9 @@ class Settings(BaseSettings):
     # Firebase Cloud Messaging (push notifications)
     FCM_SERVER_KEY: str = ""
 
+    # Frontend base URL (used in email links)
+    FRONTEND_URL: str = "http://localhost:3000"
+
     # Seed admin (app/scripts/seed_admin.py)
     ADMIN_EMAIL: str = "admin@mamaspantry.ng"
     ADMIN_PASSWORD: str = "Admin1234!"

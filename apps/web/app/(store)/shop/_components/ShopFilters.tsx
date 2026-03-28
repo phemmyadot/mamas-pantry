@@ -79,7 +79,7 @@ export default function ShopFilters() {
           );
         })}
 
-        {/* Mum's Pick toggle */}
+        {/* Special Picks toggle */}
         <button
           onClick={() => navigate(currentMumsPick ? currentCategory : "", searchInput, !currentMumsPick)}
           disabled={isPending}
@@ -89,7 +89,7 @@ export default function ShopFilters() {
               : "bg-white text-ink border-cream-dark hover:bg-gold/10 hover:border-gold"
           } disabled:opacity-60`}
         >
-          Mum&apos;s Pick ✨
+          Special Picks ✨
         </button>
 
         {isPending && (

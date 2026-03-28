@@ -120,7 +120,7 @@ export default async function HomePage() {
                 Shop now
               </Link>
               <Link href="/mums-picks" className="border border-forest-deep text-forest-deep font-ui font-medium text-sm px-6 py-3 rounded-lg hover:bg-forest-mist transition-colors text-center">
-                Mum&apos;s Picks ✨
+                Special Picks ✨
               </Link>
             </div>
           </div>
@@ -183,7 +183,7 @@ export default async function HomePage() {
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h2 className="font-display text-2xl font-bold text-forest-deep flex items-center gap-2">
-                  Mum&apos;s Picks <span className="text-gold text-xl">✨</span>
+                  Special Picks <span className="text-gold text-xl">✨</span>
                 </h2>
                 <p className="font-body text-sm italic text-muted mt-0.5">Hand-selected by Mama herself</p>
               </div>
@@ -193,7 +193,7 @@ export default async function HomePage() {
             </div>
             <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-4 lg:grid-cols-6">
               {mumsPicks.slice(0, 6).map((p) => (
-                <div key={p.id} className="flex-shrink-0 w-44 sm:w-auto">
+                <div key={p.id} className="flex-shrink-0 w-44 sm:w-auto sm:flex sm:flex-col">
                   <ProductCard product={p} />
                 </div>
               ))}

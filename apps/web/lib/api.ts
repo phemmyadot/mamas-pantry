@@ -164,6 +164,15 @@ export const auth = {
       method: "POST",
       body: JSON.stringify({ token, new_password: newPassword }),
     }),
+
+  resendVerification: (email: string) =>
+    apiFetch<void>("/api/v1/auth/email/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  verifyEmail: (token: string) =>
+    apiFetch<{ detail: string }>(`/api/v1/auth/email/verify?token=${encodeURIComponent(token)}`),
 };
 
 // ---------------------------------------------------------------------------

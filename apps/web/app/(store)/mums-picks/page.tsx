@@ -29,7 +29,7 @@ export default async function MumsPicksPage() {
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="font-display text-4xl font-bold text-forest-deep mb-3">
-          Mum&apos;s Picks <span className="text-gold">✨</span>
+          Special Picks <span className="text-gold">✨</span>
         </h1>
         <p className="font-body text-base italic text-muted max-w-md mx-auto">
           Hand-selected by Mama herself. Every product on this page has been personally chosen for quality and value.
@@ -50,7 +50,7 @@ export default async function MumsPicksPage() {
 
       {picks.length === 0 ? (
         <div className="text-center py-20">
-          <p className="font-display text-xl text-forest-deep mb-2">Mum is still curating…</p>
+          <p className="font-display text-xl text-forest-deep mb-2">Still curating…</p>
           <p className="font-body text-sm italic text-muted">Check back soon for hand-picked favourites.</p>
         </div>
       ) : (

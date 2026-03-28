@@ -39,7 +39,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const href = `/shop/${product.slug}`;
 
   return (
-    <div className="group bg-white rounded-2xl border border-cream-dark overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+    <div className="group bg-white rounded-2xl border border-cream-dark overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
       {/* Image */}
       <Link href={href} className="block relative aspect-[4/3] bg-forest-mist overflow-hidden">
         {product.image_url ? (
@@ -56,10 +56,10 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
-        {/* Mum's Pick badge (gold, top-left) */}
+        {/* Special Pick badge (gold, top-left) */}
         {product.is_mums_pick && (
           <span className="absolute top-2 left-2 text-[10px] font-ui font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide bg-gold text-amber-900">
-            Mum&apos;s Pick ✨
+            Special Pick ✨
           </span>
         )}
 

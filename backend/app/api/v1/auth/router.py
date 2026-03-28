@@ -213,6 +213,28 @@ if settings.ENABLE_EMAIL_VERIFICATION:
         await service.send_verification(user_id=current_user.id, email=current_user.email)
         emit_audit_log(AuditEventType.EMAIL_VERIFICATION_SENT, user_id=current_user.id)
 
+    @router.post(
+        "/email/resend-verification",
+        status_code=status.HTTP_204_NO_CONTENT,
+        summary="Resend email verification (unauthenticated)",
+        description="Sends a new verification link if the account exists and is not yet verified. Always returns 204.",
+    )
+    @limiter.limit("5/minute")
+    async def resend_email_verification(
+        request: Request,
+        body: PasswordResetRequest,
+        db: AsyncSession = Depends(get_db),
+    ):
+        from app.db.repositories.user_repo import UserRepository
+        user_repo = UserRepository(db)
+        user = await user_repo.get_by_email(body.email)
+        if user and not user.is_verified:
+            try:
+                service = EmailVerificationService(db)
+                await service.send_verification(user_id=user.id, email=user.email)
+            except Exception:
+                pass  # swallow throttle/send errors — always 204
+
     @router.get(
         "/email/verify",
         status_code=status.HTTP_200_OK,

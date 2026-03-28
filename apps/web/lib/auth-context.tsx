@@ -29,7 +29,7 @@ interface AuthContextValue extends AuthState {
 }
 
 export type LoginResult =
-  | { ok: true; requiresPhoneVerification: boolean }
+  | { ok: true }
   | { ok: false; error: string };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -68,10 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setCookie("mp_refresh", tokens.refresh_token, 7 * 24 * 60 * 60);
         const user = await auth.me();
         setState({ user, isAuthenticated: true, isLoading: false });
-        return {
-          ok: true,
-          requiresPhoneVerification: !user.phone_verified_at,
-        };
+        return { ok: true };
       } catch (err) {
         const msg =
           err instanceof ApiError ? err.detail : "Login failed. Try again.";
