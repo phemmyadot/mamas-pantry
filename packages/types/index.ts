@@ -109,6 +109,7 @@ export interface Order {
   total_ngn: number;
   delivery_address: DeliveryAddress;
   items: OrderItem[];
+  rider_id: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

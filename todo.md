@@ -134,28 +134,30 @@
 
 ---
 
-## Phase 4 — Admin Dashboard MVP
+## Phase 4 — Admin Dashboard MVP ✅ COMPLETE
 
 > Builds inside `apps/admin/` (`@mamas-pantry/admin`) — standalone Vite SPA on port 5173.
 
 ### Layout & auth
-- [ ] Admin layout — collapsible left sidebar (forest-deep), top bar with store name + logged-in user. Nav: Dashboard, Orders, Inventory, Shipments, Customers, Riders, Promos, Analytics, Settings
-- [ ] Admin auth guard — redirect non-admin/staff users to `/login`; STAFF role cannot access Analytics, Settings, or Customers pages
+- [x] Admin layout — collapsible left sidebar (forest-deep), top bar with store name + logged-in user. Nav: Dashboard, Orders, Inventory, Shipments, Customers, Riders, Promos, Analytics
+- [x] Admin auth guard — redirect non-admin/staff users to `/login`; STAFF role cannot access Customers or Analytics pages
 
 ### Admin pages
-- [ ] `/admin` / `/admin/dashboard` — KPI cards (Today's Revenue ₦, Active Orders count, Low Stock alert count, New Customers count), Weekly Revenue bar chart (Recharts, Saturday bar in Harvest Gold), Recent Orders table (last 10, click row → order detail drawer)
-- [ ] `/admin/orders` — paginated, filterable orders table (status, date, rider). Bulk status update. Pulsing badge on nav item for PENDING orders
-- [ ] `/admin/orders/[id]` — full order: status update dropdown (CONFIRMED → PACKED → OUT_FOR_DELIVERY → DELIVERED), rider assign, customer info, item list, payment status badge
-- [ ] `/admin/inventory` — product table: stock qty, price, active toggle. Low-stock rows highlighted red
-- [ ] `/admin/inventory/new` — product creation form: name, slug (auto-generated), description, price, compare_price, images, category (Imported/Local/Chilled/Household), origin, `is_mums_pick` toggle (independent of category), stock_qty
-- [ ] `/admin/inventory/[id]` — edit product (same form, pre-filled) + stock adjustment field
-- [ ] `/admin/shipments` — US import shipment tracker: create shipments, attach products, update arrival status + date
-- [ ] `/admin/customers` — paginated customer table: name, email, phone, orders count, total spend, loyalty points
-- [ ] `/admin/customers/[id]` — customer detail: order history, saved addresses, loyalty transactions, contact info
-- [ ] `/admin/analytics` — revenue chart (daily/weekly/monthly toggle), top 10 products table, category breakdown
-- [ ] `/admin/riders` — active riders list, current order assignments, performance stats (deliveries, on-time rate)
-- [ ] `/admin/promos` — active and expired promo codes, create new code (type, value, min order, max uses, expiry), usage stats per code
-- [ ] `/admin/settings` — store info (name, address, phone, WhatsApp), delivery zones + cut-off times, notification templates, staff account management
+- [x] `/dashboard` — KPI cards (Today's Revenue ₦, Active Orders, Low Stock, New Customers), Weekly Revenue bar chart (Recharts, Saturday bar in Harvest Gold), Recent Orders table (last 10)
+- [x] `/orders` — paginated, filterable orders table (status filter tabs). Pulsing gold dot on nav for PENDING orders
+- [x] `/orders/:id` — full order detail: status update dropdown, rider assign, delivery address, items table, totals, 5-step timeline
+- [x] `/inventory` — product table: stock qty (red row if ≤3), price, active toggle, edit link. Category + search filters
+- [x] `/inventory/new` — product creation form: name, slug (auto-generated), description, price, compare_price, image_url, category, origin, badge, is_mums_pick, stock_qty, is_active
+- [x] `/inventory/:id` — edit product (same form, pre-filled)
+- [x] `/shipments` — US import shipment tracker: create + edit shipments (name, dates, status)
+- [x] `/customers` — paginated customer table: name, email, orders count, total spend, joined date
+- [x] `/analytics` — revenue chart (7/30/90-day toggle), top 10 products table, category pie chart (Recharts)
+- [x] `/riders` — riders list with active/inactive toggle, add new rider form
+- [x] `/promos` — active and expired promo codes, create new code (type, value, min order, max uses, expiry), usage count per code
+
+### Backend additions (Phase 4)
+- [x] `GET /api/v1/admin/orders/{id}` — get single order by ID (admin)
+- [x] `Order` type updated: added `rider_id` field
 
 ---
 

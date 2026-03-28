@@ -112,6 +112,21 @@ async def list_all_orders(
     return await service.list_all_orders(status=order_status, offset=offset, limit=limit)
 
 
+@router.get(
+    "/admin/orders/{order_id}",
+    response_model=OrderResponse,
+    summary="Get order by ID (admin)",
+    description="Returns any order by ID. Admin/staff only.",
+)
+async def admin_get_order(
+    order_id: uuid.UUID,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    return await service.get_order(order_id=order_id)
+
+
 @router.patch(
     "/admin/orders/{order_id}/status",
     response_model=OrderResponse,
