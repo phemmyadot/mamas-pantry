@@ -11,7 +11,8 @@ from app.db.models.user import User
 def _with_roles(stmt):
     """Eagerly load the roles relationship when RBAC is enabled."""
     if settings.ENABLE_RBAC:
-        stmt = stmt.options(selectinload("roles"))
+        # User.roles is only defined when ENABLE_RBAC=True, so this is safe
+        stmt = stmt.options(selectinload(User.roles))  # type: ignore[attr-defined]
     return stmt
 
 
