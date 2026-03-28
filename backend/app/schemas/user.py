@@ -4,6 +4,11 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 
+class RoleSlim(BaseModel):
+    name: str
+    model_config = {"from_attributes": True}
+
+
 class UserResponse(BaseModel):
     id: uuid.UUID
     email: EmailStr
@@ -12,6 +17,7 @@ class UserResponse(BaseModel):
     is_verified: bool
     created_at: datetime
     updated_at: datetime
+    roles: list[RoleSlim] = []
 
     model_config = {"from_attributes": True}
 
