@@ -1,3 +1,30 @@
+import type {
+  TokenResponse,
+  UserResponse,
+  Product,
+  ProductCategory,
+  ProductCreate,
+  Order,
+  OrderStatus,
+  DeliveryAddress,
+  Shipment,
+  PreOrder,
+} from "@mamas-pantry/types";
+
+export type {
+  TokenResponse,
+  UserResponse,
+  Product,
+  ProductCategory,
+  ProductCreate,
+  Order,
+  OrderItem,
+  OrderStatus,
+  DeliveryAddress,
+  Shipment,
+  PreOrder,
+} from "@mamas-pantry/types";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export class ApiError extends Error {
@@ -67,7 +94,6 @@ export async function apiFetch<T>(
     if (newToken) {
       return apiFetch<T>(path, options, false);
     }
-    // Refresh failed — clear tokens and let the caller handle
     deleteCookie("mp_access");
     deleteCookie("mp_refresh");
   }
@@ -85,7 +111,6 @@ export async function apiFetch<T>(
     throw new ApiError(res.status, title, detail);
   }
 
-  // 204 No Content
   if (res.status === 204) return undefined as T;
 
   return res.json() as Promise<T>;
@@ -94,24 +119,6 @@ export async function apiFetch<T>(
 // ---------------------------------------------------------------------------
 // Auth endpoints
 // ---------------------------------------------------------------------------
-
-export interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-}
-
-export interface UserResponse {
-  id: string;
-  email: string;
-  username: string | null;
-  is_active: boolean;
-  is_verified: boolean;
-  email_verified_at: string | null;
-  phone_number: string | null;
-  phone_verified_at: string | null;
-  created_at: string;
-}
 
 export const auth = {
   register: (email: string, password: string) =>
@@ -163,44 +170,26 @@ export const auth = {
 // Products
 // ---------------------------------------------------------------------------
 
-export type ProductCategory = "mums_pick" | "local" | "imported";
-
-export interface Product {
-  id: string;
-  name: string;
-  description: string | null;
-  price_ngn: number;
-  category: ProductCategory;
-  badge: string | null;
-  image_url: string | null;
-  stock_qty: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ProductCreate {
-  name: string;
-  description?: string;
-  price_ngn: number;
-  category: ProductCategory;
-  badge?: string;
-  image_url?: string;
-  stock_qty?: number;
-  is_active?: boolean;
-}
-
 export const products = {
-  list: (params?: { category?: ProductCategory; search?: string; offset?: number; limit?: number }) => {
+  list: (params?: {
+    category?: ProductCategory;
+    mums_pick?: boolean;
+    search?: string;
+    offset?: number;
+    limit?: number;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.category) qs.set("category", params.category);
+    if (params?.mums_pick) qs.set("mums_pick", "true");
     if (params?.search) qs.set("search", params.search);
     if (params?.offset != null) qs.set("offset", String(params.offset));
     if (params?.limit != null) qs.set("limit", String(params.limit));
     return apiFetch<Product[]>(`/api/v1/products?${qs}`);
   },
 
-  get: (id: string) => apiFetch<Product>(`/api/v1/products/${id}`),
+  featured: () => apiFetch<Product[]>("/api/v1/products/featured"),
+
+  getBySlug: (slug: string) => apiFetch<Product>(`/api/v1/products/${slug}`),
 
   create: (data: ProductCreate) =>
     apiFetch<Product>("/api/v1/admin/products", { method: "POST", body: JSON.stringify(data) }),
@@ -215,39 +204,11 @@ export const products = {
 // Orders
 // ---------------------------------------------------------------------------
 
-export type OrderStatus = "pending" | "packed" | "out_for_delivery" | "delivered" | "cancelled";
-
-export interface DeliveryAddress {
-  name: string;
-  phone: string;
-  address: string;
-  city: string;
-}
-
-export interface OrderItem {
-  id: string;
-  product_id: string;
-  product_name: string;
-  qty: number;
-  unit_price_ngn: number;
-}
-
-export interface Order {
-  id: string;
-  user_id: string;
-  status: OrderStatus;
-  total_ngn: number;
-  delivery_address: DeliveryAddress;
-  items: OrderItem[];
-  created_at: string;
-  updated_at: string;
-}
-
 export const orders = {
-  create: (items: { product_id: string; qty: number }[], delivery_address: DeliveryAddress) =>
+  create: (items: { product_id: string; qty: number }[], delivery_address: DeliveryAddress, promo_code?: string) =>
     apiFetch<Order>("/api/v1/orders", {
       method: "POST",
-      body: JSON.stringify({ items, delivery_address }),
+      body: JSON.stringify({ items, delivery_address, promo_code }),
     }),
 
   myOrders: (offset = 0, limit = 20) =>
@@ -255,16 +216,40 @@ export const orders = {
 
   myOrder: (id: string) => apiFetch<Order>(`/api/v1/orders/me/${id}`),
 
-  // Admin
   adminList: (status?: OrderStatus, offset = 0, limit = 50) => {
     const qs = new URLSearchParams({ offset: String(offset), limit: String(limit) });
     if (status) qs.set("status", status);
     return apiFetch<Order[]>(`/api/v1/admin/orders?${qs}`);
   },
 
+  adminGet: (id: string) => apiFetch<Order>(`/api/v1/admin/orders/${id}`),
+
   adminUpdateStatus: (id: string, status: OrderStatus) =>
     apiFetch<Order>(`/api/v1/admin/orders/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+};
+
+// ---------------------------------------------------------------------------
+// Shipments & Pre-Orders
+// ---------------------------------------------------------------------------
+
+export const shipments = {
+  list: () => apiFetch<Shipment[]>("/api/v1/shipments"),
+  get: (id: string) => apiFetch<Shipment>(`/api/v1/shipments/${id}`),
+  products: (id: string) => apiFetch<Product[]>(`/api/v1/shipments/${id}/products`),
+  adminCreate: (data: Omit<Shipment, "id">) =>
+    apiFetch<Shipment>("/api/v1/admin/shipments", { method: "POST", body: JSON.stringify(data) }),
+  adminUpdate: (id: string, data: Partial<Shipment>) =>
+    apiFetch<Shipment>(`/api/v1/admin/shipments/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+};
+
+export const preOrders = {
+  create: (product_id: string, shipment_id: string, quantity: number) =>
+    apiFetch<PreOrder>("/api/v1/pre-orders", {
+      method: "POST",
+      body: JSON.stringify({ product_id, shipment_id, quantity }),
+    }),
+  mine: () => apiFetch<PreOrder[]>("/api/v1/pre-orders/mine"),
 };

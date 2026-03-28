@@ -3,6 +3,51 @@
 
 ---
 
+## Monorepo Restructure (Option B — pnpm workspaces)
+
+> Do this before any new feature work. Establishes the correct structure for two separate
+> frontend apps (customer Next.js + admin Vite SPA) sharing a types package.
+
+### Root setup
+- [ ] Add `pnpm-workspace.yaml` at repo root declaring workspaces: `apps/*`, `packages/*`
+- [ ] Add root `package.json` (private, scripts: `dev`, `build`, `typecheck`, `lint` delegating to workspaces)
+- [ ] Add root `.npmrc` — `shamefully-hoist=false`, `strict-peer-dependencies=false`
+- [ ] Update `.gitignore` — add `apps/*/node_modules`, `packages/*/node_modules`, `apps/*/.next`, `apps/*/dist`
+
+### Move existing Next.js app → `apps/web/`
+- [ ] Create `apps/web/` directory
+- [ ] Move all Next.js source into `apps/web/`: `app/`, `lib/`, `components/`, `public/`, `middleware.ts`, `next.config.*`, `tailwind.config.*`, `tsconfig.json`, `postcss.config.*`
+- [ ] Move `package.json` into `apps/web/package.json` — update name to `@mamas-pantry/web`
+- [ ] Update all `@/` path aliases in `apps/web/tsconfig.json` to resolve from `apps/web/src` (or keep at `apps/web/`)
+- [ ] Verify `apps/web/` runs cleanly: `pnpm --filter @mamas-pantry/web dev`
+
+### `packages/types` — shared TypeScript interfaces
+- [ ] Create `packages/types/package.json` — name: `@mamas-pantry/types`, no runtime deps, exports `./index.ts`
+- [ ] Create `packages/types/tsconfig.json` extending root config
+- [ ] Extract shared interfaces from `apps/web/lib/api.ts` into `packages/types/index.ts`:
+  - `Product`, `ProductCategory`, `ProductCreate`
+  - `Order`, `OrderItem`, `OrderStatus`, `DeliveryAddress`
+  - `UserResponse`, `TokenResponse`
+  - `Shipment`, `PreOrder` (new — needed by both web and admin)
+  - `CartItem` (web-only, keep in web)
+- [ ] Replace imports in `apps/web/lib/api.ts` — use `@mamas-pantry/types` instead of local definitions
+- [ ] Add `@mamas-pantry/types` as a workspace dependency in `apps/web/package.json`
+
+### `apps/admin/` — React 19 + Vite SPA
+- [ ] Scaffold: `pnpm create vite apps/admin --template react-ts`
+- [ ] Add `package.json` name: `@mamas-pantry/admin`
+- [ ] Install: Tailwind CSS v4, React Router v7, TanStack Query v5, Recharts, `@mamas-pantry/types`
+- [ ] Copy brand tokens CSS (`globals.css` `@theme` block) and Google Fonts config from `apps/web`
+- [ ] Set up `vite.config.ts` — base path, proxy `/api` → `http://localhost:8000` for local dev
+- [ ] Stub `apps/admin/src/main.tsx` + `App.tsx` with a placeholder "Admin" page to confirm it runs
+- [ ] Verify: `pnpm --filter @mamas-pantry/admin dev` starts on port 5173
+
+### Backend — no changes needed
+- [ ] `backend/` stays at repo root, managed independently with Python tooling
+- [ ] Document in root `README.md`: run backend with `uvicorn app.main:app --reload --port 8000` from `backend/`
+
+---
+
 ## Phase 1 — Foundation ✅ COMPLETE
 
 - [x] Tailwind v4 brand tokens (Forest Deep, Gold, Cream, Spice) + Google Fonts (Playfair Display, Lora, DM Sans)

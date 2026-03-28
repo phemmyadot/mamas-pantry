@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Brand colours — matches apps/web */
+  --color-forest-deep: #1B4332;
+  --color-forest-mid: #2D6A4F;
+  --color-forest-light: #40916C;
+  --color-forest-pale: #B7E4C7;
+  --color-forest-mist: #D8F3DC;
+  --color-gold: #D4A017;
+  --color-gold-light: #F0C040;
+  --color-cream: #FEFAE0;
+  --color-cream-dark: #F4EAC8;
+  --color-spice: #C4622D;
+  --color-ink: #1B1B1B;
+  --color-muted: #5C5C5C;
+}
+
+body {
+  background-color: #f8f7f5;
+  color: #1B1B1B;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  margin: 0;
+}

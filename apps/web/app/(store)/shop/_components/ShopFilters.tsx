@@ -6,9 +6,10 @@ import type { ProductCategory } from "@/lib/api";
 
 const TABS: { label: string; value: ProductCategory | "" }[] = [
   { label: "All", value: "" },
-  { label: "Mum's Picks", value: "mums_pick" },
-  { label: "Local", value: "local" },
   { label: "Imported", value: "imported" },
+  { label: "Local", value: "local" },
+  { label: "Chilled", value: "chilled" },
+  { label: "Household", value: "household" },
 ];
 
 export default function ShopFilters() {

@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { auth, ApiError } from "@/lib/api";
 
-export default function ResetPasswordConfirmPage() {
+export default function ResetPasswordConfirmForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token") ?? "";
@@ -72,10 +72,7 @@ export default function ResetPasswordConfirmPage() {
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium font-ui text-ink mb-1"
-                >
+                <label htmlFor="password" className="block text-sm font-medium font-ui text-ink mb-1">
                   New password
                 </label>
                 <input
@@ -90,12 +87,8 @@ export default function ResetPasswordConfirmPage() {
                   placeholder="At least 8 characters"
                 />
               </div>
-
               <div>
-                <label
-                  htmlFor="confirm"
-                  className="block text-sm font-medium font-ui text-ink mb-1"
-                >
+                <label htmlFor="confirm" className="block text-sm font-medium font-ui text-ink mb-1">
                   Confirm password
                 </label>
                 <input
@@ -109,9 +102,7 @@ export default function ResetPasswordConfirmPage() {
                   placeholder="Repeat password"
                 />
               </div>
-
               {error && <p className="text-sm text-spice font-ui">{error}</p>}
-
               <button
                 type="submit"
                 disabled={pending}
