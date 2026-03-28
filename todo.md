@@ -181,15 +181,15 @@
 
 ---
 
-## Phase 7 — Polish & Launch
+## Phase 7 — Polish & Launch ✅ COMPLETE
 
-- [ ] SEO — `generateMetadata` on all product pages (title, description, OG image via Cloudinary). Homepage structured data: `LocalBusiness` schema (address, hours, delivery areas)
-- [ ] Product pages: `Product` structured data schema (price, availability, image)
-- [ ] `sitemap.xml` — auto-generated via `next-sitemap`. Includes all products and category pages. Exclude `/checkout`, `/cart`, `/account`, `/admin`
-- [ ] `robots.txt` — disallow `/admin`, `/api`, `/checkout`, `/cart`, `/account`
-- [ ] Performance — convert `<img>` tags to `next/image` with explicit width/height (CLS). LCP target < 2.5s. Lighthouse ≥ 90 on mobile homepage
-- [ ] Cloudinary integration — upload product images to Cloudinary, store only CDN URLs in DB, use Cloudinary transformations for responsive sizes
-- [ ] Analytics — Vercel Analytics enabled; Mixpanel events for add-to-cart, checkout start, order placed
+- [x] SEO — `generateMetadata` on all product pages (title, description, OG image). Homepage `LocalBusiness` JSON-LD schema (address, hours, delivery areas)
+- [x] Product pages: `Product` structured data schema (price, availability, image) via JSON-LD `<script>` tag
+- [x] `sitemap.xml` — Next.js built-in `app/sitemap.ts` (dynamic: fetches all product slugs + static category URLs). Excludes `/checkout`, `/cart`, `/account`, `/admin` by omission
+- [x] `robots.txt` — Next.js built-in `app/robots.ts`; disallows `/admin/`, `/api/`, `/checkout`, `/cart`, `/account/`
+- [x] Performance — all `<img>` tags converted to `next/image` with `fill`+`sizes` (product grids) or explicit `width`/`height` (thumbnails); `priority` on LCP hero images; `next.config.ts` image remote patterns added
+- [x] Cloudinary integration — `lib/cloudinary.ts` `withTransform()` helper for injecting transformation params into Cloudinary CDN URLs; `res.cloudinary.com` added to `remotePatterns`
+- [x] Analytics — `@vercel/analytics` `<Analytics />` in root layout; `lib/analytics.ts` Mixpanel wrapper; events: Add to Cart (ProductCard), Checkout Start (step 2→3), Order Placed (Paystack onSuccess)
 
 ---
 

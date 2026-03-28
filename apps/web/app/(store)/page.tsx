@@ -60,8 +60,34 @@ export default async function HomePage() {
     getCategoryCounts(),
   ]);
 
+  const localBusinessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "Mama's Pantry",
+    description: "Hand-picked groceries — imported staples and local favourites — delivered to your gate, same day.",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Magodo Phase 1",
+      addressLocality: "Lagos",
+      addressRegion: "Lagos State",
+      addressCountry: "NG",
+    },
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      opens: "08:00",
+      closes: "18:00",
+    },
+    areaServed: DELIVERY_ZONES,
+    url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://mamaspantry.com",
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+      />
       {/* Shipment teaser banner — show when arriving within 7 days or already in transit */}
       {activeShipment && (activeShipment.status === "in_transit" || daysUntil(activeShipment.arrival_date) <= 7) && (
         <div className="bg-gold text-forest-deep text-center py-2 px-4">

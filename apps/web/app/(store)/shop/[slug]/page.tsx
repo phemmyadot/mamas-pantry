@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import type { Metadata } from "next";
 import type { Product } from "@/lib/api";
 import AddToCartSection from "./_components/AddToCartSection";
 
@@ -31,6 +33,31 @@ async function getRelated(category: string, excludeSlug: string): Promise<Produc
   } catch { return []; }
 }
 
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> },
+): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) return {};
+
+  const description =
+    product.description ??
+    `Shop ${product.name} at Mama's Pantry — same-day delivery in Magodo, Lagos.`;
+
+  return {
+    title: `${product.name} | Mama's Pantry`,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      images: product.image_url
+        ? [{ url: product.image_url, width: 1200, height: 630, alt: product.name }]
+        : [],
+      type: "website",
+    },
+  };
+}
+
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = await getProduct(slug);
@@ -39,8 +66,28 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const related = await getRelated(product.category, slug);
   const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category;
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description ?? undefined,
+    image: product.image_url ?? undefined,
+    offers: {
+      "@type": "Offer",
+      price: product.price_ngn,
+      priceCurrency: "NGN",
+      availability: product.stock_qty > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs font-ui text-muted mb-6">
         <Link href="/" className="hover:text-forest-mid transition-colors">Home</Link>
@@ -54,10 +101,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <div className="grid sm:grid-cols-2 gap-8 lg:gap-12">
         {/* Image */}
-        <div className="aspect-square rounded-2xl bg-forest-mist overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-square rounded-2xl bg-forest-mist overflow-hidden flex items-center justify-center">
           {product.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+            <Image
+              src={product.image_url}
+              alt={product.name}
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className="object-cover"
+            />
           ) : (
             <span className="text-7xl select-none">🛒</span>
           )}
@@ -105,10 +158,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {related.map((p) => (
               <Link key={p.id} href={`/shop/${p.slug}`} className="group bg-white rounded-2xl border border-cream-dark overflow-hidden hover:shadow-md transition-shadow">
-                <div className="aspect-[4/3] bg-forest-mist overflow-hidden">
+                <div className="relative aspect-[4/3] bg-forest-mist overflow-hidden">
                   {p.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <Image
+                      src={p.image_url}
+                      alt={p.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-3xl">🛒</div>
                   )}

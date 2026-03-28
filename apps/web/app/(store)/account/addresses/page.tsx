@@ -91,7 +91,7 @@ export default function AddressesPage() {
               <input
                 type="text"
                 required
-                value={(form as Record<string, string>)[name]}
+                value={(form as unknown as Record<string, string>)[name]}
                 onChange={(e) => setForm((f) => ({ ...f, [name]: e.target.value }))}
                 placeholder={placeholder}
                 className="w-full px-3 py-2.5 rounded-lg border border-cream-dark bg-cream font-ui text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"

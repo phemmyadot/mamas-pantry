@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { shipments, preOrders, type Shipment, type Product, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
@@ -146,10 +147,9 @@ export default function PreOrderPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((p) => (
             <div key={p.id} className="bg-white rounded-2xl border border-cream-dark overflow-hidden flex flex-col">
-              <Link href={`/shop/${p.slug}`} className="block aspect-[4/3] bg-forest-mist overflow-hidden">
+              <Link href={`/shop/${p.slug}`} className="block relative aspect-[4/3] bg-forest-mist overflow-hidden">
                 {p.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                  <Image src={p.image_url} alt={p.name} fill sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-3xl">🛒</div>
                 )}

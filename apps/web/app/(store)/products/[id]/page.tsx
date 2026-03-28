@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/lib/api";
 import AddToCartSection from "./_components/AddToCartSection";
 
@@ -60,13 +61,15 @@ export default async function ProductPage({
 
       <div className="grid sm:grid-cols-2 gap-8 lg:gap-12">
         {/* Image */}
-        <div className="aspect-square rounded-2xl bg-forest-mist overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-square rounded-2xl bg-forest-mist overflow-hidden flex items-center justify-center">
           {product.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={product.image_url}
               alt={product.name}
-              className="w-full h-full object-cover"
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className="object-cover"
             />
           ) : (
             <span className="text-7xl select-none">🛒</span>

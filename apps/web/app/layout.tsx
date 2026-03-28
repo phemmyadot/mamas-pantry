@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Lora, DM_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/lib/auth-context";
 import { CartProvider } from "@/lib/cart-context";
 import "./globals.css";
@@ -40,8 +41,9 @@ export default function RootLayout({
       className={`${playfair.variable} ${lora.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-          <AuthProvider><CartProvider>{children}</CartProvider></AuthProvider>
-        </body>
+        <AuthProvider><CartProvider>{children}</CartProvider></AuthProvider>
+        <Analytics />
+      </body>
     </html>
   );
 }

@@ -3,9 +3,11 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import { orders, addresses, type Address, type DeliveryAddress, ApiError } from "@/lib/api";
+import { track, Events } from "@/lib/analytics";
 
 declare global {
   interface Window {
@@ -158,6 +160,7 @@ export default function CheckoutPage({
     if (!slot) { setError("Please choose a delivery time."); return; }
     setError("");
     setStep(3);
+    track(Events.CHECKOUT_START, { item_count: items.length, subtotal: totalPrice });
   }
 
   // ─── Step 3: promo preview (optimistic, real validation on create) ────────────
@@ -210,6 +213,7 @@ export default function CheckoutPage({
       ref: orderId,
       metadata: { order_id: orderId, slot },
       onSuccess: () => {
+        track(Events.ORDER_PLACED, { order_id: orderId, total_ngn: totalNgn });
         clearCart();
         router.push(`/checkout/confirmation?order=${orderId}`);
       },
@@ -483,8 +487,7 @@ export default function CheckoutPage({
               <div key={product.id} className="flex gap-3 items-start">
                 <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-forest-mist flex items-center justify-center overflow-hidden">
                   {product.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                    <Image src={product.image_url} alt={product.name} width={40} height={40} className="w-full h-full object-cover" />
                   ) : (
                     <span className="text-base">🛒</span>
                   )}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 
 function formatNGN(n: number) {
@@ -41,8 +42,7 @@ export default function CartPage() {
             <div key={product.id} className="flex gap-4 items-center bg-white rounded-2xl border border-cream-dark p-4">
               <div className="w-16 h-16 flex-shrink-0 rounded-xl bg-forest-mist overflow-hidden">
                 {product.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                  <Image src={product.image_url} alt={product.name} width={64} height={64} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-2xl">🛒</div>
                 )}

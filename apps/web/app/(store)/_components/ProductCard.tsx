@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { Product } from "@/lib/api";
 import { useCart } from "@/lib/cart-context";
+import { track, Events } from "@/lib/analytics";
 
 const CATEGORY_LABELS: Record<string, string> = {
   imported: "Imported",
@@ -25,6 +27,12 @@ export default function ProductCard({ product }: { product: Product }) {
   function handleAdd() {
     addItem(product, 1);
     openCart();
+    track(Events.ADD_TO_CART, {
+      product_id: product.id,
+      product_name: product.name,
+      price_ngn: product.price_ngn,
+      category: product.category,
+    });
   }
 
   const isOutOfStock = product.stock_qty === 0;
@@ -35,11 +43,12 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* Image */}
       <Link href={href} className="block relative aspect-[4/3] bg-forest-mist overflow-hidden">
         {product.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-4xl select-none">
