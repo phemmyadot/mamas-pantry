@@ -198,7 +198,7 @@
 - [x] Backend `.env` — CORS origins, JWT secret, Gmail SMTP for email verification
 - [x] Alembic migrations run (initial auth schema + products + orders)
 - [x] Seed roles (super_admin, admin, user)
-- [ ] Run new Alembic migrations after schema changes above
-- [ ] Seed product catalogue — sample products across all 4 categories (Imported, Local, Chilled, Household), some with `is_mums_pick=true`, with ₦ prices, slugs, and origin fields
-- [ ] Create at least one test shipment record for pre-order/countdown UI development
+- [x] Run new Alembic migrations — `alembic upgrade head` (now at 0003_fcm_tokens)
+- [x] Seed product catalogue — 20 products: 6 Imported, 5 Local, 4 Chilled, 5 Household; 6 with `is_mums_pick=true`; all with ₦ prices, slugs, origin fields (`app/scripts/seed_catalogue.py`)
+- [x] Create at least one test shipment — "April 2026 USA Haul" (upcoming, arrives 2026-04-14)
 - [ ] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
