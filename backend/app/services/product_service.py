@@ -15,6 +15,7 @@ class ProductService:
     async def list(
         self,
         category: ProductCategory | None = None,
+        mums_pick: bool | None = None,
         search: str | None = None,
         active_only: bool = True,
         offset: int = 0,
@@ -25,6 +26,8 @@ class ProductService:
             query = query.where(Product.is_active.is_(True))
         if category:
             query = query.where(Product.category == category)
+        if mums_pick is not None:
+            query = query.where(Product.is_mums_pick.is_(mums_pick))
         if search:
             query = query.where(Product.name.ilike(f"%{search}%"))
 
@@ -35,8 +38,34 @@ class ProductService:
         result = await self.db.execute(query)
         return list(result.scalars().all()), total
 
+    async def featured(self) -> list[Product]:
+        result = await self.db.execute(
+            select(Product)
+            .where(Product.is_mums_pick.is_(True), Product.is_active.is_(True))
+            .order_by(Product.created_at.desc())
+            .limit(12)
+        )
+        return list(result.scalars().all())
+
+    async def category_stats(self) -> list[dict]:
+        rows = await self.db.execute(
+            select(Product.category, func.count(Product.id).label("product_count"))
+            .where(Product.is_active.is_(True))
+            .group_by(Product.category)
+        )
+        return [{"category": row.category, "product_count": row.product_count} for row in rows]
+
     async def get(self, product_id: uuid.UUID) -> Product:
         result = await self.db.execute(select(Product).where(Product.id == product_id))
+        product = result.scalar_one_or_none()
+        if not product:
+            raise NotFoundError("Product not found")
+        return product
+
+    async def get_by_slug(self, slug: str) -> Product:
+        result = await self.db.execute(
+            select(Product).where(Product.slug == slug, Product.is_active.is_(True))
+        )
         product = result.scalar_one_or_none()
         if not product:
             raise NotFoundError("Product not found")

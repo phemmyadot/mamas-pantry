@@ -1,13 +1,13 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.auth.dependencies import get_current_user, require_role
 from app.db.base import get_db
 from app.db.models.order import OrderStatus
 from app.db.models.user import User
-from app.schemas.order import OrderCreate, OrderResponse, OrderStatusUpdate
+from app.schemas.order import AssignRiderRequest, OrderCreate, OrderResponse, OrderStatusUpdate
 from app.services.order_service import OrderService
 
 router = APIRouter(tags=["orders"])
@@ -60,6 +60,24 @@ async def get_my_order(
     return await service.get_order(order_id=order_id, user_id=current_user.id)
 
 
+@router.post(
+    "/orders/webhook/paystack",
+    status_code=status.HTTP_200_OK,
+    summary="Paystack webhook",
+    description="Receives Paystack charge events, verifies HMAC-SHA512 signature, updates payment status.",
+    include_in_schema=False,
+)
+async def paystack_webhook(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    payload = await request.body()
+    signature = request.headers.get("x-paystack-signature", "")
+    service = OrderService(db)
+    await service.process_paystack_webhook(payload, signature)
+    return {"status": "ok"}
+
+
 # ── Admin endpoints ────────────────────────────────────────────────────────────
 
 @router.get(
@@ -69,14 +87,14 @@ async def get_my_order(
     description="Returns all orders, filterable by status. Admin only.",
 )
 async def list_all_orders(
-    status: OrderStatus | None = Query(default=None),
+    order_status: OrderStatus | None = Query(default=None, alias="status"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     _current_user: User = Depends(require_role("admin")),
     db: AsyncSession = Depends(get_db),
 ):
     service = OrderService(db)
-    return await service.list_all_orders(status=status, offset=offset, limit=limit)
+    return await service.list_all_orders(status=order_status, offset=offset, limit=limit)
 
 
 @router.patch(
@@ -93,3 +111,19 @@ async def update_order_status(
 ):
     service = OrderService(db)
     return await service.update_status(order_id=order_id, data=body)
+
+
+@router.post(
+    "/admin/orders/{order_id}/assign-rider",
+    response_model=OrderResponse,
+    summary="Assign rider to order (admin)",
+    description="Assigns a dispatch rider to an order. Admin/staff only.",
+)
+async def assign_rider(
+    order_id: uuid.UUID,
+    body: AssignRiderRequest,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    return await service.assign_rider(order_id=order_id, rider_id=body.rider_id)

@@ -1,9 +1,25 @@
 from app.db.models.user import User
 from app.db.models.token import RefreshToken
 from app.db.models.product import Product, ProductCategory
-from app.db.models.order import Order, OrderItem, OrderStatus
+from app.db.models.order import Order, OrderItem, OrderStatus, PaymentStatus
+from app.db.models.rider import Rider
+from app.db.models.address import Address
+from app.db.models.shipment import Shipment, ShipmentStatus
+from app.db.models.pre_order import PreOrder, PreOrderStatus
+from app.db.models.loyalty import LoyaltyTransaction, LoyaltyTransactionType
+from app.db.models.promo_code import PromoCode, DiscountType
 
-__all__ = ["User", "RefreshToken", "Product", "ProductCategory", "Order", "OrderItem", "OrderStatus"]
+__all__ = [
+    "User", "RefreshToken",
+    "Product", "ProductCategory",
+    "Order", "OrderItem", "OrderStatus", "PaymentStatus",
+    "Rider",
+    "Address",
+    "Shipment", "ShipmentStatus",
+    "PreOrder", "PreOrderStatus",
+    "LoyaltyTransaction", "LoyaltyTransactionType",
+    "PromoCode", "DiscountType",
+]
 
 # Conditional model imports based on feature flags
 from app.core.config import settings

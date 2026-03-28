@@ -3,48 +3,19 @@
 
 ---
 
-## Monorepo Restructure (Option B — pnpm workspaces)
+## Monorepo Restructure ✅ COMPLETE
 
-> Do this before any new feature work. Establishes the correct structure for two separate
-> frontend apps (customer Next.js + admin Vite SPA) sharing a types package.
-
-### Root setup
-- [ ] Add `pnpm-workspace.yaml` at repo root declaring workspaces: `apps/*`, `packages/*`
-- [ ] Add root `package.json` (private, scripts: `dev`, `build`, `typecheck`, `lint` delegating to workspaces)
-- [ ] Add root `.npmrc` — `shamefully-hoist=false`, `strict-peer-dependencies=false`
-- [ ] Update `.gitignore` — add `apps/*/node_modules`, `packages/*/node_modules`, `apps/*/.next`, `apps/*/dist`
-
-### Move existing Next.js app → `apps/web/`
-- [ ] Create `apps/web/` directory
-- [ ] Move all Next.js source into `apps/web/`: `app/`, `lib/`, `components/`, `public/`, `middleware.ts`, `next.config.*`, `tailwind.config.*`, `tsconfig.json`, `postcss.config.*`
-- [ ] Move `package.json` into `apps/web/package.json` — update name to `@mamas-pantry/web`
-- [ ] Update all `@/` path aliases in `apps/web/tsconfig.json` to resolve from `apps/web/src` (or keep at `apps/web/`)
-- [ ] Verify `apps/web/` runs cleanly: `pnpm --filter @mamas-pantry/web dev`
-
-### `packages/types` — shared TypeScript interfaces
-- [ ] Create `packages/types/package.json` — name: `@mamas-pantry/types`, no runtime deps, exports `./index.ts`
-- [ ] Create `packages/types/tsconfig.json` extending root config
-- [ ] Extract shared interfaces from `apps/web/lib/api.ts` into `packages/types/index.ts`:
-  - `Product`, `ProductCategory`, `ProductCreate`
-  - `Order`, `OrderItem`, `OrderStatus`, `DeliveryAddress`
-  - `UserResponse`, `TokenResponse`
-  - `Shipment`, `PreOrder` (new — needed by both web and admin)
-  - `CartItem` (web-only, keep in web)
-- [ ] Replace imports in `apps/web/lib/api.ts` — use `@mamas-pantry/types` instead of local definitions
-- [ ] Add `@mamas-pantry/types` as a workspace dependency in `apps/web/package.json`
-
-### `apps/admin/` — React 19 + Vite SPA
-- [ ] Scaffold: `pnpm create vite apps/admin --template react-ts`
-- [ ] Add `package.json` name: `@mamas-pantry/admin`
-- [ ] Install: Tailwind CSS v4, React Router v7, TanStack Query v5, Recharts, `@mamas-pantry/types`
-- [ ] Copy brand tokens CSS (`globals.css` `@theme` block) and Google Fonts config from `apps/web`
-- [ ] Set up `vite.config.ts` — base path, proxy `/api` → `http://localhost:8000` for local dev
-- [ ] Stub `apps/admin/src/main.tsx` + `App.tsx` with a placeholder "Admin" page to confirm it runs
-- [ ] Verify: `pnpm --filter @mamas-pantry/admin dev` starts on port 5173
-
-### Backend — no changes needed
-- [ ] `backend/` stays at repo root, managed independently with Python tooling
-- [ ] Document in root `README.md`: run backend with `uvicorn app.main:app --reload --port 8000` from `backend/`
+- [x] `pnpm-workspace.yaml` — workspaces: `apps/*`, `packages/*`
+- [x] Root `package.json` — private workspace root, `dev:web`, `dev:admin`, `build:*`, `typecheck` scripts
+- [x] `.npmrc` — `shamefully-hoist=false`, build approvals for esbuild/sharp/unrs-resolver
+- [x] `.gitignore` — updated for monorepo paths
+- [x] `apps/web/` (`@mamas-pantry/web`) — all Next.js source moved here, builds and typechecks clean
+- [x] `packages/types/` (`@mamas-pantry/types`) — shared interfaces: Product, Order, User, Shipment, PreOrder, PromoCode
+- [x] `ProductCategory` corrected to `imported|local|chilled|household`; `is_mums_pick` boolean added to Product type
+- [x] `Order` type updated: `confirmed` status, `delivery_fee_ngn`, `payment_status`, `payment_ref`
+- [x] `apps/web/lib/api.ts` — all domain types imported from `@mamas-pantry/types`
+- [x] `apps/admin/` (`@mamas-pantry/admin`) — React 19 + Vite + TanStack Query + Recharts + React Router v7, brand tokens, proxy to `:8000`, builds clean
+- [x] `backend/` stays at root, managed independently
 
 ---
 
@@ -64,53 +35,54 @@
 > Spec defines different categories and additional fields/tables vs what was built in phase 2.
 
 ### Products model changes
-- [ ] Change `ProductCategory` enum from `mums_pick|local|imported` → `imported|local|chilled|household`
-- [ ] Add `is_mums_pick` boolean field (independent of category — a product can be `imported` AND `is_mums_pick=true`)
-- [ ] Add `slug` field (unique, URL-safe, used for routing: `/shop/[slug]`)
-- [ ] Add `compare_price` field (Numeric, nullable — for strikethrough pricing)
-- [ ] Add `origin` field (string, e.g. "USA", "Nigeria")
-- [ ] Add `images` field (array of URLs, replaces single `image_url`)
-- [ ] Write and run Alembic migration for all product changes
+- [x] Change `ProductCategory` enum from `mums_pick|local|imported` → `imported|local|chilled|household`
+- [x] Add `is_mums_pick` boolean field (independent of category — a product can be `imported` AND `is_mums_pick=true`)
+- [x] Add `slug` field (unique, URL-safe, used for routing: `/shop/[slug]`)
+- [x] Add `compare_price` field (Numeric, nullable — for strikethrough pricing)
+- [x] Add `origin` field (string, e.g. "USA", "Nigeria")
+- [x] Add `images` field (array of URLs, replaces single `image_url`)
+- [x] Write Alembic migration for all product changes (`0002_schema_revisions.py`)
+- [ ] Run migration: `cd backend && alembic upgrade head`
 
 ### Orders model changes
-- [ ] Add `CONFIRMED` to `OrderStatus` enum (full set: PENDING → CONFIRMED → PACKED → OUT_FOR_DELIVERY → DELIVERED | CANCELLED)
-- [ ] Add `delivery_fee` field (Numeric)
-- [ ] Add `payment_status` field (enum: unpaid | paid | failed)
-- [ ] Add `payment_ref` field (Paystack reference, nullable string)
-- [ ] Add `rider_id` FK (nullable, links to riders table)
-- [ ] Add `notes` field (nullable text)
-- [ ] Write and run Alembic migration for order changes
+- [x] Add `CONFIRMED` to `OrderStatus` enum (full set: PENDING → CONFIRMED → PACKED → OUT_FOR_DELIVERY → DELIVERED | CANCELLED)
+- [x] Add `delivery_fee` field (Numeric)
+- [x] Add `payment_status` field (enum: unpaid | paid | failed)
+- [x] Add `payment_ref` field (Paystack reference, nullable string)
+- [x] Add `rider_id` FK (nullable, links to riders table)
+- [x] Add `notes` field (nullable text)
+- [x] Write Alembic migration for order changes (same `0002` file)
 
 ### New tables
-- [ ] `addresses` — user saved delivery addresses (id, user_id, label, street, area, city, is_default). Magodo Phase 1 pre-filled as default on register
-- [ ] `shipments` — US import shipment tracker (id, name, origin_country, departure_date, arrival_date, status, notes)
-- [ ] `pre_orders` — customer pre-orders (id, user_id, product_id, shipment_id, quantity, status)
-- [ ] `riders` — dispatch riders (id, name, phone, is_active, current_lat, current_lng)
-- [ ] `loyalty_transactions` — points earned/redeemed (id, user_id, order_id, points, type [EARN|REDEEM|EXPIRE], description)
-- [ ] `promo_codes` — discount codes (id, code, discount_type [PERCENTAGE|FIXED], discount_value, min_order, max_uses, used_count, expires_at)
-- [ ] Write and run Alembic migration for all new tables
+- [x] `addresses` — user saved delivery addresses (id, user_id, label, street, area, city, is_default). Magodo Phase 1 pre-filled as default on register
+- [x] `shipments` — US import shipment tracker (id, name, origin_country, departure_date, arrival_date, status, notes)
+- [x] `pre_orders` — customer pre-orders (id, user_id, product_id, shipment_id, quantity, status)
+- [x] `riders` — dispatch riders (id, name, phone, is_active, current_lat, current_lng)
+- [x] `loyalty_transactions` — points earned/redeemed (id, user_id, order_id, points, type [EARN|REDEEM|EXPIRE], description)
+- [x] `promo_codes` — discount codes (id, code, discount_type [PERCENTAGE|FIXED], discount_value, min_order, max_uses, used_count, expires_at)
+- [x] Write Alembic migration for all new tables (same `0002` file)
 
 ### New API endpoints
-- [ ] `GET /api/v1/products/featured` — returns `is_mums_pick=true` products (for homepage)
-- [ ] `GET /api/v1/products?mums_pick=true` — add `mums_pick` boolean filter to existing list endpoint
-- [ ] `GET /api/v1/categories` — returns 4 categories with product count each
-- [ ] `GET /api/v1/shipments` — upcoming and recent shipments (public)
-- [ ] `GET /api/v1/shipments/{id}/products` — products available for pre-order on this shipment (public)
-- [ ] `POST /api/v1/pre-orders` — place a pre-order (auth)
-- [ ] `GET /api/v1/pre-orders/mine` — customer's active pre-orders (auth)
-- [ ] `POST /api/v1/admin/shipments` — create shipment record (admin)
-- [ ] `PATCH /api/v1/admin/shipments/{id}` — update shipment status and arrival date (admin)
-- [ ] `POST /api/v1/admin/orders/{id}/assign-rider` — assign rider to order (staff)
-- [ ] `POST /api/v1/orders/webhook/paystack` — Paystack payment webhook, verify HMAC-SHA512 signature, update payment_status
-- [ ] `GET /api/v1/admin/dashboard` — KPI summary: today's revenue, order counts, low-stock alerts, weekly chart data (single call, no waterfall)
-- [ ] `GET /api/v1/admin/customers` — paginated customer list with order count and total spend
-- [ ] `GET /api/v1/admin/analytics` — revenue by date range, top products, category breakdown
-- [ ] `POST /api/v1/admin/promo-codes` — create promo code
-- [ ] `GET /api/v1/admin/inventory/low-stock` — products below reorder threshold
+- [x] `GET /api/v1/products/featured` — returns `is_mums_pick=true` products (for homepage)
+- [x] `GET /api/v1/products?mums_pick=true` — add `mums_pick` boolean filter to existing list endpoint
+- [x] `GET /api/v1/categories` — returns 4 categories with product count each
+- [x] `GET /api/v1/shipments` — upcoming and recent shipments (public)
+- [x] `GET /api/v1/shipments/{id}/products` — products available for pre-order on this shipment (public)
+- [x] `POST /api/v1/pre-orders` — place a pre-order (auth)
+- [x] `GET /api/v1/pre-orders/mine` — customer's active pre-orders (auth)
+- [x] `POST /api/v1/admin/shipments` — create shipment record (admin)
+- [x] `PATCH /api/v1/admin/shipments/{id}` — update shipment status and arrival date (admin)
+- [x] `POST /api/v1/admin/orders/{id}/assign-rider` — assign rider to order (staff)
+- [x] `POST /api/v1/orders/webhook/paystack` — Paystack payment webhook, verify HMAC-SHA512 signature, update payment_status
+- [x] `GET /api/v1/admin/dashboard` — KPI summary: today's revenue, order counts, low-stock alerts, weekly chart data (single call, no waterfall)
+- [x] `GET /api/v1/admin/customers` — paginated customer list with order count and total spend
+- [x] `GET /api/v1/admin/analytics` — revenue by date range, top products, category breakdown
+- [x] `POST /api/v1/admin/promo-codes` — create promo code
+- [x] `GET /api/v1/admin/inventory/low-stock` — products below reorder threshold
 
 ---
 
-## Phase 2 — Customer MVP (storefront pages)
+## Phase 3 — Customer MVP (storefront pages)
 
 > Partially built in phase 3 of previous work. Several pages need revisions per spec.
 
@@ -159,9 +131,9 @@
 
 ---
 
-## Phase 3 — Admin Dashboard MVP
+## Phase 4 — Admin Dashboard MVP
 
-> Builds inside `app/(admin)/` route group in the Next.js app. Full sidebar layout.
+> Builds inside `apps/admin/` (`@mamas-pantry/admin`) — standalone Vite SPA on port 5173.
 
 ### Layout & auth
 - [ ] Admin layout — collapsible left sidebar (forest-deep), top bar with store name + logged-in user. Nav: Dashboard, Orders, Inventory, Shipments, Customers, Riders, Promos, Analytics, Settings
@@ -184,7 +156,7 @@
 
 ---
 
-## Phase 4 — Mum's Picks & Pre-Order
+## Phase 5 — Mum's Picks & Pre-Order
 
 - [ ] `ShipmentCountdown` component — calculates days until `arrival_date` of next active shipment. Shown on `/mums-picks` and homepage hero
 - [ ] Mum's Picks page fully wired to `GET /products?mums_pick=true` + shipment countdown
@@ -193,7 +165,7 @@
 
 ---
 
-## Phase 5 — Growth Features
+## Phase 6 — Growth Features
 
 - [ ] Loyalty points — credit points on order DELIVERED (backend), display balance in account, `LoyaltyPointsDisplay` component (shows pts + ₦ equivalent)
 - [ ] Promo codes — apply at checkout step 3, validate via backend, show discount line in order summary
@@ -203,7 +175,7 @@
 
 ---
 
-## Phase 6 — Polish & Launch
+## Phase 7 — Polish & Launch
 
 - [ ] SEO — `generateMetadata` on all product pages (title, description, OG image via Cloudinary). Homepage structured data: `LocalBusiness` schema (address, hours, delivery areas)
 - [ ] Product pages: `Product` structured data schema (price, availability, image)

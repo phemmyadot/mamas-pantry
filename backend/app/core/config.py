@@ -62,6 +62,9 @@ class Settings(BaseSettings):
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""
 
+    # Paystack
+    PAYSTACK_SECRET_KEY: str = ""
+
     # OAuth2 (ENABLE_OAUTH2)
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
