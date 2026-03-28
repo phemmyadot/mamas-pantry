@@ -2,18 +2,18 @@
 
 ## Foundation
 
-- [ ] Read Next.js 16 docs in `node_modules/next/dist/docs/` before writing any code (required by AGENTS.md)
-- [ ] Configure Tailwind v4 with brand tokens (Forest Deep `#1B4332`, Harvest Gold `#D4A017`, Market Spice `#C4622D`, Warm Cream `#FEFAE0`) and Google Fonts (Playfair Display, Lora, DM Sans)
-- [ ] Create API client — typed fetch wrapper with JWT bearer header, automatic token refresh via `/auth/refresh`, and RFC 7807 error handling
-- [ ] Create auth context/store — persist access + refresh tokens, expose user state, login/logout helpers, `isAuthenticated` flag
+- [x] Read Next.js 16 docs in `node_modules/next/dist/docs/` before writing any code (required by AGENTS.md)
+- [x] Configure Tailwind v4 with brand tokens (Forest Deep `#1B4332`, Harvest Gold `#D4A017`, Market Spice `#C4622D`, Warm Cream `#FEFAE0`) and Google Fonts (Playfair Display, Lora, DM Sans)
+- [x] Create API client — typed fetch wrapper with JWT bearer header, automatic token refresh via `/auth/refresh`, and RFC 7807 error handling
+- [x] Create auth context/store — persist access + refresh tokens, expose user state, login/logout helpers, `isAuthenticated` flag
 
 ## Auth UI — Standard / Phone OTP
 
-- [ ] Build Register page — email + password form, `POST /auth/register`, redirect to phone verification
-- [ ] Build Login page — email + password form, `POST /auth/login`, store tokens, redirect to home (or `/verify-phone` if unverified)
-- [ ] Build Phone OTP pages — (1) enter phone + send OTP via `POST /auth/phone/send-otp`; (2) enter 6-digit code + verify via `POST /auth/phone/verify-otp`; show resend countdown (3/hr limit)
-- [ ] Build Password Reset pages — (1) request form (`POST /auth/password-reset/request`); (2) confirm form with token from email link (`POST /auth/password-reset/confirm`)
-- [ ] Implement route middleware — redirect unauthenticated users to `/login`; redirect verified users away from auth pages
+- [x] Build Register page — email + password form, `POST /auth/register`, redirect to phone verification
+- [x] Build Login page — email + password form, `POST /auth/login`, store tokens, redirect to home (or `/verify-phone` if unverified)
+- [x] Build Phone OTP pages — (1) enter phone + send OTP via `POST /auth/phone/send-otp`; (2) enter 6-digit code + verify via `POST /auth/phone/verify-otp`; show resend countdown (3/hr limit)
+- [x] Build Password Reset pages — (1) request form (`POST /auth/password-reset/request`); (2) confirm form with token from email link (`POST /auth/password-reset/confirm`)
+- [x] Implement route middleware — redirect unauthenticated users to `/login`; redirect verified users away from auth pages
 
 ## Backend Extensions
 
