@@ -48,6 +48,16 @@ async def register(
         ip_address=request.client.host if request.client else "",
         user_agent=request.headers.get("user-agent", ""),
     )
+
+    # Send email verification link immediately after registration
+    if settings.ENABLE_EMAIL_VERIFICATION:
+        try:
+            from app.services.email_verification_service import EmailVerificationService
+            ev_service = EmailVerificationService(db)
+            await ev_service.send_verification(user_id=user.id, email=user.email)
+        except Exception:
+            pass  # best-effort — user can request a resend
+
     return user
 
 
