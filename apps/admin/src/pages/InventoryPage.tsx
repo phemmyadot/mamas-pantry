@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { products, type Product } from "@/lib/api";
+import { products } from "@/lib/api";
 import { formatNGN } from "@/lib/utils";
 import Spinner from "@/components/Spinner";
 
@@ -25,6 +25,12 @@ export default function InventoryPage() {
       products.update(id, { is_active }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["products"] }),
   });
+
+  const sortedProducts = useMemo(() => {
+    return [...(data ?? [])].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
+  }, [data]);
 
   return (
     <div className="max-w-5xl space-y-4">
@@ -77,7 +83,7 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {(data ?? []).map((p) => (
+                {sortedProducts.map((p) => (
                   <tr key={p.id} className={`border-b border-gray-50 ${p.stock_qty <= 3 ? "bg-red-50" : ""}`}>
                     <td className="px-5 py-3">
                       <div className="font-medium text-ink">{p.name}</div>
@@ -104,7 +110,7 @@ export default function InventoryPage() {
                     </td>
                   </tr>
                 ))}
-                {data?.length === 0 && (
+                {sortedProducts.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-5 py-10 text-center text-muted">No products found.</td>
                   </tr>
