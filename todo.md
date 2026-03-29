@@ -201,42 +201,47 @@
 - [x] Run new Alembic migrations — `alembic upgrade head` (now at 0003_fcm_tokens)
 - [x] Seed product catalogue — 20 products: 6 Imported, 5 Local, 4 Chilled, 5 Household; 6 with `is_mums_pick=true`; all with ₦ prices, slugs, origin fields (`app/scripts/seed_catalogue.py`)
 - [x] Create at least one test shipment — "April 2026 USA Haul" (upcoming, arrives 2026-04-14)
-- [ ] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
+- [x] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
 
 ## BUGS
 
-[x] on payment success, app stays in checkout. should go home/my orders
-[x] on payment success, order status wasnt updated
-[x] cart wasnt cleared on payment success
-[x] when i update status of order in admin, i have to refresh page to show new status in list.
-[x] customer list and count in admin shouldn't include admin and staffs
-[x] when i uncheck active on admin inventor, it disappears from list.
-[x]  customer count in admin home shouldn't include admin and staffs
-[x] when i edit an invetory, i had to refresh to show effect. should update state
-[x] updating order to delivered fails
-[x] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
-[x] ready to pickup filter in orders is lagging, opthers are instant
+- [x] on payment success, app stays in checkout. should go home/my orders
+- [x] on payment success, order status wasnt updated
+- [x] cart wasnt cleared on payment success
+- [x] when i update status of order in admin, i have to refresh page to show new status in list.
+- [x] customer list and count in admin shouldn't include admin and staffs
+- [x] when i uncheck active on admin inventor, it disappears from list.
+- [x]  customer count in admin home shouldn't include admin and staffs
+- [x] when i edit an invetory, i had to refresh to show effect. should update state
+- [x] updating order to delivered fails
+- [x] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
+- [x] ready to pickup filter in orders is lagging, opthers are instant
 
 
 ## Features
-[x] allow admin create staff account for users and manage staffs/rider. staff can see orders, inventory (view only), riders(view only), in store purchase(make basic for now). rider only see assigned
-[x] in-store staff purchase flow: pick items, select cash/card, confirm payment, save as paid+delivered order with in-store channel and attending staff username
-[x] in store purchase to support bar code scaning (products to store sku)
-[x] send order status change email to customer
+- [x] allow admin create staff account for users and manage staffs/rider. staff can see orders, inventory (view only), riders(view only), in store purchase(make basic for now). rider only see assigned
+- [x] in-store staff purchase flow: pick items, select cash/card, confirm payment, save as paid+delivered order with in-store channel and attending staff username
+- [x] in store purchase to support bar code scaning (products to store sku)
+- [x] send order status change email to customer
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
-[x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
-[x] authntication state is not properly done, sometimes it shows signin and then username on refresh
-[x] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
-[x] set delivery fee in admin. different fee for each locations available
-[x] instore, create order. when payment done, then confirm payment. this will allow users that payment fail to keep their order incheck to try again later. [x] clean pending instore orders by EOD. 
-[x] show modal confirmation after created order and after payment confirmation. 
-[x] staffs are allowed to change status to paid(only, can't change after) for order they made
-[x] staff access => staff detail page.  
-[x] show staff performance.  
-[x] time between start and order creation create. will derive time per item amd average time the staff use per item
-[x] average daily orders for staff 
-[x] average daily revenue for staff
+- [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
+- [x] authntication state is not properly done, sometimes it shows signin and then username on refresh
+- [x] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
+- [x] set delivery fee in admin. different fee for each locations available
+- [x] instore, create order. when payment done, then confirm payment. this will allow users that payment fail to keep their order incheck to try again later. 
+- [x] clean pending instore orders by EOD. 
+- [x] show modal confirmation after created order and after payment confirmation. 
+- [x] staffs are allowed to change status to paid(only, can't change after) for order they made
+- [x] staff access => staff detail page.  
+- [x] show staff performance.  
+- [x] time between start and order creation create. will derive time per item amd average time the staff use per item
+- [x] average daily orders for staff 
+- [x] average daily revenue for staff
 
-## Future
-[ ] Rider app - RIDER
-[ ] Cutomer mobile
+## Rider app - RIDER
+- [ ] see list of assigned deliveries
+- [ ] mark as delivered only
+- [ ] navigation to address
+
+
+## Cutomer mobile
