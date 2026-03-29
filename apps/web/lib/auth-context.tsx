@@ -42,11 +42,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const refreshUser = useCallback(async () => {
-    const hasToken = typeof document !== "undefined" && /(?:^|; )mp_access=/.test(document.cookie);
-    if (!hasToken) {
+    if (typeof document === "undefined") {
       setState({ user: null, isAuthenticated: false, isLoading: false });
       return;
     }
+
+    const hasAccessToken = /(?:^|; )mp_access=/.test(document.cookie);
+    const hasRefreshToken = /(?:^|; )mp_refresh=/.test(document.cookie);
+    if (!hasAccessToken && !hasRefreshToken) {
+      setState({ user: null, isAuthenticated: false, isLoading: false });
+      return;
+    }
+
+    setState((prev) => ({ ...prev, isLoading: true }));
+
     try {
       const user = await auth.me();
       setState({ user, isAuthenticated: true, isLoading: false });

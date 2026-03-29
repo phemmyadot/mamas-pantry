@@ -9,7 +9,8 @@ const AUTH_ROUTES = ["/login", "/register"];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("mp_access")?.value;
-  const isAuthenticated = Boolean(accessToken);
+  const refreshToken = request.cookies.get("mp_refresh")?.value;
+  const isAuthenticated = Boolean(accessToken || refreshToken);
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)

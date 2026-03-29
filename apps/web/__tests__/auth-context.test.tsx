@@ -87,6 +87,20 @@ describe("AuthContext", () => {
     expect(screen.getByTestId("email").textContent).toBe("user@example.com");
   });
 
+  it("calls auth.me when only refresh cookie is present", async () => {
+    Object.defineProperty(document, "cookie", { writable: true, value: "mp_refresh=refresh-token" });
+    mockMe.mockResolvedValueOnce({
+      id: "u1", email: "user@example.com", username: "user",
+      is_active: true, is_verified: true,
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(), roles: [],
+    });
+
+    renderAuth();
+    await waitFor(() => expect(screen.queryByTestId("loading")).toBeNull());
+    expect(mockMe).toHaveBeenCalledOnce();
+    expect(screen.getByTestId("authenticated").textContent).toBe("true");
+  });
+
   it("stays unauthenticated when auth.me throws", async () => {
     Object.defineProperty(document, "cookie", { writable: true, value: "mp_access=badtoken" });
     mockMe.mockRejectedValueOnce(new Error("401"));

@@ -224,7 +224,7 @@ Features
 [ ] send order status change email to customer
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
 [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
-[ ] authntication state is not properly done, sometimes it shows signin and then username on refresh
+[x] authntication state is not properly done, sometimes it shows signin and then username on refresh
 
 
 Future

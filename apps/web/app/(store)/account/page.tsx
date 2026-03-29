@@ -14,12 +14,20 @@ const NAV_ITEMS = [
 ];
 
 export default function AccountPage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) router.replace("/login");
-  }, [isAuthenticated, router]);
+    if (!isLoading && !isAuthenticated) router.replace("/login");
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+        <p className="font-ui text-sm text-muted animate-pulse">Loading account...</p>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
