@@ -473,3 +473,67 @@ async def test_admin_can_set_delivery_fee_by_area_and_order_uses_it(client, db_s
     assert order_resp.status_code == 201, order_resp.text
     data = order_resp.json()
     assert Decimal(str(data["delivery_fee_ngn"])) == Decimal("1200")
+
+
+@pytest.mark.asyncio
+async def test_order_status_change_sends_customer_email(client, db_session, monkeypatch):
+    admin = await create_test_user(client, email="admin9@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    customer = await create_test_user(client, email="customer9@example.com")
+
+    admin_tokens = await login_user(client, email="admin9@example.com")
+    customer_tokens = await login_user(client, email="customer9@example.com")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Email Status Product",
+            "slug": "email-status-product",
+            "description": "Order status email test product",
+            "price_ngn": 2400,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_resp.json()["id"], "qty": 1}],
+            "delivery_address": {
+                "name": "Email Test Customer",
+                "phone": "08034445555",
+                "address": "7 Email Avenue",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+
+    sent_payload = {}
+
+    async def _fake_send_order_status_email(to: str, order_id: str, status: str, customer_name: str | None = None):
+        sent_payload["to"] = to
+        sent_payload["order_id"] = order_id
+        sent_payload["status"] = status
+        sent_payload["customer_name"] = customer_name
+
+    monkeypatch.setattr("app.core.email.send_order_status_email", _fake_send_order_status_email)
+
+    status_resp = await client.patch(
+        f"/api/v1/admin/orders/{order_id}/status",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"status": "packed"},
+    )
+    assert status_resp.status_code == 200, status_resp.text
+
+    assert sent_payload["to"] == "customer9@example.com"
+    assert sent_payload["order_id"] == order_id
+    assert sent_payload["status"] == "packed"
+    assert sent_payload["customer_name"] == "Email Test Customer"

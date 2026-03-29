@@ -13,6 +13,7 @@ from app.db.models.delivery_zone_fee import DeliveryZoneFee
 from app.db.models.order import Order, OrderItem, OrderStatus, PaymentStatus
 from app.db.models.product import Product
 from app.db.models.promo_code import PromoCode, DiscountType
+from app.db.models.user import User
 from app.schemas.order import OrderCreate, OrderStatusUpdate
 
 
@@ -203,6 +204,23 @@ class OrderService:
             await ns.notify_order_status(order)
         except Exception:
             pass  # Notifications are best-effort
+
+        # Send email notification on status change
+        try:
+            from app.core.email import send_order_status_email
+
+            user_result = await self.db.execute(select(User).where(User.id == order.user_id))
+            user = user_result.scalar_one_or_none()
+            if user and user.email:
+                customer_name = (order.delivery_address or {}).get("name")
+                await send_order_status_email(
+                    to=user.email,
+                    order_id=str(order.id),
+                    status=order.status.value,
+                    customer_name=customer_name,
+                )
+        except Exception:
+            pass  # Email is best-effort
 
         await self.db.refresh(order)
         return order

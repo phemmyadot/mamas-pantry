@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orders, riders, type OrderStatus } from "@/lib/api";
@@ -16,6 +17,7 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
@@ -29,9 +31,15 @@ export default function OrderDetailPage() {
 
   const statusMutation = useMutation({
     mutationFn: (status: string) => orders.updateStatus(id!, status),
+    onMutate: (status: string) => {
+      setPendingStatus(status);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["order", id] });
       qc.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onSettled: () => {
+      setPendingStatus(null);
     },
   });
 
@@ -100,8 +108,13 @@ export default function OrderDetailPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h2 className="text-sm font-semibold text-forest-deep">Update status</h2>
           <select
-            value={order.status}
-            onChange={(e) => statusMutation.mutate(e.target.value)}
+            value={pendingStatus ?? order.status}
+            onChange={(e) => {
+              const nextStatus = e.target.value;
+              if (nextStatus !== order.status) {
+                statusMutation.mutate(nextStatus);
+              }
+            }}
             disabled={statusMutation.isPending}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
@@ -111,6 +124,12 @@ export default function OrderDetailPage() {
               </option>
             ))}
           </select>
+          {statusMutation.isPending && (
+            <p className="text-xs text-muted inline-flex items-center gap-2">
+              <Spinner className="w-3.5 h-3.5" />
+              Updating status...
+            </p>
+          )}
           {statusMutation.isError && <p className="text-xs text-spice">Failed to update status.</p>}
         </div>
 

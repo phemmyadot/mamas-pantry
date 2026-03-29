@@ -9,6 +9,16 @@ from app.core.config import settings
 TEMPLATE_DIR = Path(__file__).parent.parent / "templates" / "email"
 jinja_env = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)), autoescape=True)
 
+ORDER_STATUS_LABELS = {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "packed": "Packed",
+    "ready_for_pickup": "Ready for pickup",
+    "out_for_delivery": "Out for delivery",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+}
+
 
 async def send_email(to: str, subject: str, template_name: str, context: dict) -> None:
     """Send an HTML email using aiosmtplib + jinja2 template."""
@@ -47,4 +57,24 @@ async def send_verification_email(to: str, verification_token: str) -> None:
         subject="Verify Your Email",
         template_name="email_verification.html",
         context={"verification_link": verification_link, "project_name": settings.PROJECT_NAME},
+    )
+
+
+async def send_order_status_email(
+    to: str,
+    order_id: str,
+    status: str,
+    customer_name: str | None = None,
+) -> None:
+    await send_email(
+        to=to,
+        subject=f"Order #{order_id[:8]} is now {ORDER_STATUS_LABELS.get(status, status.replace('_', ' ').title())}",
+        template_name="order_status_update.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "order_id": order_id,
+            "status_label": ORDER_STATUS_LABELS.get(status, status.replace("_", " ").title()),
+            "customer_name": customer_name or "Customer",
+            "orders_link": f"{settings.FRONTEND_URL}/orders/{order_id}",
+        },
     )
