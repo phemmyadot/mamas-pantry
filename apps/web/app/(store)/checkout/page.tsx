@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
-import { orders, addresses, type Address, type DeliveryAddress, ApiError } from "@/lib/api";
+import { orders, addresses, type Address, type DeliveryAddress, type FulfillmentType, ApiError } from "@/lib/api";
 import { track, Events } from "@/lib/analytics";
 
 declare global {
@@ -89,6 +89,7 @@ export default function CheckoutPage({
   });
 
   const [slot, setSlot] = useState<string>("");
+  const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>("delivery");
   const [promoCode, setPromoCode] = useState(initialPromo);
   const [discount, setDiscount] = useState(0);
   const [promoError, setPromoError] = useState("");
@@ -131,7 +132,17 @@ export default function CheckoutPage({
   }
 
   // ─── Derived address for the order ──────────────────────────────────────────
-  function buildDeliveryAddress(): DeliveryAddress {
+function buildDeliveryAddress(): DeliveryAddress {
+    if (fulfillmentType === "pickup") {
+      return {
+        name: (user?.email?.split("@")[0] ?? addressForm.name) || "Pickup Customer",
+        phone: addressForm.phone,
+        address: "Mama's Pantry, Magodo Phase 1",
+        city: "Lagos",
+        fulfillment_type: "pickup",
+      };
+    }
+
     if (isAuthenticated && !useNewAddress && selectedAddressId) {
       const a = savedAddresses.find((x) => x.id === selectedAddressId)!;
       return {
@@ -139,6 +150,7 @@ export default function CheckoutPage({
         phone: addressForm.phone, // still need phone
         address: `${a.street}, ${a.area}`,
         city: a.city,
+        fulfillment_type: fulfillmentType,
       };
     }
     return {
@@ -146,14 +158,23 @@ export default function CheckoutPage({
       phone: addressForm.phone,
       address: `${addressForm.address}, ${addressForm.area}`,
       city: addressForm.city,
+      fulfillment_type: fulfillmentType,
     };
   }
 
   // ─── Step 1: validate address ────────────────────────────────────────────────
-  function handleStep1Next() {
+function handleStep1Next() {
     const normalizedPhone = normalizeNigerianPhone(addressForm.phone);
     if (!normalizedPhone) {
       setError("Please enter a valid Nigerian phone number (e.g. 08012345678).");
+      return;
+    }
+
+    if (fulfillmentType === "pickup") {
+      setAddressForm((f) => ({ ...f, phone: normalizedPhone }));
+      setError("");
+      setStep(3);
+      track(Events.CHECKOUT_START, { item_count: items.length, subtotal: totalPrice });
       return;
     }
 
@@ -197,7 +218,8 @@ export default function CheckoutPage({
       const order = await orders.create(
         items.map((i) => ({ product_id: i.product.id, qty: i.qty })),
         buildDeliveryAddress(),
-        promoCode || undefined
+        promoCode || undefined,
+        fulfillmentType,
       );
       orderId = order.id;
       totalNgn = Number(order.total_ngn);
@@ -242,7 +264,8 @@ export default function CheckoutPage({
   }
 
   const subtotal = totalPrice;
-  const estimatedTotal = subtotal + DELIVERY_FEE - discount;
+  const effectiveDeliveryFee = fulfillmentType === "pickup" ? 0 : DELIVERY_FEE;
+  const estimatedTotal = subtotal + effectiveDeliveryFee - discount;
 
   // ─── Render ───────────────────────────────────────────────────────────────────
   return (
@@ -250,7 +273,7 @@ export default function CheckoutPage({
       {/* Step indicator */}
       <div className="flex items-center gap-0 mb-8">
         {([1, 2, 3] as Step[]).map((s, i) => {
-          const labels = ["Address", "Delivery", "Payment"];
+          const labels = ["Fulfillment", "Delivery", "Payment"];
           const done = step > s;
           const active = step === s;
           return (
@@ -280,9 +303,46 @@ export default function CheckoutPage({
           {/* ── STEP 1: Address ── */}
           {step === 1 && (
             <div className="space-y-5">
-              <h2 className="font-display text-xl font-bold text-forest-deep">Delivery address</h2>
+              <h2 className="font-display text-xl font-bold text-forest-deep">Fulfillment & details</h2>
 
-              {isAuthenticated && savedAddresses.length > 0 && !useNewAddress ? (
+              <div>
+                <label className="block font-ui text-xs font-medium text-muted mb-2">How do you want to receive this order?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFulfillmentType("delivery")}
+                    className={`px-3 py-2 rounded-lg border text-sm font-ui ${fulfillmentType === "delivery" ? "border-forest-deep bg-forest-mist text-forest-deep" : "border-cream-dark bg-white text-muted"}`}
+                  >
+                    Delivery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFulfillmentType("pickup")}
+                    className={`px-3 py-2 rounded-lg border text-sm font-ui ${fulfillmentType === "pickup" ? "border-forest-deep bg-forest-mist text-forest-deep" : "border-cream-dark bg-white text-muted"}`}
+                  >
+                    Pickup
+                  </button>
+                </div>
+              </div>
+
+              {fulfillmentType === "pickup" ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block font-ui text-xs font-medium text-muted mb-1">Phone number <span className="text-spice">*</span></label>
+                    <input
+                      type="tel"
+                      required
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      value={addressForm.phone}
+                      onChange={(e) => setAddressForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="e.g. 0812 345 6789"
+                      className="w-full px-3 py-2.5 rounded-lg border border-cream-dark bg-cream font-ui text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
+                    />
+                  </div>
+                  <p className="font-ui text-xs text-muted">Pickup location: Mama&apos;s Pantry, Magodo Phase 1, Lagos.</p>
+                </div>
+              ) : (isAuthenticated && savedAddresses.length > 0 && !useNewAddress ? (
                 <>
                   <div className="space-y-2">
                     {savedAddresses.map((a) => (
@@ -377,7 +437,7 @@ export default function CheckoutPage({
                     </div>
                   </div>
                 </>
-              )}
+              ))}
 
               {error && <p className="font-ui text-sm text-spice">{error}</p>}
 
@@ -385,13 +445,13 @@ export default function CheckoutPage({
                 onClick={handleStep1Next}
                 className="w-full bg-forest-deep text-cream font-ui font-medium text-sm py-3 rounded-lg hover:bg-forest-mid transition-colors"
               >
-                Continue to delivery →
+                {fulfillmentType === "pickup" ? "Continue to review ->" : "Continue to delivery ->"}
               </button>
             </div>
           )}
 
           {/* ── STEP 2: Delivery slot ── */}
-          {step === 2 && (
+          {step === 2 && fulfillmentType === "delivery" && (
             <div className="space-y-5">
               <h2 className="font-display text-xl font-bold text-forest-deep">Choose delivery time</h2>
               <p className="font-body text-sm italic text-muted -mt-2">Lagos time (WAT)</p>
@@ -465,23 +525,32 @@ export default function CheckoutPage({
               {/* Delivery summary */}
               <div className="bg-cream rounded-2xl border border-cream-dark p-4 space-y-1 text-sm font-ui">
                 <div className="flex justify-between">
-                  <span className="text-muted">Delivering to</span>
+                  <span className="text-muted">{fulfillmentType === "pickup" ? "Pickup location" : "Delivering to"}</span>
                   <span className="text-ink font-medium text-right max-w-[55%]">
-                    {isAuthenticated && !useNewAddress && selectedAddressId
+                    {fulfillmentType === "pickup"
+                      ? "Mama's Pantry, Magodo Phase 1, Lagos"
+                      : isAuthenticated && !useNewAddress && selectedAddressId
                       ? (() => { const a = savedAddresses.find((x) => x.id === selectedAddressId); return a ? `${a.street}, ${a.area}` : ""; })()
                       : `${addressForm.address}, ${addressForm.area}`}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">Delivery slot</span>
-                  <span className="text-ink font-medium">{SLOTS.find((s) => s.id === slot)?.label}</span>
-                </div>
+                {fulfillmentType === "delivery" ? (
+                  <div className="flex justify-between">
+                    <span className="text-muted">Delivery slot</span>
+                    <span className="text-ink font-medium">{SLOTS.find((s) => s.id === slot)?.label}</span>
+                  </div>
+                ) : (
+                  <div className="flex justify-between">
+                    <span className="text-muted">Pickup</span>
+                    <span className="text-ink font-medium">You will be notified when ready</span>
+                  </div>
+                )}
               </div>
 
               {error && <p className="font-ui text-sm text-spice">{error}</p>}
 
               <div className="flex gap-2">
-                <button onClick={() => { setError(""); setStep(2); }} className="px-5 py-3 border border-cream-dark rounded-lg font-ui text-sm text-muted hover:bg-cream transition-colors">
+                <button onClick={() => { setError(""); setStep(fulfillmentType === "pickup" ? 1 : 2); }} className="px-5 py-3 border border-cream-dark rounded-lg font-ui text-sm text-muted hover:bg-cream transition-colors">
                   ← Back
                 </button>
                 <button
@@ -526,8 +595,8 @@ export default function CheckoutPage({
               <span className="text-ink">{formatNGN(subtotal)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted">Delivery</span>
-              <span className="text-ink">{formatNGN(DELIVERY_FEE)}</span>
+              <span className="text-muted">{fulfillmentType === "pickup" ? "Pickup" : "Delivery"}</span>
+              <span className="text-ink">{formatNGN(effectiveDeliveryFee)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-forest-light">
@@ -545,3 +614,4 @@ export default function CheckoutPage({
     </div>
   );
 }
+

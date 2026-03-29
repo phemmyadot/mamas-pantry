@@ -1,10 +1,16 @@
 import uuid
+from enum import Enum
 from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.db.models.order import OrderStatus, PaymentStatus
+
+
+class FulfillmentType(str, Enum):
+    delivery = "delivery"
+    pickup = "pickup"
 
 
 class DeliveryAddress(BaseModel):
@@ -35,6 +41,7 @@ class OrderItemCreate(BaseModel):
 class OrderCreate(BaseModel):
     items: list[OrderItemCreate] = Field(..., min_length=1)
     delivery_address: DeliveryAddress
+    fulfillment_type: FulfillmentType = FulfillmentType.delivery
     promo_code: str | None = None
     notes: str | None = None
 

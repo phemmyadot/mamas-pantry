@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
-import { orders, type OrderStatus } from "@/lib/api";
+import { orders, type Order, type OrderStatus } from "@/lib/api";
 import { formatNGN, formatDateTime } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
 import Spinner from "@/components/Spinner";
@@ -11,26 +11,48 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "pending", label: "Pending" },
   { value: "confirmed", label: "Confirmed" },
   { value: "packed", label: "Packed" },
+  { value: "ready_for_pickup", label: "Ready for pickup" },
   { value: "out_for_delivery", label: "Out for delivery" },
   { value: "delivered", label: "Delivered" },
   { value: "cancelled", label: "Cancelled" },
 ];
 
 const PAGE_SIZE = 25;
+const FETCH_PAGE_SIZE = 100;
+
+async function fetchAllOrders() {
+  const all: Order[] = [];
+  let offset = 0;
+
+  while (true) {
+    const chunk = await orders.list({ offset, limit: FETCH_PAGE_SIZE });
+    all.push(...chunk);
+    if (chunk.length < FETCH_PAGE_SIZE) break;
+    offset += FETCH_PAGE_SIZE;
+  }
+
+  return all;
+}
 
 export default function OrdersPage() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(0);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["orders", status, page],
-    queryFn: () => orders.list({
-      status: status || undefined,
-      offset: page * PAGE_SIZE,
-      limit: PAGE_SIZE,
-    }),
-    placeholderData: (prev) => prev,
+    queryKey: ["orders", "all"],
+    queryFn: fetchAllOrders,
   });
+
+  const filteredOrders = useMemo(() => {
+    const list = data ?? [];
+    if (!status) return list;
+    return list.filter((o) => o.status === status);
+  }, [data, status]);
+
+  const pagedOrders = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    return filteredOrders.slice(start, start + PAGE_SIZE);
+  }, [filteredOrders, page]);
 
   return (
     <div className="max-w-5xl space-y-4">
@@ -73,7 +95,7 @@ export default function OrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {(data ?? []).map((o) => (
+                {pagedOrders.map((o) => (
                   <tr key={o.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="px-5 py-3">
                       <Link
@@ -97,7 +119,7 @@ export default function OrdersPage() {
                     <td className="px-5 py-3"><StatusBadge status={o.payment_status} /></td>
                   </tr>
                 ))}
-                {data?.length === 0 && (
+                {filteredOrders.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-5 py-10 text-center text-muted">
                       No orders{status ? ` with status "${status}"` : ""}.
@@ -110,7 +132,7 @@ export default function OrdersPage() {
         )}
 
         {/* Pagination */}
-        {(data?.length === PAGE_SIZE || page > 0) && (
+        {(filteredOrders.length > PAGE_SIZE || page > 0) && (
           <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
             <button
               onClick={() => setPage((p) => Math.max(0, p - 1))}
@@ -122,7 +144,7 @@ export default function OrdersPage() {
             <span className="text-xs text-muted">Page {page + 1}</span>
             <button
               onClick={() => setPage((p) => p + 1)}
-              disabled={(data?.length ?? 0) < PAGE_SIZE}
+              disabled={(page + 1) * PAGE_SIZE >= filteredOrders.length}
               className="text-xs font-medium text-muted hover:text-forest-deep disabled:opacity-40"
             >
               Next →

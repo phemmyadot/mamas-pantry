@@ -27,6 +27,10 @@ class OrderService:
     def _with_order_relations(query):
         return query.options(selectinload(Order.items), selectinload(Order.rider))
 
+    @staticmethod
+    def _is_pickup(order: Order) -> bool:
+        return (order.delivery_address or {}).get("fulfillment_type") == "pickup"
+
     async def _apply_promo(self, code: str, subtotal: Decimal) -> tuple[PromoCode, Decimal]:
         from datetime import datetime, timezone
         result = await self.db.execute(select(PromoCode).where(PromoCode.code == code.upper()))
@@ -73,7 +77,8 @@ class OrderService:
                 unit_price_ngn=unit_price,
             ))
 
-        delivery_fee = DELIVERY_FEE_NGN
+        is_pickup = data.fulfillment_type.value == "pickup"
+        delivery_fee = Decimal("0") if is_pickup else DELIVERY_FEE_NGN
         discount = Decimal("0")
 
         if data.promo_code:
@@ -89,7 +94,10 @@ class OrderService:
             subtotal_ngn=subtotal,
             delivery_fee_ngn=delivery_fee,
             total_ngn=total,
-            delivery_address=data.delivery_address.model_dump(),
+            delivery_address={
+                **data.delivery_address.model_dump(),
+                "fulfillment_type": data.fulfillment_type.value,
+            },
             notes=data.notes,
             items=items,
         )
@@ -140,8 +148,19 @@ class OrderService:
         if not order:
             raise NotFoundError("Order not found")
 
-        if data.status == OrderStatus.delivered and not order.rider_id:
-            raise ValidationError("Assign a rider before marking order as delivered")
+        is_pickup = self._is_pickup(order)
+
+        if is_pickup and data.status == OrderStatus.out_for_delivery:
+            raise ValidationError("Pickup orders should use ready_for_pickup instead of out_for_delivery")
+
+        if (not is_pickup) and data.status == OrderStatus.ready_for_pickup:
+            raise ValidationError("Delivery orders cannot be set to ready_for_pickup")
+
+        if data.status == OrderStatus.delivered:
+            if is_pickup and order.status != OrderStatus.ready_for_pickup:
+                raise ValidationError("Set status to ready_for_pickup before marking order as delivered")
+            if (not is_pickup) and (not order.rider_id):
+                raise ValidationError("Assign a rider before marking order as delivered")
 
         prev_status = order.status
         order.status = data.status
@@ -170,6 +189,8 @@ class OrderService:
 
     async def assign_rider(self, order_id: uuid.UUID, rider_id: uuid.UUID) -> Order:
         order = await self.get_order(order_id)
+        if self._is_pickup(order):
+            raise ValidationError("Pickup orders do not support rider assignment")
         if order.status != OrderStatus.out_for_delivery:
             raise ValidationError("Rider can only be assigned when order is out_for_delivery")
         order.rider_id = rider_id

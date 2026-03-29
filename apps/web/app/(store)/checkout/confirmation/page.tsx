@@ -7,6 +7,7 @@ import { orders, type Order } from "@/lib/api";
 const STATUS_LABELS: Record<string, string> = {
   pending: "Order received",
   packed: "Being packed",
+  ready_for_pickup: "Ready for pickup",
   out_for_delivery: "Out for delivery",
   delivered: "Delivered",
   cancelled: "Cancelled",

@@ -13,6 +13,7 @@ class OrderStatus(str, enum.Enum):
     pending = "pending"
     confirmed = "confirmed"
     packed = "packed"
+    ready_for_pickup = "ready_for_pickup"
     out_for_delivery = "out_for_delivery"
     delivered = "delivered"
     cancelled = "cancelled"

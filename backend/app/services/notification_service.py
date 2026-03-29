@@ -17,6 +17,7 @@ FCM_SEND_URL = "https://fcm.googleapis.com/fcm/send"
 ORDER_STATUS_MESSAGES: dict[str, tuple[str, str]] = {
     "confirmed":        ("Order confirmed ✓", "Your order has been confirmed and will be packed soon."),
     "packed":           ("Order packed 📦", "Your order is packed and ready for pickup by the rider."),
+    "ready_for_pickup": ("Ready for pickup", "Your order is ready for pickup at Mama's Pantry."),
     "out_for_delivery": ("Out for delivery 🛵", "Your rider is on the way! Expect delivery shortly."),
     "delivered":        ("Delivered ✓", "Your order has been delivered. Enjoy your groceries!"),
     "cancelled":        ("Order cancelled", "Your order has been cancelled. Contact us if you have questions."),

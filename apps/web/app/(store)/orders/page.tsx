@@ -8,6 +8,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   pending:          { label: "Pending",           color: "bg-amber-100 text-amber-800" },
   confirmed:        { label: "Confirmed",         color: "bg-blue-100 text-blue-800" },
   packed:           { label: "Packed",            color: "bg-indigo-100 text-indigo-800" },
+  ready_for_pickup: { label: "Ready for pickup",  color: "bg-cyan-100 text-cyan-800" },
   out_for_delivery: { label: "Out for delivery",  color: "bg-purple-100 text-purple-800" },
   delivered:        { label: "Delivered",         color: "bg-forest-mist text-forest-deep" },
   cancelled:        { label: "Cancelled",         color: "bg-red-100 text-red-700" },

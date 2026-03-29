@@ -5,12 +5,14 @@ import { use } from "react";
 import Link from "next/link";
 import { orders, type Order, ApiError } from "@/lib/api";
 
-const STATUS_STEPS = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"] as const;
+const DELIVERY_STATUS_STEPS = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"] as const;
+const PICKUP_STATUS_STEPS = ["pending", "confirmed", "packed", "ready_for_pickup", "delivered"] as const;
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
   confirmed: "Confirmed",
   packed: "Packed",
+  ready_for_pickup: "Ready for pickup",
   out_for_delivery: "Out for delivery",
   delivered: "Delivered",
   cancelled: "Cancelled",
@@ -46,7 +48,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     </div>
   );
 
-  const stepIndex = STATUS_STEPS.indexOf(order.status as typeof STATUS_STEPS[number]);
+  const isPickup = order.delivery_address?.fulfillment_type === "pickup";
+  const statusSteps = isPickup ? PICKUP_STATUS_STEPS : DELIVERY_STATUS_STEPS;
+  const stepIndex = statusSteps.indexOf(order.status as typeof statusSteps[number]);
   const isCancelled = order.status === "cancelled";
   const payment = PAYMENT_LABELS[order.payment_status] ?? { label: order.payment_status, color: "bg-cream-dark text-muted" };
 
@@ -63,16 +67,21 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             Placed {new Date(order.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
           </p>
         </div>
-        <span className={`font-ui text-xs font-semibold px-3 py-1 rounded-full ${payment.color}`}>
-          {payment.label}
-        </span>
+        <div className="flex flex-col items-end gap-2">
+          <span className={`font-ui text-xs font-semibold px-3 py-1 rounded-full ${isPickup ? "bg-cyan-100 text-cyan-800" : "bg-slate-100 text-slate-700"}`}>
+            {isPickup ? "Pickup" : "Delivery"}
+          </span>
+          <span className={`font-ui text-xs font-semibold px-3 py-1 rounded-full ${payment.color}`}>
+            {payment.label}
+          </span>
+        </div>
       </div>
 
       {/* Status timeline */}
       {!isCancelled && (
         <div className="bg-cream rounded-2xl border border-cream-dark p-5 mb-6">
           <div className="flex items-center justify-between">
-            {STATUS_STEPS.map((step, i) => {
+            {statusSteps.map((step, i) => {
               const done = i <= stepIndex;
               const active = i === stepIndex;
               return (
@@ -85,7 +94,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   <span className={`font-ui text-[10px] text-center leading-tight ${active ? "text-forest-deep font-semibold" : "text-muted"}`}>
                     {STATUS_LABELS[step]}
                   </span>
-                  {i < STATUS_STEPS.length - 1 && (
+                  {i < statusSteps.length - 1 && (
                     <div className={`absolute h-0.5 ${done ? "bg-forest-deep" : "bg-cream-dark"}`} style={{ width: "calc(100% / 5)", top: "16px", left: "50%", position: "relative", marginTop: "-24px" }} />
                   )}
                 </div>
@@ -143,7 +152,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Delivery address */}
       <div className="bg-white rounded-2xl border border-cream-dark p-5">
-        <h2 className="font-display text-base font-bold text-forest-deep mb-3">Delivery address</h2>
+        <h2 className="font-display text-base font-bold text-forest-deep mb-3">{isPickup ? "Pickup details" : "Delivery address"}</h2>
         <p className="font-ui text-sm text-ink">{order.delivery_address.name}</p>
         <p className="font-ui text-sm text-muted">{order.delivery_address.address}</p>
         <p className="font-ui text-sm text-muted">{order.delivery_address.city}</p>

@@ -7,6 +7,7 @@ import type {
   Order,
   OrderStatus,
   DeliveryAddress,
+  FulfillmentType,
   Shipment,
   PreOrder,
 } from "@mamas-pantry/types";
@@ -21,6 +22,7 @@ export type {
   OrderItem,
   OrderStatus,
   DeliveryAddress,
+  FulfillmentType,
   Shipment,
   PreOrder,
 } from "@mamas-pantry/types";
@@ -218,10 +220,15 @@ export const products = {
 // ---------------------------------------------------------------------------
 
 export const orders = {
-  create: (items: { product_id: string; qty: number }[], delivery_address: DeliveryAddress, promo_code?: string) =>
+  create: (
+    items: { product_id: string; qty: number }[],
+    delivery_address: DeliveryAddress,
+    promo_code?: string,
+    fulfillment_type?: FulfillmentType,
+  ) =>
     apiFetch<Order>("/api/v1/orders", {
       method: "POST",
-      body: JSON.stringify({ items, delivery_address, promo_code }),
+      body: JSON.stringify({ items, delivery_address, promo_code, fulfillment_type }),
     }),
 
   confirmPayment: (orderId: string) =>

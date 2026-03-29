@@ -77,17 +77,20 @@ export type OrderStatus =
   | "pending"
   | "confirmed"
   | "packed"
+  | "ready_for_pickup"
   | "out_for_delivery"
   | "delivered"
   | "cancelled";
 
 export type PaymentStatus = "unpaid" | "paid" | "failed";
+export type FulfillmentType = "delivery" | "pickup";
 
 export interface DeliveryAddress {
   name: string;
   phone: string;
   address: string;
   city: string;
+  fulfillment_type?: FulfillmentType;
 }
 
 export interface OrderItem {

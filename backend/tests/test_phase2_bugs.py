@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 import pytest
 from sqlalchemy import select
@@ -349,3 +350,75 @@ async def test_create_order_rejects_non_nigerian_phone(client, db_session):
         },
     )
     assert order_resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_pickup_orders_use_ready_for_pickup_and_disallow_rider_assignment(client, db_session):
+    admin = await create_test_user(client, email="admin7@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    customer = await create_test_user(client, email="customer7@example.com")
+
+    admin_tokens = await login_user(client, email="admin7@example.com")
+    customer_tokens = await login_user(client, email="customer7@example.com")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Pickup Rule Product",
+            "slug": "pickup-rule-product",
+            "description": "Pickup flow test product",
+            "price_ngn": 3500,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_resp.json()["id"], "qty": 1}],
+            "fulfillment_type": "pickup",
+            "delivery_address": {
+                "name": "Pickup Customer",
+                "phone": "08030001111",
+                "address": "Pickup Desk",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+    assert Decimal(str(order_resp.json()["delivery_fee_ngn"])) == Decimal("0")
+
+    out_resp = await client.patch(
+        f"/api/v1/admin/orders/{order_id}/status",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"status": "out_for_delivery"},
+    )
+    assert out_resp.status_code == 422
+
+    ready_resp = await client.patch(
+        f"/api/v1/admin/orders/{order_id}/status",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"status": "ready_for_pickup"},
+    )
+    assert ready_resp.status_code == 200, ready_resp.text
+
+    rider_resp = await client.post(
+        "/api/v1/admin/riders",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"name": "Pickup Rider", "phone": "08036660000"},
+    )
+    assert rider_resp.status_code == 201, rider_resp.text
+
+    assign_resp = await client.post(
+        f"/api/v1/admin/orders/{order_id}/assign-rider",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"rider_id": rider_resp.json()["id"]},
+    )
+    assert assign_resp.status_code == 422

@@ -5,10 +5,11 @@ import { formatNGN, formatDateTime } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
 import Spinner from "@/components/Spinner";
 
-const STATUS_FLOW: OrderStatus[] = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"];
+const DELIVERY_STATUS_FLOW: OrderStatus[] = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"];
+const PICKUP_STATUS_FLOW: OrderStatus[] = ["pending", "confirmed", "packed", "ready_for_pickup", "delivered"];
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending", confirmed: "Confirmed", packed: "Packed",
-  out_for_delivery: "Out for delivery", delivered: "Delivered", cancelled: "Cancelled",
+  ready_for_pickup: "Ready for pickup", out_for_delivery: "Out for delivery", delivered: "Delivered", cancelled: "Cancelled",
 };
 
 export default function OrderDetailPage() {
@@ -45,9 +46,11 @@ export default function OrderDetailPage() {
   if (isLoading) return <div className="flex justify-center py-20"><Spinner className="w-8 h-8" /></div>;
   if (!order) return <p className="text-sm text-spice py-10">Order not found.</p>;
 
-  const currentIdx = STATUS_FLOW.indexOf(order.status as OrderStatus);
-  const canAssignRider = order.status === "out_for_delivery";
-  const canMarkDelivered = Boolean(order.rider_id);
+  const isPickup = order.delivery_address?.fulfillment_type === "pickup";
+  const statusFlow = isPickup ? PICKUP_STATUS_FLOW : DELIVERY_STATUS_FLOW;
+  const currentIdx = statusFlow.indexOf(order.status as OrderStatus);
+  const canAssignRider = !isPickup && order.status === "out_for_delivery";
+  const canMarkDelivered = isPickup ? order.status === "ready_for_pickup" : Boolean(order.rider_id);
 
   return (
     <div className="max-w-3xl space-y-5">
@@ -57,6 +60,9 @@ export default function OrderDetailPage() {
         <h1 className="text-xl font-bold text-forest-deep">
           Order #{order.id.slice(0, 8).toUpperCase()}
         </h1>
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isPickup ? "bg-cyan-100 text-cyan-800" : "bg-slate-100 text-slate-700"}`}>
+          {isPickup ? "Pickup" : "Delivery"}
+        </span>
         <StatusBadge status={order.status} />
         <StatusBadge status={order.payment_status} />
       </div>
@@ -66,7 +72,7 @@ export default function OrderDetailPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-sm font-semibold text-forest-deep mb-4">Status timeline</h2>
           <div className="flex gap-0">
-            {STATUS_FLOW.map((s, i) => {
+            {statusFlow.map((s, i) => {
               const done = i <= currentIdx;
               const active = i === currentIdx;
               return (
@@ -89,7 +95,7 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className={`grid gap-4 ${isPickup ? "sm:grid-cols-1" : "sm:grid-cols-2"}`}>
         {/* Status update */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h2 className="text-sm font-semibold text-forest-deep">Update status</h2>
@@ -99,7 +105,7 @@ export default function OrderDetailPage() {
             disabled={statusMutation.isPending}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
-            {[...STATUS_FLOW, "cancelled"].map((s) => (
+            {[...statusFlow, "cancelled"].map((s) => (
               <option key={s} value={s} disabled={s === "delivered" && !canMarkDelivered}>
                 {STATUS_LABELS[s] ?? s}
               </option>
@@ -109,7 +115,7 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Rider assign */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+        {!isPickup && <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
           <h2 className="text-sm font-semibold text-forest-deep">Assign rider</h2>
           <select
             value={order.rider_id ?? ""}
@@ -123,7 +129,7 @@ export default function OrderDetailPage() {
             ))}
           </select>
           {riderMutation.isError && <p className="text-xs text-spice">Failed to assign rider.</p>}
-        </div>
+        </div>}
       </div>
 
       {/* Delivery address */}

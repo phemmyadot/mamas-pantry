@@ -3,9 +3,11 @@
 import { use, useState } from "react";
 import { apiFetch, type Order, ApiError } from "@/lib/api";
 
-const STATUS_STEPS = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"] as const;
+const DELIVERY_STATUS_STEPS = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"] as const;
+const PICKUP_STATUS_STEPS = ["pending", "confirmed", "packed", "ready_for_pickup", "delivered"] as const;
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending", confirmed: "Confirmed", packed: "Packed",
+  ready_for_pickup: "Ready for pickup",
   out_for_delivery: "Out for delivery", delivered: "Delivered", cancelled: "Cancelled",
 };
 
@@ -34,7 +36,8 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
     setLoading(false);
   }
 
-  const stepIndex = order ? STATUS_STEPS.indexOf(order.status as typeof STATUS_STEPS[number]) : -1;
+  const statusSteps = order?.delivery_address?.fulfillment_type === "pickup" ? PICKUP_STATUS_STEPS : DELIVERY_STATUS_STEPS;
+  const stepIndex = order ? statusSteps.indexOf(order.status as typeof statusSteps[number]) : -1;
 
   return (
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-10">
@@ -91,7 +94,7 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
           {order.status !== "cancelled" && (
             <div className="bg-cream rounded-2xl border border-cream-dark p-5">
               <div className="flex justify-between">
-                {STATUS_STEPS.map((step, i) => {
+                {statusSteps.map((step, i) => {
                   const done = i <= stepIndex;
                   const active = i === stepIndex;
                   return (
