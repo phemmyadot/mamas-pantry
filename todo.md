@@ -222,7 +222,9 @@ BUGS Phase 2
 
 
 Features
-[ ] allow admin create staff account for users and manage staffs
+[x] allow admin create staff account for users and manage staffs/rider. staff can see orders, inventory (view only), riders(view only), in store purchase(make basic for now). rider only see assigned
+[ ] in store purchase to support bar code scaning (products to store sku)
+[ ] 
 [x] send order status change email to customer
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
 [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info

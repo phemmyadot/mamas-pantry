@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query, status
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,6 +16,16 @@ from app.schemas.user import UserResponse
 from app.services.admin_service import AdminService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
+
+ACCESS_ROLE_NAMES = {"staff", "rider"}
+
+
+class CreateAccessUserRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    username: str | None = Field(default=None, min_length=3, max_length=50)
+    role: str
 
 
 @router.get(
@@ -31,6 +42,108 @@ async def list_users(
 ):
     service = AdminService(db)
     return await service.list_users(offset=offset, limit=limit)
+
+
+@router.get(
+    "/staff-users",
+    response_model=list[UserResponse],
+    summary="List staff/rider users",
+)
+async def list_staff_users(
+    role: str | None = Query(default=None, description="Optional role filter: staff or rider"),
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = AdminService(db)
+    if role:
+        role_name = role.strip().lower()
+        if role_name not in ACCESS_ROLE_NAMES:
+            from app.core.exceptions import ValidationError
+
+            raise ValidationError("Role must be either 'staff' or 'rider'")
+        return await service.list_users_by_role_names([role_name])
+    return await service.list_users_by_role_names(sorted(ACCESS_ROLE_NAMES))
+
+
+@router.post(
+    "/staff-users",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create staff/rider account",
+)
+async def create_staff_user(
+    body: CreateAccessUserRequest,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    role_name = body.role.strip().lower()
+    if role_name not in ACCESS_ROLE_NAMES:
+        from app.core.exceptions import ValidationError
+
+        raise ValidationError("Role must be either 'staff' or 'rider'")
+    service = AdminService(db)
+    user = await service.create_user_with_role(
+        email=body.email,
+        password=body.password,
+        username=body.username,
+        role_name=role_name,
+    )
+    emit_audit_log(
+        AuditEventType.ROLE_ASSIGNED,
+        user_id=user.id,
+        metadata={"role": role_name, "created_by": str(_current_user.id)},
+    )
+    return user
+
+
+@router.post(
+    "/users/{user_id}/access-role",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Assign staff/rider role (admin)",
+)
+async def assign_access_role(
+    user_id: uuid.UUID,
+    role: str = Query(..., description="staff or rider"),
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    role_name = role.strip().lower()
+    if role_name not in ACCESS_ROLE_NAMES:
+        from app.core.exceptions import ValidationError
+
+        raise ValidationError("Role must be either 'staff' or 'rider'")
+    service = AdminService(db)
+    await service.assign_named_role(user_id=user_id, role_name=role_name)
+    emit_audit_log(
+        AuditEventType.ROLE_ASSIGNED,
+        user_id=user_id,
+        metadata={"role": role_name, "assigned_by": str(_current_user.id)},
+    )
+
+
+@router.delete(
+    "/users/{user_id}/access-role",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remove staff/rider role (admin)",
+)
+async def remove_access_role(
+    user_id: uuid.UUID,
+    role: str = Query(..., description="staff or rider"),
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    role_name = role.strip().lower()
+    if role_name not in ACCESS_ROLE_NAMES:
+        from app.core.exceptions import ValidationError
+
+        raise ValidationError("Role must be either 'staff' or 'rider'")
+    service = AdminService(db)
+    await service.remove_named_role(user_id=user_id, role_name=role_name)
+    emit_audit_log(
+        AuditEventType.ROLE_REMOVED,
+        user_id=user_id,
+        metadata={"role": role_name, "removed_by": str(_current_user.id)},
+    )
 
 
 @router.post(

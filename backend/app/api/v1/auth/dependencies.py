@@ -91,6 +91,25 @@ def require_role(role_name: str):
     return _check
 
 
+def require_any_role(*role_names: str):
+    """Dependency factory: raises 403 if user lacks any of the supplied roles."""
+    allowed = set(role_names)
+
+    async def _check(current_user: User = Depends(get_current_user)) -> User:
+        if not settings.ENABLE_RBAC:
+            return current_user
+        if not hasattr(current_user, "roles"):
+            raise PermissionError(f"One of roles {sorted(allowed)} required")
+        user_role_names = {r.name for r in current_user.roles}
+        if "super_admin" in user_role_names:
+            return current_user
+        if user_role_names.isdisjoint(allowed):
+            raise PermissionError(f"One of roles {sorted(allowed)} required")
+        return current_user
+
+    return _check
+
+
 def require_permission(permission: str):
     """Dependency factory: raises 403 if user lacks the specified permission (Spec §4 Complex)."""
     async def _check(current_user: User = Depends(get_current_user)) -> User:

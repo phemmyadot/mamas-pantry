@@ -88,7 +88,11 @@ class AuthService:
             raise AuthError("Account is deactivated")
 
         if settings.ENABLE_EMAIL_VERIFICATION and not user.is_verified:
-            raise AuthError("email_not_verified", status_code=403)
+            role_names = {r.name for r in getattr(user, "roles", [])}
+            bypass_roles = {"admin", "super_admin", "staff", "rider"}
+            can_bypass_email_verification = bool(role_names & bypass_roles)
+            if not can_bypass_email_verification:
+                raise AuthError("email_not_verified", status_code=403)
 
         _clear_failed_attempts(email)
 

@@ -6,6 +6,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isStaff: boolean;
+  isRider: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
@@ -41,12 +42,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const roles = user?.roles?.map((r) => r.name) ?? [];
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
   const isStaff = isAdmin || roles.includes("staff");
+  const isRider = roles.includes("rider");
 
   return (
     <AuthContext.Provider value={{
       user, loading,
       isAuthenticated: !!user,
       isAdmin, isStaff,
+      isRider,
       login, logout,
     }}>
       {children}

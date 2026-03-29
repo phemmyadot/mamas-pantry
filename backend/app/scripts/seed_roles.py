@@ -28,6 +28,23 @@ DEFAULT_ROLES = [
         ],
     },
     {
+        "name": "staff",
+        "description": "Store staff access",
+        "permissions": [
+            "orders:read",
+            "inventory:read",
+            "riders:read",
+            "instore:create",
+        ],
+    },
+    {
+        "name": "rider",
+        "description": "Dispatch rider access",
+        "permissions": [
+            "orders:assigned:read",
+        ],
+    },
+    {
         "name": "user",
         "description": "Standard user access",
         "permissions": [

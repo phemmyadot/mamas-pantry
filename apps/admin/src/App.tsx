@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { AuthProvider } from "@/contexts/auth-context";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleRoute from "@/components/RoleRoute";
 import AdminLayout from "@/components/AdminLayout";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -11,10 +12,19 @@ import ProductFormPage from "@/pages/ProductFormPage";
 import ShipmentsPage from "@/pages/ShipmentsPage";
 import CustomersPage from "@/pages/CustomersPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
-import RidersPage from "@/pages/RidersPage";
 import PromosPage from "@/pages/PromosPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import DeliveryFeesPage from "@/pages/DeliveryFeesPage";
+import StaffManagementPage from "@/pages/StaffManagementPage";
+import InStorePurchasePage from "@/pages/InStorePurchasePage";
+import { useAuth } from "@/contexts/auth-context";
+
+function HomeRedirect() {
+  const { isAdmin, isRider, isStaff } = useAuth();
+  if (isAdmin) return <Navigate to="/dashboard" replace />;
+  if (isRider || isStaff) return <Navigate to="/orders" replace />;
+  return <Navigate to="/dashboard" replace />;
+}
 
 export default function App() {
   return (
@@ -30,26 +40,27 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
+            <Route index element={<HomeRedirect />} />
+            <Route path="dashboard" element={<RoleRoute allow={["admin"]}><DashboardPage /></RoleRoute>} />
 
-            <Route path="orders" element={<OrdersPage />} />
-            <Route path="orders/:id" element={<OrderDetailPage />} />
+            <Route path="orders" element={<RoleRoute allow={["admin", "staff", "rider"]}><OrdersPage /></RoleRoute>} />
+            <Route path="orders/:id" element={<RoleRoute allow={["admin", "staff", "rider"]}><OrderDetailPage /></RoleRoute>} />
 
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="inventory/new" element={<ProductFormPage />} />
-            <Route path="inventory/:id" element={<ProductFormPage />} />
+            <Route path="inventory" element={<RoleRoute allow={["admin", "staff"]}><InventoryPage /></RoleRoute>} />
+            <Route path="inventory/new" element={<RoleRoute allow={["admin"]}><ProductFormPage /></RoleRoute>} />
+            <Route path="inventory/:id" element={<RoleRoute allow={["admin"]}><ProductFormPage /></RoleRoute>} />
+            <Route path="in-store" element={<RoleRoute allow={["admin", "staff"]}><InStorePurchasePage /></RoleRoute>} />
 
-            <Route path="shipments" element={<ShipmentsPage />} />
-            <Route path="customers" element={<CustomersPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="riders" element={<RidersPage />} />
-            <Route path="promos" element={<PromosPage />} />
-            <Route path="delivery-fees" element={<DeliveryFeesPage />} />
-            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="shipments" element={<RoleRoute allow={["admin"]}><ShipmentsPage /></RoleRoute>} />
+            <Route path="customers" element={<RoleRoute allow={["admin"]}><CustomersPage /></RoleRoute>} />
+            <Route path="analytics" element={<RoleRoute allow={["admin"]}><AnalyticsPage /></RoleRoute>} />
+            <Route path="staff-access" element={<RoleRoute allow={["admin"]}><StaffManagementPage /></RoleRoute>} />
+            <Route path="promos" element={<RoleRoute allow={["admin"]}><PromosPage /></RoleRoute>} />
+            <Route path="delivery-fees" element={<RoleRoute allow={["admin"]}><DeliveryFeesPage /></RoleRoute>} />
+            <Route path="notifications" element={<RoleRoute allow={["admin"]}><NotificationsPage /></RoleRoute>} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

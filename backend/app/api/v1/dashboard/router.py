@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.auth.dependencies import require_role
+from app.api.v1.auth.dependencies import require_any_role, require_role
 from app.db.base import get_db
 from app.db.models.delivery_zone_fee import DeliveryZoneFee
 from app.db.models.order import Order, OrderStatus, PaymentStatus
@@ -331,7 +331,7 @@ async def create_promo_code(
     summary="List riders (admin)",
 )
 async def list_riders(
-    _current_user: User = Depends(require_role("admin")),
+    _current_user: User = Depends(require_any_role("admin", "staff")),
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(

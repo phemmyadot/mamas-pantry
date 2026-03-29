@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.auth.dependencies import get_current_user, require_role
+from app.api.v1.auth.dependencies import get_current_user, require_any_role, require_role
 from app.db.base import get_db
 from app.db.models.product import ProductCategory
 from app.db.models.user import User
@@ -88,7 +88,7 @@ async def admin_list_products(
     search: str | None = Query(default=None, max_length=100),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=200),
-    _current_user: User = Depends(require_role("admin")),
+    _current_user: User = Depends(require_any_role("admin", "staff")),
     db: AsyncSession = Depends(get_db),
 ):
     service = ProductService(db)
@@ -106,7 +106,7 @@ async def admin_list_products(
 )
 async def low_stock(
     threshold: int = Query(default=5, ge=0),
-    _current_user: User = Depends(require_role("admin")),
+    _current_user: User = Depends(require_any_role("admin", "staff")),
     db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy import select

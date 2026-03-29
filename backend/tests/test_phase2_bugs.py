@@ -537,3 +537,51 @@ async def test_order_status_change_sends_customer_email(client, db_session, monk
     assert sent_payload["order_id"] == order_id
     assert sent_payload["status"] == "packed"
     assert sent_payload["customer_name"] == "Email Test Customer"
+
+
+@pytest.mark.asyncio
+async def test_admin_can_create_staff_account(client, db_session):
+    admin = await create_test_user(client, email="admin10@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    admin_tokens = await login_user(client, email="admin10@example.com")
+
+    resp = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "newstaff@example.com",
+            "password": "StrongPass123",
+            "username": "newstaff",
+            "role": "staff",
+        },
+    )
+    assert resp.status_code == 201, resp.text
+    roles = [r["name"] for r in resp.json().get("roles", [])]
+    assert "staff" in roles
+
+
+@pytest.mark.asyncio
+async def test_unverified_staff_can_login(client, db_session):
+    admin = await create_test_user(client, email="admin12@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    admin_tokens = await login_user(client, email="admin12@example.com")
+
+    create_resp = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "staff-login@example.com",
+            "password": "StrongPass123",
+            "username": "stafflogin",
+            "role": "staff",
+        },
+    )
+    assert create_resp.status_code == 201, create_resp.text
+
+    login_resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "staff-login@example.com", "password": "StrongPass123"},
+    )
+    assert login_resp.status_code == 200, login_resp.text
+    data = login_resp.json()
+    assert "access_token" in data and "refresh_token" in data

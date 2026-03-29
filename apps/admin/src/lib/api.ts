@@ -108,6 +108,36 @@ export const auth = {
   logout: () => apiFetch<void>("/auth/logout", { method: "POST" }).catch(() => {}),
 };
 
+export interface AdminUser {
+  id: string;
+  email: string;
+  username: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+  roles?: { name: string }[];
+}
+
+export interface AccessUserCreate {
+  email: string;
+  password: string;
+  username?: string | null;
+  role: "staff" | "rider";
+}
+
+export const adminUsers = {
+  list: () => apiFetch<AdminUser[]>("/admin/users"),
+  listStaffUsers: (role?: "staff" | "rider") =>
+    apiFetch<AdminUser[]>(`/admin/staff-users${role ? `?role=${role}` : ""}`),
+  createStaffUser: (data: AccessUserCreate) =>
+    apiFetch<AdminUser>("/admin/staff-users", { method: "POST", body: JSON.stringify(data) }),
+  assignAccessRole: (userId: string, role: "staff" | "rider") =>
+    apiFetch<void>(`/admin/users/${userId}/access-role?role=${role}`, { method: "POST" }),
+  removeAccessRole: (userId: string, role: "staff" | "rider") =>
+    apiFetch<void>(`/admin/users/${userId}/access-role?role=${role}`, { method: "DELETE" }),
+};
+
 // ── dashboard ──────────────────────────────────────────────────────────────────
 
 export interface DailyRevenue { date: string; revenue_ngn: number; }

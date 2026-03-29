@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { products } from "@/lib/api";
+import { useAuth } from "@/contexts/auth-context";
 import { formatNGN } from "@/lib/utils";
 import Spinner from "@/components/Spinner";
 
@@ -12,6 +13,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function InventoryPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const { isAdmin } = useAuth();
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -36,12 +38,14 @@ export default function InventoryPage() {
     <div className="max-w-5xl space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-forest-deep">Inventory</h1>
-        <Link
-          to="/inventory/new"
-          className="bg-forest-deep text-cream text-sm font-medium px-4 py-2 rounded-lg hover:bg-forest-mid transition-colors"
-        >
-          + Add product
-        </Link>
+        {isAdmin && (
+          <Link
+            to="/inventory/new"
+            className="bg-forest-deep text-cream text-sm font-medium px-4 py-2 rounded-lg hover:bg-forest-mid transition-colors"
+          >
+            + Add product
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -98,15 +102,23 @@ export default function InventoryPage() {
                       {p.stock_qty}
                     </td>
                     <td className="px-5 py-3">
-                      <button
-                        onClick={() => toggleMutation.mutate({ id: p.id, is_active: !p.is_active })}
-                        className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.is_active ? "bg-forest-light" : "bg-gray-200"}`}
-                      >
-                        <span className={`inline-block w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform mt-0.5 ${p.is_active ? "translate-x-4" : "translate-x-0.5"}`} />
-                      </button>
+                      {isAdmin ? (
+                        <button
+                          onClick={() => toggleMutation.mutate({ id: p.id, is_active: !p.is_active })}
+                          className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${p.is_active ? "bg-forest-light" : "bg-gray-200"}`}
+                        >
+                          <span className={`inline-block w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform mt-0.5 ${p.is_active ? "translate-x-4" : "translate-x-0.5"}`} />
+                        </button>
+                      ) : (
+                        <span className="text-xs text-muted">{p.is_active ? "Yes" : "No"}</span>
+                      )}
                     </td>
                     <td className="px-5 py-3">
-                      <Link to={`/inventory/${p.id}`} className="text-xs text-forest-light hover:underline">Edit</Link>
+                      {isAdmin ? (
+                        <Link to={`/inventory/${p.id}`} className="text-xs text-forest-light hover:underline">Edit</Link>
+                      ) : (
+                        <span className="text-xs text-muted">View only</span>
+                      )}
                     </td>
                   </tr>
                 ))}

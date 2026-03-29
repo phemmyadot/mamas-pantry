@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { orders, riders, type OrderStatus } from "@/lib/api";
+import { useAuth } from "@/contexts/auth-context";
 import { formatNGN, formatDateTime } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
 import Spinner from "@/components/Spinner";
@@ -17,6 +18,7 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { isAdmin } = useAuth();
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
   const { data: order, isLoading } = useQuery({
@@ -103,6 +105,7 @@ export default function OrderDetailPage() {
         </div>
       )}
 
+      {isAdmin && (
       <div className={`grid gap-4 ${isPickup ? "sm:grid-cols-1" : "sm:grid-cols-2"}`}>
         {/* Status update */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
@@ -150,6 +153,7 @@ export default function OrderDetailPage() {
           {riderMutation.isError && <p className="text-xs text-spice">Failed to assign rider.</p>}
         </div>}
       </div>
+      )}
 
       {/* Delivery address */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">

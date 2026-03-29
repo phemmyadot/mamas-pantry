@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.auth.dependencies import get_current_user, require_role
+from app.api.v1.auth.dependencies import get_current_user, require_any_role, require_role
 from app.db.base import get_db
 from app.db.models.order import OrderStatus
 from app.db.models.user import User
@@ -120,7 +120,7 @@ async def list_all_orders(
     order_status: OrderStatus | None = Query(default=None, alias="status"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
-    _current_user: User = Depends(require_role("admin")),
+    _current_user: User = Depends(require_any_role("admin", "staff")),
     db: AsyncSession = Depends(get_db),
 ):
     service = OrderService(db)
@@ -135,7 +135,7 @@ async def list_all_orders(
 )
 async def admin_get_order(
     order_id: uuid.UUID,
-    _current_user: User = Depends(require_role("admin")),
+    _current_user: User = Depends(require_any_role("admin", "staff")),
     db: AsyncSession = Depends(get_db),
 ):
     service = OrderService(db)
