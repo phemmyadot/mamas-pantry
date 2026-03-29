@@ -14,6 +14,7 @@ import AnalyticsPage from "@/pages/AnalyticsPage";
 import RidersPage from "@/pages/RidersPage";
 import PromosPage from "@/pages/PromosPage";
 import NotificationsPage from "@/pages/NotificationsPage";
+import DeliveryFeesPage from "@/pages/DeliveryFeesPage";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="riders" element={<RidersPage />} />
             <Route path="promos" element={<PromosPage />} />
+            <Route path="delivery-fees" element={<DeliveryFeesPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
           </Route>
 

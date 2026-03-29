@@ -227,8 +227,8 @@ Features
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
 [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
 [x] authntication state is not properly done, sometimes it shows signin and then username on refresh
-[ ] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
-[ ] set delivery fee in admin. different fee for each locations available
+[x] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
+[x] set delivery fee in admin. different fee for each locations available
 
 Future
 [ ] in store interface - STAFF

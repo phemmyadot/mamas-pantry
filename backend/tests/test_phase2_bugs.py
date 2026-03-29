@@ -422,3 +422,54 @@ async def test_pickup_orders_use_ready_for_pickup_and_disallow_rider_assignment(
         json={"rider_id": rider_resp.json()["id"]},
     )
     assert assign_resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_admin_can_set_delivery_fee_by_area_and_order_uses_it(client, db_session):
+    admin = await create_test_user(client, email="admin8@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    customer = await create_test_user(client, email="customer8@example.com")
+
+    admin_tokens = await login_user(client, email="admin8@example.com")
+    customer_tokens = await login_user(client, email="customer8@example.com")
+
+    fee_resp = await client.put(
+        "/api/v1/admin/delivery-fees",
+        headers=auth_header(admin_tokens["access_token"]),
+        json=[{"area": "Ketu", "fee_ngn": 1200}],
+    )
+    assert fee_resp.status_code == 200, fee_resp.text
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Area Fee Product",
+            "slug": "area-fee-product",
+            "description": "Area fee test product",
+            "price_ngn": 2000,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_resp.json()["id"], "qty": 1}],
+            "delivery_address": {
+                "name": "Area Fee Customer",
+                "phone": "08037771234",
+                "address": "12 Main Street, Ketu",
+                "area": "Ketu",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    data = order_resp.json()
+    assert Decimal(str(data["delivery_fee_ngn"])) == Decimal("1200")

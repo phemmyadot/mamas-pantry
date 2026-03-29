@@ -314,6 +314,14 @@ export interface AddressCreate {
   is_default?: boolean;
 }
 
+export interface DeliveryZone {
+  id: string;
+  area: string;
+  fee_ngn: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const addresses = {
   list: () => apiFetch<Address[]>("/api/v1/addresses"),
   create: (data: AddressCreate) =>
@@ -321,6 +329,10 @@ export const addresses = {
   update: (id: string, data: Partial<AddressCreate>) =>
     apiFetch<Address>(`/api/v1/addresses/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   delete: (id: string) => apiFetch<void>(`/api/v1/addresses/${id}`, { method: "DELETE" }),
+};
+
+export const deliveryZones = {
+  list: () => apiFetch<DeliveryZone[]>("/api/v1/delivery-zones"),
 };
 
 // ---------------------------------------------------------------------------

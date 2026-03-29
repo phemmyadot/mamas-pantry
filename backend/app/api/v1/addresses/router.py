@@ -7,10 +7,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.v1.auth.dependencies import get_current_user
 from app.db.base import get_db
 from app.db.models.address import Address
+from app.db.models.delivery_zone_fee import DeliveryZoneFee
 from app.db.models.user import User
+from app.schemas.delivery_zone import DeliveryZoneFeeResponse
 from app.schemas.address import AddressCreate, AddressResponse, AddressUpdate
 
 router = APIRouter(tags=["addresses"])
+
+
+@router.get(
+    "/delivery-zones",
+    response_model=list[DeliveryZoneFeeResponse],
+    summary="Delivery zones and fees",
+)
+async def delivery_zones(
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(DeliveryZoneFee).order_by(DeliveryZoneFee.area.asc()))
+    return [
+        DeliveryZoneFeeResponse(
+            id=str(z.id),
+            area=z.area,
+            fee_ngn=float(z.fee_ngn),
+            created_at=z.created_at,
+            updated_at=z.updated_at,
+        )
+        for z in result.scalars().all()
+    ]
 
 
 @router.get(

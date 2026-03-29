@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
   { to: "/customers", label: "Customers", icon: "👤", adminOnly: true },
   { to: "/riders",    label: "Riders",    icon: "🛵" },
   { to: "/promos",        label: "Promos",        icon: "🏷" },
+  { to: "/delivery-fees", label: "Delivery fees", icon: "🚚" },
   { to: "/analytics",    label: "Analytics",    icon: "📊", adminOnly: true },
   { to: "/notifications", label: "Notifications", icon: "🔔", adminOnly: true },
 ];
@@ -127,3 +128,4 @@ export default function AdminLayout() {
     </div>
   );
 }
+

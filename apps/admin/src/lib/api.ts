@@ -256,3 +256,17 @@ export const promoCodes = {
   create: (data: PromoCodeCreate) =>
     apiFetch<PromoCode>("/admin/promo-codes", { method: "POST", body: JSON.stringify(data) }),
 };
+
+// ── delivery fees ─────────────────────────────────────────────────────────────
+
+export interface DeliveryFee {
+  id: string;
+  area: string;
+  fee_ngn: number;
+}
+
+export const deliveryFees = {
+  list: () => apiFetch<DeliveryFee[]>("/admin/delivery-fees"),
+  save: (rows: { area: string; fee_ngn: number }[]) =>
+    apiFetch<DeliveryFee[]>("/admin/delivery-fees", { method: "PUT", body: JSON.stringify(rows) }),
+};

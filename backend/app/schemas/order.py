@@ -17,6 +17,7 @@ class DeliveryAddress(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     phone: str = Field(..., min_length=7, max_length=20)
     address: str = Field(..., min_length=5, max_length=300)
+    area: str | None = Field(None, min_length=1, max_length=100)
     city: str = Field(..., min_length=1, max_length=100)
 
     @field_validator("phone")

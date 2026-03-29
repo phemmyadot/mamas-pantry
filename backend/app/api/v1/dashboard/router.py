@@ -8,12 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.auth.dependencies import require_role
 from app.db.base import get_db
+from app.db.models.delivery_zone_fee import DeliveryZoneFee
 from app.db.models.order import Order, OrderStatus, PaymentStatus
 from app.db.models.product import Product
 from app.db.models.promo_code import PromoCode
 from app.db.models.rider import Rider
 from app.db.models.role import Role, UserRole
 from app.db.models.user import User
+from app.schemas.delivery_zone import DeliveryZoneFeeInput, DeliveryZoneFeeResponse
 from app.schemas.promo_code import PromoCodeCreate, PromoCodeResponse
 from app.schemas.rider import RiderCreate, RiderResponse, RiderUpdate
 
@@ -408,3 +410,77 @@ async def update_rider_location(
     await db.flush()
     await db.refresh(rider)
     return rider
+
+
+@router.get(
+    "/admin/delivery-fees",
+    response_model=list[DeliveryZoneFeeResponse],
+    summary="List delivery fees by area (admin)",
+)
+async def list_delivery_fees(
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(DeliveryZoneFee).order_by(DeliveryZoneFee.area.asc()))
+    return [
+        DeliveryZoneFeeResponse(
+            id=str(f.id),
+            area=f.area,
+            fee_ngn=float(f.fee_ngn),
+            created_at=f.created_at,
+            updated_at=f.updated_at,
+        )
+        for f in result.scalars().all()
+    ]
+
+
+@router.put(
+    "/admin/delivery-fees",
+    response_model=list[DeliveryZoneFeeResponse],
+    summary="Set delivery fees by area (admin)",
+)
+async def upsert_delivery_fees(
+    body: list[DeliveryZoneFeeInput],
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    from fastapi import HTTPException
+
+    if not body:
+        return []
+
+    incoming_areas: set[str] = set()
+
+    for item in body:
+        area = item.area.strip()
+        if not area:
+            raise HTTPException(status_code=422, detail="Area is required")
+        if item.fee_ngn < 0:
+            raise HTTPException(status_code=422, detail=f"Fee cannot be negative for area '{area}'")
+        incoming_areas.add(area)
+
+        existing = await db.execute(select(DeliveryZoneFee).where(DeliveryZoneFee.area == area))
+        fee = existing.scalar_one_or_none()
+        if fee:
+            fee.fee_ngn = item.fee_ngn
+        else:
+            db.add(DeliveryZoneFee(area=area, fee_ngn=item.fee_ngn))
+
+    if incoming_areas:
+        existing_rows = await db.execute(select(DeliveryZoneFee))
+        for zone in existing_rows.scalars().all():
+            if zone.area not in incoming_areas:
+                await db.delete(zone)
+
+    await db.flush()
+    result = await db.execute(select(DeliveryZoneFee).order_by(DeliveryZoneFee.area.asc()))
+    return [
+        DeliveryZoneFeeResponse(
+            id=str(f.id),
+            area=f.area,
+            fee_ngn=float(f.fee_ngn),
+            created_at=f.created_at,
+            updated_at=f.updated_at,
+        )
+        for f in result.scalars().all()
+    ]

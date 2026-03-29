@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { addresses, type Address, type AddressCreate, ApiError } from "@/lib/api";
+import { addresses, deliveryZones, type Address, type AddressCreate, ApiError } from "@/lib/api";
 
-const AREA_OPTIONS = ["Magodo Phase 1", "Magodo Phase 2", "Alapere", "Ketu", "Ojota", "Other"];
+const DEFAULT_AREA_OPTIONS = ["Magodo Phase 1", "Magodo Phase 2", "Alapere", "Ketu", "Ojota"];
 
 export default function AddressesPage() {
   const [list, setList] = useState<Address[]>([]);
@@ -12,10 +12,21 @@ export default function AddressesPage() {
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [areaOptions, setAreaOptions] = useState<string[]>(DEFAULT_AREA_OPTIONS);
   const [form, setForm] = useState<AddressCreate>({ label: "Home", street: "", area: "Magodo Phase 1", city: "Lagos", is_default: false });
 
   useEffect(() => {
     addresses.list().then(setList).finally(() => setLoading(false));
+    deliveryZones
+      .list()
+      .then((zones) => {
+        const options = zones.map((z) => z.area);
+        if (options.length > 0) {
+          setAreaOptions(options);
+          setForm((f) => ({ ...f, area: options.includes(f.area) ? f.area : options[0] }));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   async function handleSave(e: React.FormEvent) {
@@ -26,7 +37,7 @@ export default function AddressesPage() {
       const created = await addresses.create(form);
       setList((prev) => [...prev, created]);
       setShowForm(false);
-      setForm({ label: "Home", street: "", area: "Magodo Phase 1", city: "Lagos", is_default: false });
+      setForm({ label: "Home", street: "", area: areaOptions[0] ?? "Magodo Phase 1", city: "Lagos", is_default: false });
     } catch (err) {
       setError(err instanceof ApiError ? err.detail : "Failed to save address.");
     }
@@ -101,7 +112,7 @@ export default function AddressesPage() {
           <div>
             <label className="block font-ui text-xs font-medium text-muted mb-1">Area</label>
             <select value={form.area} onChange={(e) => setForm((f) => ({ ...f, area: e.target.value }))} className="w-full px-3 py-2.5 rounded-lg border border-cream-dark bg-cream font-ui text-sm focus:outline-none focus:ring-2 focus:ring-forest-light">
-              {AREA_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+              {areaOptions.map((o) => <option key={o}>{o}</option>)}
             </select>
           </div>
           <label className="flex items-center gap-2 cursor-pointer">

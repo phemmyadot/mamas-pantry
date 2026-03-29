@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
-import { orders, addresses, type Address, type DeliveryAddress, type FulfillmentType, ApiError } from "@/lib/api";
+import { orders, addresses, deliveryZones, type Address, type DeliveryAddress, type FulfillmentType, ApiError } from "@/lib/api";
 import { track, Events } from "@/lib/analytics";
 
 declare global {
@@ -17,14 +17,7 @@ declare global {
 
 const DELIVERY_FEE = 500;
 
-const AREA_OPTIONS = [
-  "Magodo Phase 1",
-  "Magodo Phase 2",
-  "Alapere",
-  "Ketu",
-  "Ojota",
-  "Other",
-];
+const DEFAULT_AREA_OPTIONS = ["Magodo Phase 1", "Magodo Phase 2", "Alapere", "Ketu", "Ojota"];
 
 /** Returns Lagos current hour (UTC+1) */
 function lagosHour() {
@@ -90,6 +83,7 @@ export default function CheckoutPage({
 
   const [slot, setSlot] = useState<string>("");
   const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>("delivery");
+  const [areaOptions, setAreaOptions] = useState<string[]>(DEFAULT_AREA_OPTIONS);
   const [promoCode, setPromoCode] = useState(initialPromo);
   const [discount, setDiscount] = useState(0);
   const [promoError, setPromoError] = useState("");
@@ -108,6 +102,19 @@ export default function CheckoutPage({
       if (def) setSelectedAddressId(def.id);
     }).catch(() => { });
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    deliveryZones
+      .list()
+      .then((zones) => {
+        const options = zones.map((z) => z.area);
+        if (options.length > 0) {
+          setAreaOptions(options);
+          setAddressForm((f) => ({ ...f, area: options.includes(f.area) ? f.area : options[0] }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Inject Paystack script
   useEffect(() => {
@@ -138,6 +145,7 @@ function buildDeliveryAddress(): DeliveryAddress {
         name: (user?.email?.split("@")[0] ?? addressForm.name) || "Pickup Customer",
         phone: addressForm.phone,
         address: "Mama's Pantry, Magodo Phase 1",
+        area: "Magodo Phase 1",
         city: "Lagos",
         fulfillment_type: "pickup",
       };
@@ -149,6 +157,7 @@ function buildDeliveryAddress(): DeliveryAddress {
         name: user?.email?.split("@")[0] ?? "",
         phone: addressForm.phone, // still need phone
         address: `${a.street}, ${a.area}`,
+        area: a.area,
         city: a.city,
         fulfillment_type: fulfillmentType,
       };
@@ -157,6 +166,7 @@ function buildDeliveryAddress(): DeliveryAddress {
       name: addressForm.name,
       phone: addressForm.phone,
       address: `${addressForm.address}, ${addressForm.area}`,
+      area: addressForm.area,
       city: addressForm.city,
       fulfillment_type: fulfillmentType,
     };
@@ -423,7 +433,7 @@ function handleStep1Next() {
                         onChange={(e) => setAddressForm((f) => ({ ...f, area: e.target.value }))}
                         className="w-full px-3 py-2.5 rounded-lg border border-cream-dark bg-cream font-ui text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
                       >
-                        {AREA_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                        {areaOptions.map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </div>
                     <div>

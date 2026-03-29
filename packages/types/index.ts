@@ -89,6 +89,7 @@ export interface DeliveryAddress {
   name: string;
   phone: string;
   address: string;
+  area?: string;
   city: string;
   fulfillment_type?: FulfillmentType;
 }

@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
+from app.db.models.delivery_zone_fee import DeliveryZoneFee
 from app.db.models.order import Order, OrderItem, OrderStatus, PaymentStatus
 from app.db.models.product import Product
 from app.db.models.promo_code import PromoCode, DiscountType
@@ -30,6 +31,20 @@ class OrderService:
     @staticmethod
     def _is_pickup(order: Order) -> bool:
         return (order.delivery_address or {}).get("fulfillment_type") == "pickup"
+
+    @staticmethod
+    def _normalize_area(area: str) -> str:
+        return " ".join((area or "").strip().lower().split())
+
+    async def _resolve_delivery_fee(self, area: str | None) -> Decimal:
+        if not area:
+            return DELIVERY_FEE_NGN
+        normalized = self._normalize_area(area)
+        result = await self.db.execute(select(DeliveryZoneFee))
+        for zone in result.scalars().all():
+            if self._normalize_area(zone.area) == normalized:
+                return Decimal(str(zone.fee_ngn))
+        return DELIVERY_FEE_NGN
 
     async def _apply_promo(self, code: str, subtotal: Decimal) -> tuple[PromoCode, Decimal]:
         from datetime import datetime, timezone
@@ -78,7 +93,12 @@ class OrderService:
             ))
 
         is_pickup = data.fulfillment_type.value == "pickup"
-        delivery_fee = Decimal("0") if is_pickup else DELIVERY_FEE_NGN
+        area = data.delivery_address.area
+        if not area and data.delivery_address.address:
+            parts = [p.strip() for p in data.delivery_address.address.split(",") if p.strip()]
+            if len(parts) >= 2:
+                area = parts[-1]
+        delivery_fee = Decimal("0") if is_pickup else await self._resolve_delivery_fee(area)
         discount = Decimal("0")
 
         if data.promo_code:
