@@ -238,10 +238,12 @@
 - [x] average daily orders for staff 
 - [x] average daily revenue for staff
 
-## Rider app - RIDER
+## Rider app - React Native
 - [ ] see list of assigned deliveries
 - [ ] mark as delivered only
 - [ ] navigation to address
+- [ ] customer security
 
 
-## Cutomer mobile
+## Cutomer mobile app - React Native
+- [ ] same features as customer web 
