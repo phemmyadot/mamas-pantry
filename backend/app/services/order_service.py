@@ -14,7 +14,7 @@ from app.db.models.order import Order, OrderItem, OrderStatus, PaymentStatus
 from app.db.models.product import Product
 from app.db.models.promo_code import PromoCode, DiscountType
 from app.db.models.user import User
-from app.schemas.order import OrderCreate, OrderStatusUpdate
+from app.schemas.order import InStoreOrderCreate, OrderCreate, OrderStatusUpdate
 
 
 # ₦500 flat delivery fee — adjust per zone if needed
@@ -118,6 +118,61 @@ class OrderService:
             delivery_address={
                 **data.delivery_address.model_dump(),
                 "fulfillment_type": data.fulfillment_type.value,
+            },
+            notes=data.notes,
+            items=items,
+        )
+        self.db.add(order)
+        await self.db.flush()
+        await self.db.refresh(order)
+        return order
+
+    async def create_in_store_order(self, staff_user: User, data: InStoreOrderCreate) -> Order:
+        items: list[OrderItem] = []
+        subtotal = Decimal("0")
+
+        for line in data.items:
+            result = await self.db.execute(
+                select(Product).where(Product.id == line.product_id, Product.is_active.is_(True))
+            )
+            product = result.scalar_one_or_none()
+            if not product:
+                raise NotFoundError(f"Product {line.product_id} not found or unavailable")
+            if product.stock_qty < line.qty:
+                raise ValidationError(f"Insufficient stock for '{product.name}' (available: {product.stock_qty})")
+
+            unit_price = Decimal(str(product.price_ngn))
+            subtotal += unit_price * line.qty
+            product.stock_qty -= line.qty
+
+            items.append(
+                OrderItem(
+                    product_id=line.product_id,
+                    product_name=product.name,
+                    qty=line.qty,
+                    unit_price_ngn=unit_price,
+                )
+            )
+
+        staff_display = (staff_user.username or staff_user.email or "").strip()
+        order = Order(
+            user_id=staff_user.id,
+            status=OrderStatus.delivered,
+            payment_status=PaymentStatus.paid,
+            payment_ref=f"in-store-{uuid.uuid4().hex[:12]}",
+            subtotal_ngn=subtotal,
+            delivery_fee_ngn=Decimal("0"),
+            total_ngn=subtotal,
+            delivery_address={
+                "name": data.customer_name.strip(),
+                "phone": (data.customer_phone or "N/A").strip() or "N/A",
+                "address": "In-store purchase",
+                "city": "In-store",
+                "fulfillment_type": "pickup",
+                "order_channel": "in_store",
+                "attended_by_staff_username": staff_display,
+                "attended_by_staff_id": str(staff_user.id),
+                "payment_method": data.payment_method,
             },
             notes=data.notes,
             items=items,

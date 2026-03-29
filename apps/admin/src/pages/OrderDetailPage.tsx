@@ -57,6 +57,8 @@ export default function OrderDetailPage() {
   if (!order) return <p className="text-sm text-spice py-10">Order not found.</p>;
 
   const isPickup = order.delivery_address?.fulfillment_type === "pickup";
+  const isInStore = order.delivery_address?.order_channel === "in_store";
+  const fulfillmentLabel = isInStore ? "In-store" : isPickup ? "Pickup" : "Delivery";
   const statusFlow = isPickup ? PICKUP_STATUS_FLOW : DELIVERY_STATUS_FLOW;
   const currentIdx = statusFlow.indexOf(order.status as OrderStatus);
   const canAssignRider = !isPickup && order.status === "out_for_delivery";
@@ -70,8 +72,8 @@ export default function OrderDetailPage() {
         <h1 className="text-xl font-bold text-forest-deep">
           Order #{order.id.slice(0, 8).toUpperCase()}
         </h1>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isPickup ? "bg-cyan-100 text-cyan-800" : "bg-slate-100 text-slate-700"}`}>
-          {isPickup ? "Pickup" : "Delivery"}
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isInStore ? "bg-amber-100 text-amber-800" : isPickup ? "bg-cyan-100 text-cyan-800" : "bg-slate-100 text-slate-700"}`}>
+          {fulfillmentLabel}
         </span>
         <StatusBadge status={order.status} />
         <StatusBadge status={order.payment_status} />
@@ -105,7 +107,7 @@ export default function OrderDetailPage() {
         </div>
       )}
 
-      {isAdmin && (
+      {isAdmin && !isInStore && (
       <div className={`grid gap-4 ${isPickup ? "sm:grid-cols-1" : "sm:grid-cols-2"}`}>
         {/* Status update */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
@@ -163,6 +165,8 @@ export default function OrderDetailPage() {
           ["Phone", order.delivery_address.phone],
           ["Address", order.delivery_address.address],
           ["City", order.delivery_address.city],
+          ["Channel", fulfillmentLabel],
+          ["Attended by", order.delivery_address.attended_by_staff_username ?? "-"],
           ["Placed", formatDateTime(order.created_at)],
         ].map(([label, val]) => (
           <div key={label} className="flex justify-between text-sm">

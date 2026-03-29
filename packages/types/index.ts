@@ -92,6 +92,10 @@ export interface DeliveryAddress {
   area?: string;
   city: string;
   fulfillment_type?: FulfillmentType;
+  order_channel?: "in_store" | "online";
+  attended_by_staff_username?: string;
+  attended_by_staff_id?: string;
+  payment_method?: "cash" | "card";
 }
 
 export interface OrderItem {

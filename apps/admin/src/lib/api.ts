@@ -204,6 +204,19 @@ export const orders = {
     apiFetch<Order>(`/admin/orders/${id}/assign-rider`, { method: "POST", body: JSON.stringify({ rider_id: riderId }) }),
 };
 
+export interface InStoreOrderCreate {
+  customer_name: string;
+  customer_phone?: string | null;
+  payment_method: "cash" | "card";
+  items: { product_id: string; qty: number }[];
+  notes?: string | null;
+}
+
+export const inStoreOrders = {
+  create: (data: InStoreOrderCreate) =>
+    apiFetch<Order>("/admin/orders/in-store", { method: "POST", body: JSON.stringify(data) }),
+};
+
 // ── shipments ──────────────────────────────────────────────────────────────────
 
 export interface ShipmentCreate {

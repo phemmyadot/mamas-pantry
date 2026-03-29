@@ -203,7 +203,7 @@
 - [x] Create at least one test shipment — "April 2026 USA Haul" (upcoming, arrives 2026-04-14)
 - [ ] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
 
-BUGS
+## BUGS
 
 [x] on payment success, app stays in checkout. should go home/my orders
 [x] on payment success, order status wasnt updated
@@ -213,7 +213,7 @@ BUGS
 [x] when i uncheck active on admin inventor, it disappears from list.
 
 
-BUGS Phase 2
+## BUGS Phase 2
 [x]  customer count in admin home shouldn't include admin and staffs
 [x] when i edit an invetory, i had to refresh to show effect. should update state
 [x] updating order to delivered fails
@@ -221,10 +221,10 @@ BUGS Phase 2
 [x] ready to pickup filter in orders is lagging, opthers are instant
 
 
-Features
+## Features
 [x] allow admin create staff account for users and manage staffs/rider. staff can see orders, inventory (view only), riders(view only), in store purchase(make basic for now). rider only see assigned
+[x] in-store staff purchase flow: pick items, select cash/card, confirm payment, save as paid+delivered order with in-store channel and attending staff username
 [ ] in store purchase to support bar code scaning (products to store sku)
-[ ] 
 [x] send order status change email to customer
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
 [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
@@ -232,7 +232,7 @@ Features
 [x] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
 [x] set delivery fee in admin. different fee for each locations available
 
-Future
+## Future
 [ ] in store interface - STAFF
 [ ] Rider app - RIDER
 [ ] Cutomer mobile

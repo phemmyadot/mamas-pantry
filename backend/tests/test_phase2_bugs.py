@@ -585,3 +585,59 @@ async def test_unverified_staff_can_login(client, db_session):
     assert login_resp.status_code == 200, login_resp.text
     data = login_resp.json()
     assert "access_token" in data and "refresh_token" in data
+
+
+@pytest.mark.asyncio
+async def test_staff_can_create_paid_delivered_in_store_order(client, db_session):
+    admin = await create_test_user(client, email="admin13@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    admin_tokens = await login_user(client, email="admin13@example.com")
+
+    staff_create = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "instore-staff@example.com",
+            "password": "StrongPass123",
+            "username": "instorestaff",
+            "role": "staff",
+        },
+    )
+    assert staff_create.status_code == 201, staff_create.text
+
+    staff_tokens = await login_user(client, email="instore-staff@example.com", password="StrongPass123")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Instore Test Product",
+            "slug": "instore-test-product",
+            "description": "In-store test product",
+            "price_ngn": 3000,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+    product_id = product_resp.json()["id"]
+
+    create_resp = await client.post(
+        "/api/v1/admin/orders/in-store",
+        headers=auth_header(staff_tokens["access_token"]),
+        json={
+            "customer_name": "Walk-in Customer",
+            "customer_phone": "08035556666",
+            "payment_method": "cash",
+            "items": [{"product_id": product_id, "qty": 2}],
+            "notes": "Counter sale",
+        },
+    )
+    assert create_resp.status_code == 201, create_resp.text
+    order = create_resp.json()
+    assert order["payment_status"] == "paid"
+    assert order["status"] == "delivered"
+    assert order["delivery_address"]["order_channel"] == "in_store"
+    assert order["delivery_address"]["attended_by_staff_username"] == "instorestaff"

@@ -55,6 +55,19 @@ class AssignRiderRequest(BaseModel):
     rider_id: uuid.UUID
 
 
+class InStoreOrderItemCreate(BaseModel):
+    product_id: uuid.UUID
+    qty: int = Field(..., ge=1)
+
+
+class InStoreOrderCreate(BaseModel):
+    customer_name: str = Field(..., min_length=1, max_length=100)
+    customer_phone: str | None = Field(default=None, min_length=7, max_length=20)
+    payment_method: str = Field(..., pattern="^(cash|card)$")
+    items: list[InStoreOrderItemCreate] = Field(..., min_length=1)
+    notes: str | None = None
+
+
 class PaystackWebhookEvent(BaseModel):
     event: str
     data: dict

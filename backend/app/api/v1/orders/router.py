@@ -7,7 +7,7 @@ from app.api.v1.auth.dependencies import get_current_user, require_any_role, req
 from app.db.base import get_db
 from app.db.models.order import OrderStatus
 from app.db.models.user import User
-from app.schemas.order import AssignRiderRequest, OrderCreate, OrderResponse, OrderStatusUpdate
+from app.schemas.order import AssignRiderRequest, InStoreOrderCreate, OrderCreate, OrderResponse, OrderStatusUpdate
 from app.services.order_service import OrderService
 
 router = APIRouter(tags=["orders"])
@@ -172,3 +172,19 @@ async def assign_rider(
 ):
     service = OrderService(db)
     return await service.assign_rider(order_id=order_id, rider_id=body.rider_id)
+
+
+@router.post(
+    "/admin/orders/in-store",
+    response_model=OrderResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create in-store purchase order (admin/staff)",
+    description="Creates an in-store order, marks payment as paid, and status as delivered.",
+)
+async def create_in_store_order(
+    body: InStoreOrderCreate,
+    current_user: User = Depends(require_any_role("admin", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    return await service.create_in_store_order(staff_user=current_user, data=body)
