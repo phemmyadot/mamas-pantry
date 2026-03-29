@@ -139,6 +139,10 @@ class OrderService:
         order = result.scalar_one_or_none()
         if not order:
             raise NotFoundError("Order not found")
+
+        if data.status == OrderStatus.delivered and not order.rider_id:
+            raise ValidationError("Assign a rider before marking order as delivered")
+
         prev_status = order.status
         order.status = data.status
         await self.db.flush()
@@ -166,6 +170,8 @@ class OrderService:
 
     async def assign_rider(self, order_id: uuid.UUID, rider_id: uuid.UUID) -> Order:
         order = await self.get_order(order_id)
+        if order.status != OrderStatus.out_for_delivery:
+            raise ValidationError("Rider can only be assigned when order is out_for_delivery")
         order.rider_id = rider_id
         await self.db.flush()
         await self.db.refresh(order)

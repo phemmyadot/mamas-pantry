@@ -217,6 +217,7 @@ BUGS Phase 2
 [x]  customer count in admin home shouldn't include admin and staffs
 [x] when i edit an invetory, i had to refresh to show effect. should update state
 [x] updating order to delivered fails
+[ ] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
 
 
 Features
@@ -225,7 +226,7 @@ Features
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
 [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
 [x] authntication state is not properly done, sometimes it shows signin and then username on refresh
-
+[ ] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
 
 Future
 [ ] in store interface - STAFF

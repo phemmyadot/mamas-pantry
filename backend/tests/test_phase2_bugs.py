@@ -89,6 +89,28 @@ async def test_update_order_to_delivered_creates_loyalty_record(client, db_sessi
     assert order_resp.status_code == 201, order_resp.text
     order_id = order_resp.json()["id"]
 
+    rider_resp = await client.post(
+        "/api/v1/admin/riders",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"name": "Delivered Rider", "phone": "08037770000"},
+    )
+    assert rider_resp.status_code == 201, rider_resp.text
+    rider_id = rider_resp.json()["id"]
+
+    out_resp = await client.patch(
+        f"/api/v1/admin/orders/{order_id}/status",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"status": "out_for_delivery"},
+    )
+    assert out_resp.status_code == 200, out_resp.text
+
+    assign_resp = await client.post(
+        f"/api/v1/admin/orders/{order_id}/assign-rider",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"rider_id": rider_id},
+    )
+    assert assign_resp.status_code == 200, assign_resp.text
+
     status_resp = await client.patch(
         f"/api/v1/admin/orders/{order_id}/status",
         headers=auth_header(admin_tokens["access_token"]),
@@ -156,19 +178,19 @@ async def test_customer_order_includes_rider_when_out_for_delivery(client, db_se
     assert rider_resp.status_code == 201, rider_resp.text
     rider_id = rider_resp.json()["id"]
 
-    assign_resp = await client.post(
-        f"/api/v1/admin/orders/{order_id}/assign-rider",
-        headers=auth_header(admin_tokens["access_token"]),
-        json={"rider_id": rider_id},
-    )
-    assert assign_resp.status_code == 200, assign_resp.text
-
     status_resp = await client.patch(
         f"/api/v1/admin/orders/{order_id}/status",
         headers=auth_header(admin_tokens["access_token"]),
         json={"status": "out_for_delivery"},
     )
     assert status_resp.status_code == 200, status_resp.text
+
+    assign_resp = await client.post(
+        f"/api/v1/admin/orders/{order_id}/assign-rider",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"rider_id": rider_id},
+    )
+    assert assign_resp.status_code == 200, assign_resp.text
 
     my_order_resp = await client.get(
         f"/api/v1/orders/me/{order_id}",
@@ -181,3 +203,108 @@ async def test_customer_order_includes_rider_when_out_for_delivery(client, db_se
     assert data["rider"] is not None
     assert data["rider"]["name"] == "Tunde Rider"
     assert data["rider"]["phone"] == "08039990000"
+
+
+@pytest.mark.asyncio
+async def test_assign_rider_requires_out_for_delivery_status(client, db_session):
+    admin = await create_test_user(client, email="admin4@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    customer = await create_test_user(client, email="customer4@example.com")
+
+    admin_tokens = await login_user(client, email="admin4@example.com")
+    customer_tokens = await login_user(client, email="customer4@example.com")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Assignment Rule Product",
+            "slug": "assignment-rule-product",
+            "description": "Rule test product",
+            "price_ngn": 2000,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 5,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_resp.json()["id"], "qty": 1}],
+            "delivery_address": {
+                "name": "Rule Customer",
+                "phone": "08031110000",
+                "address": "3 Rule Street",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+
+    rider_resp = await client.post(
+        "/api/v1/admin/riders",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"name": "Rule Rider", "phone": "08038880000"},
+    )
+    assert rider_resp.status_code == 201, rider_resp.text
+
+    assign_resp = await client.post(
+        f"/api/v1/admin/orders/{order_id}/assign-rider",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"rider_id": rider_resp.json()["id"]},
+    )
+    assert assign_resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_delivered_status_requires_assigned_rider(client, db_session):
+    admin = await create_test_user(client, email="admin5@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    customer = await create_test_user(client, email="customer5@example.com")
+
+    admin_tokens = await login_user(client, email="admin5@example.com")
+    customer_tokens = await login_user(client, email="customer5@example.com")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Delivered Rule Product",
+            "slug": "delivered-rule-product",
+            "description": "Delivered rule test product",
+            "price_ngn": 2200,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 5,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_resp.json()["id"], "qty": 1}],
+            "delivery_address": {
+                "name": "Delivered Rule Customer",
+                "phone": "08032220000",
+                "address": "5 Rule Avenue",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+
+    status_resp = await client.patch(
+        f"/api/v1/admin/orders/{order_id}/status",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"status": "delivered"},
+    )
+    assert status_resp.status_code == 422

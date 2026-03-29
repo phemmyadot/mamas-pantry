@@ -46,6 +46,8 @@ export default function OrderDetailPage() {
   if (!order) return <p className="text-sm text-spice py-10">Order not found.</p>;
 
   const currentIdx = STATUS_FLOW.indexOf(order.status as OrderStatus);
+  const canAssignRider = order.status === "out_for_delivery";
+  const canMarkDelivered = Boolean(order.rider_id);
 
   return (
     <div className="max-w-3xl space-y-5">
@@ -98,7 +100,9 @@ export default function OrderDetailPage() {
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
             {[...STATUS_FLOW, "cancelled"].map((s) => (
-              <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
+              <option key={s} value={s} disabled={s === "delivered" && !canMarkDelivered}>
+                {STATUS_LABELS[s] ?? s}
+              </option>
             ))}
           </select>
           {statusMutation.isError && <p className="text-xs text-spice">Failed to update status.</p>}
@@ -110,7 +114,7 @@ export default function OrderDetailPage() {
           <select
             value={order.rider_id ?? ""}
             onChange={(e) => e.target.value && riderMutation.mutate(e.target.value)}
-            disabled={riderMutation.isPending}
+            disabled={riderMutation.isPending || !canAssignRider}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
             <option value="">— Select rider —</option>
