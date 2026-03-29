@@ -7,6 +7,7 @@ import { dashboard } from "@/lib/api";
 import { formatNGN, formatDateTime } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
 import Spinner from "@/components/Spinner";
+import { useAuth } from "@/contexts/auth-context";
 
 function KpiCard({ label, value, sub, accent = false }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
@@ -19,6 +20,19 @@ function KpiCard({ label, value, sub, accent = false }: { label: string; value: 
 }
 
 export default function DashboardPage() {
+  const { isAdmin, isStaff } = useAuth();
+
+  if (isStaff && !isAdmin) {
+    return (
+      <div className="max-w-4xl">
+        <h1 className="text-xl font-bold text-forest-deep">Dashboard</h1>
+        <div className="mt-4 rounded-xl border border-gray-200 bg-white p-6">
+          <p className="text-sm text-muted">Staff dashboard coming soon</p>
+        </div>
+      </div>
+    );
+  }
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard"],
     queryFn: dashboard.get,

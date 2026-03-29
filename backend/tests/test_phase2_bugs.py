@@ -588,7 +588,7 @@ async def test_unverified_staff_can_login(client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_staff_can_create_paid_delivered_in_store_order(client, db_session):
+async def test_staff_can_create_unpaid_pending_in_store_order_and_confirm_payment(client, db_session):
     admin = await create_test_user(client, email="admin13@example.com")
     await _assign_role(db_session, admin["id"], "admin")
     admin_tokens = await login_user(client, email="admin13@example.com")
@@ -637,7 +637,241 @@ async def test_staff_can_create_paid_delivered_in_store_order(client, db_session
     )
     assert create_resp.status_code == 201, create_resp.text
     order = create_resp.json()
-    assert order["payment_status"] == "paid"
-    assert order["status"] == "delivered"
+    assert order["payment_status"] == "unpaid"
+    assert order["status"] == "pending"
     assert order["delivery_address"]["order_channel"] == "in_store"
     assert order["delivery_address"]["attended_by_staff_username"] == "instorestaff"
+
+    pay_resp = await client.post(
+        f"/api/v1/admin/orders/{order['id']}/confirm-in-store-payment",
+        headers=auth_header(staff_tokens["access_token"]),
+    )
+    assert pay_resp.status_code == 200, pay_resp.text
+    paid_order = pay_resp.json()
+    assert paid_order["payment_status"] == "paid"
+    assert paid_order["status"] == "delivered"
+
+    second_pay_resp = await client.post(
+        f"/api/v1/admin/orders/{order['id']}/confirm-in-store-payment",
+        headers=auth_header(staff_tokens["access_token"]),
+    )
+    assert second_pay_resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_staff_can_only_confirm_payment_for_own_in_store_orders(client, db_session):
+    admin = await create_test_user(client, email="admin14@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    admin_tokens = await login_user(client, email="admin14@example.com")
+
+    create_staff_a = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "instore-owner-a@example.com",
+            "password": "StrongPass123",
+            "username": "ownera",
+            "role": "staff",
+        },
+    )
+    assert create_staff_a.status_code == 201, create_staff_a.text
+
+    create_staff_b = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "instore-owner-b@example.com",
+            "password": "StrongPass123",
+            "username": "ownerb",
+            "role": "staff",
+        },
+    )
+    assert create_staff_b.status_code == 201, create_staff_b.text
+
+    staff_a_tokens = await login_user(client, email="instore-owner-a@example.com", password="StrongPass123")
+    staff_b_tokens = await login_user(client, email="instore-owner-b@example.com", password="StrongPass123")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Instore Ownership Product",
+            "slug": "instore-ownership-product",
+            "description": "In-store ownership test product",
+            "price_ngn": 1800,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 8,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+    product_id = product_resp.json()["id"]
+
+    order_resp = await client.post(
+        "/api/v1/admin/orders/in-store",
+        headers=auth_header(staff_a_tokens["access_token"]),
+        json={
+            "payment_method": "card",
+            "items": [{"product_id": product_id, "qty": 1}],
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+
+    unauthorized_pay = await client.post(
+        f"/api/v1/admin/orders/{order_id}/confirm-in-store-payment",
+        headers=auth_header(staff_b_tokens["access_token"]),
+    )
+    assert unauthorized_pay.status_code == 422
+
+    admin_pay = await client.post(
+        f"/api/v1/admin/orders/{order_id}/confirm-in-store-payment",
+        headers=auth_header(admin_tokens["access_token"]),
+    )
+    assert admin_pay.status_code == 200, admin_pay.text
+
+
+@pytest.mark.asyncio
+async def test_admin_can_cleanup_stale_pending_in_store_orders_and_restock(client, db_session):
+    from datetime import datetime, timedelta, timezone
+    from app.db.models.order import Order
+    from app.db.models.product import Product
+
+    admin = await create_test_user(client, email="admin15@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    admin_tokens = await login_user(client, email="admin15@example.com")
+
+    staff_create = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "instore-cleanup-staff@example.com",
+            "password": "StrongPass123",
+            "username": "cleanupstaff",
+            "role": "staff",
+        },
+    )
+    assert staff_create.status_code == 201, staff_create.text
+    staff_tokens = await login_user(client, email="instore-cleanup-staff@example.com", password="StrongPass123")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Instore Cleanup Product",
+            "slug": "instore-cleanup-product",
+            "description": "In-store cleanup test product",
+            "price_ngn": 2200,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 5,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+    product_id = product_resp.json()["id"]
+
+    order_resp = await client.post(
+        "/api/v1/admin/orders/in-store",
+        headers=auth_header(staff_tokens["access_token"]),
+        json={
+            "payment_method": "cash",
+            "items": [{"product_id": product_id, "qty": 2}],
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+
+    order_row = await db_session.get(Order, uuid.UUID(order_id))
+    assert order_row is not None
+    order_row.created_at = datetime.now(timezone.utc) - timedelta(days=1)
+    await db_session.flush()
+    await db_session.commit()
+
+    cleanup_resp = await client.post(
+        "/api/v1/admin/orders/in-store/cleanup-pending",
+        headers=auth_header(admin_tokens["access_token"]),
+    )
+    assert cleanup_resp.status_code == 200, cleanup_resp.text
+    assert cleanup_resp.json()["cancelled_count"] >= 1
+
+    order_after_resp = await client.get(
+        f"/api/v1/admin/orders/{order_id}",
+        headers=auth_header(admin_tokens["access_token"]),
+    )
+    assert order_after_resp.status_code == 200, order_after_resp.text
+    assert order_after_resp.json()["status"] == "cancelled"
+    assert order_after_resp.json()["payment_status"] == "unpaid"
+
+    product_after = await db_session.get(Product, uuid.UUID(product_id))
+    assert product_after is not None
+    assert product_after.stock_qty == 5
+
+
+@pytest.mark.asyncio
+async def test_admin_can_view_staff_performance_detail(client, db_session):
+    admin = await create_test_user(client, email="admin16@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    admin_tokens = await login_user(client, email="admin16@example.com")
+
+    staff_create = await client.post(
+        "/api/v1/admin/staff-users",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "email": "staff-perf@example.com",
+            "password": "StrongPass123",
+            "username": "staffperf",
+            "role": "staff",
+        },
+    )
+    assert staff_create.status_code == 201, staff_create.text
+    staff_id = staff_create.json()["id"]
+    staff_tokens = await login_user(client, email="staff-perf@example.com", password="StrongPass123")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Staff Perf Product",
+            "slug": "staff-perf-product",
+            "description": "Staff perf test product",
+            "price_ngn": 2100,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+    product_id = product_resp.json()["id"]
+
+    create_order_resp = await client.post(
+        "/api/v1/admin/orders/in-store",
+        headers=auth_header(staff_tokens["access_token"]),
+        json={
+            "payment_method": "cash",
+            "items": [{"product_id": product_id, "qty": 3}],
+        },
+    )
+    assert create_order_resp.status_code == 201, create_order_resp.text
+    order_id = create_order_resp.json()["id"]
+
+    pay_resp = await client.post(
+        f"/api/v1/admin/orders/{order_id}/confirm-in-store-payment",
+        headers=auth_header(staff_tokens["access_token"]),
+    )
+    assert pay_resp.status_code == 200, pay_resp.text
+
+    perf_resp = await client.get(
+        f"/api/v1/admin/staff-users/{staff_id}/performance",
+        headers=auth_header(admin_tokens["access_token"]),
+    )
+    assert perf_resp.status_code == 200, perf_resp.text
+    data = perf_resp.json()
+    assert data["user"]["id"] == staff_id
+    assert data["metrics"]["total_orders"] >= 1
+    assert data["metrics"]["paid_orders"] >= 1
+    assert data["metrics"]["total_items"] >= 3
+    assert data["metrics"]["avg_daily_orders"] >= 1
+    assert len(data["recent_orders"]) >= 1

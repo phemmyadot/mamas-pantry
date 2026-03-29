@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { orders, riders, type OrderStatus } from "@/lib/api";
+import { inStoreOrders, orders, riders, type OrderStatus } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
 import { formatNGN, formatDateTime } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
@@ -18,8 +18,9 @@ export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isStaff, user } = useAuth();
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [showPaidModal, setShowPaidModal] = useState(false);
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", id],
@@ -53,6 +54,15 @@ export default function OrderDetailPage() {
     },
   });
 
+  const confirmInStorePaymentMutation = useMutation({
+    mutationFn: () => inStoreOrders.confirmPayment(id!),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["order", id] });
+      await qc.invalidateQueries({ queryKey: ["orders"] });
+      setShowPaidModal(true);
+    },
+  });
+
   if (isLoading) return <div className="flex justify-center py-20"><Spinner className="w-8 h-8" /></div>;
   if (!order) return <p className="text-sm text-spice py-10">Order not found.</p>;
 
@@ -63,6 +73,11 @@ export default function OrderDetailPage() {
   const currentIdx = statusFlow.indexOf(order.status as OrderStatus);
   const canAssignRider = !isPickup && order.status === "out_for_delivery";
   const canMarkDelivered = isPickup ? order.status === "ready_for_pickup" : Boolean(order.rider_id);
+  const attendedById = order.delivery_address?.attended_by_staff_id ?? null;
+  const canConfirmInStorePayment =
+    isInStore &&
+    order.payment_status === "unpaid" &&
+    (isAdmin || (isStaff && attendedById === user?.id));
 
   return (
     <div className="max-w-3xl space-y-5">
@@ -157,6 +172,31 @@ export default function OrderDetailPage() {
       </div>
       )}
 
+      {isInStore && order.payment_status === "unpaid" && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+          <h2 className="text-sm font-semibold text-forest-deep">In-store payment</h2>
+          <p className="text-xs text-muted">
+            Confirm payment only after customer payment succeeds.
+          </p>
+          <button
+            type="button"
+            onClick={() => confirmInStorePaymentMutation.mutate()}
+            disabled={!canConfirmInStorePayment || confirmInStorePaymentMutation.isPending}
+            className="px-4 py-2 rounded-lg bg-forest-deep text-cream text-sm font-medium disabled:opacity-60"
+          >
+            {confirmInStorePaymentMutation.isPending ? "Confirming..." : "Mark as paid"}
+          </button>
+          {!canConfirmInStorePayment && (
+            <p className="text-xs text-muted">
+              Only admin or the staff who created this in-store order can mark it as paid.
+            </p>
+          )}
+          {confirmInStorePaymentMutation.isError && (
+            <p className="text-xs text-spice">Failed to confirm payment.</p>
+          )}
+        </div>
+      )}
+
       {/* Delivery address */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
         <h2 className="text-sm font-semibold text-forest-deep mb-3">Delivery details</h2>
@@ -224,6 +264,26 @@ export default function OrderDetailPage() {
           </tfoot>
         </table>
       </div>
+
+      {showPaidModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-5 space-y-4">
+            <h3 className="text-base font-semibold text-forest-deep">Payment Confirmed</h3>
+            <p className="text-sm text-muted">
+              Order #{order.id.slice(0, 8).toUpperCase()} is now marked as paid.
+            </p>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowPaidModal(false)}
+                className="px-4 py-2 rounded-lg bg-forest-deep text-cream text-sm font-medium"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

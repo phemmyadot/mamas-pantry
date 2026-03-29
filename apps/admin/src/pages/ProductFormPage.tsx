@@ -9,6 +9,7 @@ const CATEGORIES: ProductCategory[] = ["imported", "local", "chilled", "househol
 
 const EMPTY: ProductCreate = {
   name: "", slug: "", description: null,
+  sku: "",
   price_ngn: 0, compare_price_ngn: null,
   category: "local", is_mums_pick: false,
   badge: null, origin: null,
@@ -37,6 +38,7 @@ export default function ProductFormPage() {
       setForm({
         name: existing.name,
         slug: existing.slug,
+        sku: existing.sku,
         description: existing.description,
         price_ngn: existing.price_ngn,
         compare_price_ngn: existing.compare_price_ngn,
@@ -99,8 +101,8 @@ export default function ProductFormPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
-        {/* Name + slug */}
-        <div className="grid sm:grid-cols-2 gap-4">
+        {/* Name + slug + sku */}
+        <div className="grid sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-medium text-muted mb-1">Name <span className="text-spice">*</span></label>
             <input
@@ -119,6 +121,16 @@ export default function ProductFormPage() {
               value={form.slug}
               onChange={(e) => { setSlugManual(true); set("slug", e.target.value); }}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-forest-light"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-muted mb-1">SKU <span className="text-spice">*</span></label>
+            <input
+              required
+              type="text"
+              value={form.sku ?? ""}
+              onChange={(e) => set("sku", e.target.value.toUpperCase())}
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-forest-light"
             />
           </div>
         </div>

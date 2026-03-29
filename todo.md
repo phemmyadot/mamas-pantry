@@ -211,9 +211,6 @@
 [x] when i update status of order in admin, i have to refresh page to show new status in list.
 [x] customer list and count in admin shouldn't include admin and staffs
 [x] when i uncheck active on admin inventor, it disappears from list.
-
-
-## BUGS Phase 2
 [x]  customer count in admin home shouldn't include admin and staffs
 [x] when i edit an invetory, i had to refresh to show effect. should update state
 [x] updating order to delivered fails
@@ -231,6 +228,14 @@
 [x] authntication state is not properly done, sometimes it shows signin and then username on refresh
 [x] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
 [x] set delivery fee in admin. different fee for each locations available
+[x] instore, create order. when payment done, then confirm payment. this will allow users that payment fail to keep their order incheck to try again later. [x] clean pending instore orders by EOD. 
+[x] show modal confirmation after created order and after payment confirmation. 
+[x] staffs are allowed to change status to paid(only, can't change after) for order they made
+[x] staff access => staff detail page.  
+[x] show staff performance.  
+[x] time between start and order creation create. will derive time per item amd average time the staff use per item
+[x] average daily orders for staff 
+[x] average daily revenue for staff
 
 ## Future
 [ ] in store interface - STAFF

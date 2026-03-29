@@ -16,13 +16,15 @@ import PromosPage from "@/pages/PromosPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import DeliveryFeesPage from "@/pages/DeliveryFeesPage";
 import StaffManagementPage from "@/pages/StaffManagementPage";
+import StaffDetailPage from "@/pages/StaffDetailPage";
 import InStorePurchasePage from "@/pages/InStorePurchasePage";
 import { useAuth } from "@/contexts/auth-context";
 
 function HomeRedirect() {
   const { isAdmin, isRider, isStaff } = useAuth();
   if (isAdmin) return <Navigate to="/dashboard" replace />;
-  if (isRider || isStaff) return <Navigate to="/orders" replace />;
+  if (isStaff) return <Navigate to="/dashboard" replace />;
+  if (isRider) return <Navigate to="/orders" replace />;
   return <Navigate to="/dashboard" replace />;
 }
 
@@ -41,7 +43,7 @@ export default function App() {
             }
           >
             <Route index element={<HomeRedirect />} />
-            <Route path="dashboard" element={<RoleRoute allow={["admin"]}><DashboardPage /></RoleRoute>} />
+            <Route path="dashboard" element={<RoleRoute allow={["admin", "staff"]}><DashboardPage /></RoleRoute>} />
 
             <Route path="orders" element={<RoleRoute allow={["admin", "staff", "rider"]}><OrdersPage /></RoleRoute>} />
             <Route path="orders/:id" element={<RoleRoute allow={["admin", "staff", "rider"]}><OrderDetailPage /></RoleRoute>} />
@@ -55,6 +57,7 @@ export default function App() {
             <Route path="customers" element={<RoleRoute allow={["admin"]}><CustomersPage /></RoleRoute>} />
             <Route path="analytics" element={<RoleRoute allow={["admin"]}><AnalyticsPage /></RoleRoute>} />
             <Route path="staff-access" element={<RoleRoute allow={["admin"]}><StaffManagementPage /></RoleRoute>} />
+            <Route path="staff-access/:id" element={<RoleRoute allow={["admin"]}><StaffDetailPage /></RoleRoute>} />
             <Route path="promos" element={<RoleRoute allow={["admin"]}><PromosPage /></RoleRoute>} />
             <Route path="delivery-fees" element={<RoleRoute allow={["admin"]}><DeliveryFeesPage /></RoleRoute>} />
             <Route path="notifications" element={<RoleRoute allow={["admin"]}><NotificationsPage /></RoleRoute>} />

@@ -61,11 +61,15 @@ class InStoreOrderItemCreate(BaseModel):
 
 
 class InStoreOrderCreate(BaseModel):
-    customer_name: str = Field(..., min_length=1, max_length=100)
+    customer_name: str = Field(default="Walk-in Customer", min_length=1, max_length=100)
     customer_phone: str | None = Field(default=None, min_length=7, max_length=20)
     payment_method: str = Field(..., pattern="^(cash|card)$")
     items: list[InStoreOrderItemCreate] = Field(..., min_length=1)
     notes: str | None = None
+
+
+class InStoreCleanupResponse(BaseModel):
+    cancelled_count: int
 
 
 class PaystackWebhookEvent(BaseModel):

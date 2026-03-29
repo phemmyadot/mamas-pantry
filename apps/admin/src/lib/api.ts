@@ -126,12 +126,44 @@ export interface AccessUserCreate {
   role: "staff" | "rider";
 }
 
+export interface StaffPerformanceMetrics {
+  total_orders: number;
+  paid_orders: number;
+  pending_orders: number;
+  total_items: number;
+  total_revenue_ngn: number;
+  avg_time_per_item_minutes: number;
+  avg_order_processing_minutes: number;
+  avg_daily_orders: number;
+  avg_daily_revenue_ngn: number;
+  first_order_at: string | null;
+  last_order_at: string | null;
+}
+
+export interface StaffPerformanceOrder {
+  id: string;
+  status: string;
+  payment_status: string;
+  total_ngn: number;
+  item_count: number;
+  created_at: string;
+  processing_minutes: number;
+}
+
+export interface StaffPerformanceResponse {
+  user: AdminUser;
+  metrics: StaffPerformanceMetrics;
+  recent_orders: StaffPerformanceOrder[];
+}
+
 export const adminUsers = {
   list: () => apiFetch<AdminUser[]>("/admin/users"),
   listStaffUsers: (role?: "staff" | "rider") =>
     apiFetch<AdminUser[]>(`/admin/staff-users${role ? `?role=${role}` : ""}`),
   createStaffUser: (data: AccessUserCreate) =>
     apiFetch<AdminUser>("/admin/staff-users", { method: "POST", body: JSON.stringify(data) }),
+  getStaffPerformance: (userId: string) =>
+    apiFetch<StaffPerformanceResponse>(`/admin/staff-users/${userId}/performance`),
   assignAccessRole: (userId: string, role: "staff" | "rider") =>
     apiFetch<void>(`/admin/users/${userId}/access-role?role=${role}`, { method: "POST" }),
   removeAccessRole: (userId: string, role: "staff" | "rider") =>
@@ -162,6 +194,7 @@ export const dashboard = {
 
 export interface ProductCreate {
   name: string; slug: string; description?: string | null;
+  sku?: string | null;
   price_ngn: number; compare_price_ngn?: number | null;
   category: ProductCategory; is_mums_pick: boolean;
   badge?: string | null; origin?: string | null;
@@ -179,6 +212,7 @@ export const products = {
     return apiFetch<Product[]>(`/admin/products?${qs}`);
   },
   get: (id: string) => apiFetch<Product>(`/products/${id}`),
+  getBySku: (sku: string) => apiFetch<Product>(`/admin/products/by-sku/${encodeURIComponent(sku)}`),
   create: (data: ProductCreate) =>
     apiFetch<Product>("/admin/products", { method: "POST", body: JSON.stringify(data) }),
   update: (id: string, data: Partial<ProductCreate>) =>
@@ -215,6 +249,10 @@ export interface InStoreOrderCreate {
 export const inStoreOrders = {
   create: (data: InStoreOrderCreate) =>
     apiFetch<Order>("/admin/orders/in-store", { method: "POST", body: JSON.stringify(data) }),
+  confirmPayment: (id: string) =>
+    apiFetch<Order>(`/admin/orders/${id}/confirm-in-store-payment`, { method: "POST" }),
+  cleanupPending: () =>
+    apiFetch<{ cancelled_count: number }>("/admin/orders/in-store/cleanup-pending", { method: "POST" }),
 };
 
 // ── shipments ──────────────────────────────────────────────────────────────────

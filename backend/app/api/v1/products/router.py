@@ -135,6 +135,21 @@ async def create_product(
     return await service.create(body)
 
 
+@router.get(
+    "/admin/products/by-sku/{sku}",
+    response_model=ProductResponse,
+    summary="Get product by SKU (admin/staff)",
+    description="Returns a single active product by SKU for barcode/in-store lookup.",
+)
+async def admin_get_product_by_sku(
+    sku: str,
+    _current_user: User = Depends(require_any_role("admin", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = ProductService(db)
+    return await service.get_by_sku(sku, active_only=True)
+
+
 @router.patch(
     "/admin/products/{product_id}",
     response_model=ProductResponse,

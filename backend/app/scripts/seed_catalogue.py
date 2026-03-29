@@ -273,7 +273,8 @@ async def seed() -> None:
         # Products
         created = 0
         skipped = 0
-        for data in PRODUCTS:
+        for i, data in enumerate(PRODUCTS, start=1):
+            data.setdefault("sku", f"SKU-{i:06d}")
             result = await session.execute(select(Product).where(Product.slug == data["slug"]))
             if result.scalar_one_or_none():
                 skipped += 1

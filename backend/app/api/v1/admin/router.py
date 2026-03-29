@@ -28,6 +28,36 @@ class CreateAccessUserRequest(BaseModel):
     role: str
 
 
+class StaffPerformanceOrder(BaseModel):
+    id: uuid.UUID
+    status: str
+    payment_status: str
+    total_ngn: float
+    item_count: int
+    created_at: datetime
+    processing_minutes: float
+
+
+class StaffPerformanceMetrics(BaseModel):
+    total_orders: int
+    paid_orders: int
+    pending_orders: int
+    total_items: int
+    total_revenue_ngn: float
+    avg_time_per_item_minutes: float
+    avg_order_processing_minutes: float
+    avg_daily_orders: float
+    avg_daily_revenue_ngn: float
+    first_order_at: datetime | None
+    last_order_at: datetime | None
+
+
+class StaffPerformanceResponse(BaseModel):
+    user: UserResponse
+    metrics: StaffPerformanceMetrics
+    recent_orders: list[StaffPerformanceOrder]
+
+
 @router.get(
     "/users",
     response_model=list[UserResponse],
@@ -63,6 +93,20 @@ async def list_staff_users(
             raise ValidationError("Role must be either 'staff' or 'rider'")
         return await service.list_users_by_role_names([role_name])
     return await service.list_users_by_role_names(sorted(ACCESS_ROLE_NAMES))
+
+
+@router.get(
+    "/staff-users/{user_id}/performance",
+    response_model=StaffPerformanceResponse,
+    summary="Staff performance detail",
+)
+async def get_staff_performance(
+    user_id: uuid.UUID,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = AdminService(db)
+    return await service.get_staff_performance(user_id=user_id)
 
 
 @router.post(

@@ -1,7 +1,9 @@
 import hashlib
 import hmac
 import uuid
+from datetime import datetime, time, timezone
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -157,14 +159,14 @@ class OrderService:
         staff_display = (staff_user.username or staff_user.email or "").strip()
         order = Order(
             user_id=staff_user.id,
-            status=OrderStatus.delivered,
-            payment_status=PaymentStatus.paid,
-            payment_ref=f"in-store-{uuid.uuid4().hex[:12]}",
+            status=OrderStatus.pending,
+            payment_status=PaymentStatus.unpaid,
+            payment_ref=f"in-store-pending-{uuid.uuid4().hex[:12]}",
             subtotal_ngn=subtotal,
             delivery_fee_ngn=Decimal("0"),
             total_ngn=subtotal,
             delivery_address={
-                "name": data.customer_name.strip(),
+                "name": data.customer_name.strip() or "Walk-in Customer",
                 "phone": (data.customer_phone or "N/A").strip() or "N/A",
                 "address": "In-store purchase",
                 "city": "In-store",
@@ -181,6 +183,55 @@ class OrderService:
         await self.db.flush()
         await self.db.refresh(order)
         return order
+
+    async def confirm_in_store_payment(self, order_id: uuid.UUID, actor: User) -> Order:
+        order = await self.get_order(order_id=order_id)
+        if (order.delivery_address or {}).get("order_channel") != "in_store":
+            raise ValidationError("Only in-store orders can be paid from this endpoint")
+        if order.payment_status == PaymentStatus.paid:
+            raise ValidationError("Payment has already been confirmed for this order")
+        if order.status == OrderStatus.cancelled:
+            raise ValidationError("Cannot confirm payment for a cancelled order")
+
+        actor_roles = {r.name for r in getattr(actor, "roles", [])}
+        is_admin = "admin" in actor_roles or "super_admin" in actor_roles
+        if not is_admin:
+            attended_by_staff_id = (order.delivery_address or {}).get("attended_by_staff_id")
+            if attended_by_staff_id != str(actor.id):
+                raise ValidationError("Staff can only confirm payment for orders they created")
+
+        order.payment_status = PaymentStatus.paid
+        order.status = OrderStatus.delivered
+        order.payment_ref = order.payment_ref or f"in-store-paid-{uuid.uuid4().hex[:12]}"
+        await self.db.flush()
+        await self.db.refresh(order)
+        return order
+
+    async def cleanup_pending_in_store_orders_eod(self) -> int:
+        lagos = ZoneInfo("Africa/Lagos")
+        now_local = datetime.now(lagos)
+        start_of_today_local = datetime.combine(now_local.date(), time.min, tzinfo=lagos)
+        cutoff_utc = start_of_today_local.astimezone(timezone.utc)
+
+        result = await self.db.execute(
+            self._with_order_relations(select(Order)).where(
+                Order.payment_status == PaymentStatus.unpaid,
+                Order.status.not_in([OrderStatus.cancelled, OrderStatus.delivered]),
+                Order.created_at < cutoff_utc,
+            )
+        )
+        orders = list(result.scalars().all())
+        cancelled_count = 0
+
+        for order in orders:
+            if (order.delivery_address or {}).get("order_channel") != "in_store":
+                continue
+            await self._restock_order(order)
+            order.status = OrderStatus.cancelled
+            cancelled_count += 1
+
+        await self.db.flush()
+        return cancelled_count
 
     async def get_order(self, order_id: uuid.UUID, user_id: uuid.UUID | None = None) -> Order:
         query = self._with_order_relations(select(Order)).where(Order.id == order_id)
@@ -290,6 +341,15 @@ class OrderService:
         await self.db.flush()
         await self.db.refresh(order)
         return order
+
+    async def _restock_order(self, order: Order) -> None:
+        if not order.items:
+            return
+        for item in order.items:
+            result = await self.db.execute(select(Product).where(Product.id == item.product_id))
+            product = result.scalar_one_or_none()
+            if product:
+                product.stock_qty += item.qty
 
     async def track_order(self, order_id: uuid.UUID, phone: str) -> Order:
         """Public tracking: verify order exists and phone matches delivery address."""

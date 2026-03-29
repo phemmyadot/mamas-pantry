@@ -22,6 +22,7 @@ class Product(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     slug: Mapped[str] = mapped_column(String(220), nullable=False, unique=True, index=True)
+    sku: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     price_ngn: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     compare_price_ngn: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)

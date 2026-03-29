@@ -31,6 +31,7 @@ export interface Product {
   id: string;
   name: string;
   slug: string;
+  sku: string;
   description: string | null;
   price_ngn: number;
   compare_price_ngn: number | null;
@@ -48,6 +49,7 @@ export interface Product {
 export interface ProductCreate {
   name: string;
   slug?: string;
+  sku?: string;
   description?: string;
   price_ngn: number;
   compare_price_ngn?: number;

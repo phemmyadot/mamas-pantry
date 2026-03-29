@@ -7,7 +7,14 @@ from app.api.v1.auth.dependencies import get_current_user, require_any_role, req
 from app.db.base import get_db
 from app.db.models.order import OrderStatus
 from app.db.models.user import User
-from app.schemas.order import AssignRiderRequest, InStoreOrderCreate, OrderCreate, OrderResponse, OrderStatusUpdate
+from app.schemas.order import (
+    AssignRiderRequest,
+    InStoreCleanupResponse,
+    InStoreOrderCreate,
+    OrderCreate,
+    OrderResponse,
+    OrderStatusUpdate,
+)
 from app.services.order_service import OrderService
 
 router = APIRouter(tags=["orders"])
@@ -179,7 +186,7 @@ async def assign_rider(
     response_model=OrderResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create in-store purchase order (admin/staff)",
-    description="Creates an in-store order, marks payment as paid, and status as delivered.",
+    description="Creates an in-store order as unpaid pending. Payment is confirmed in a separate step.",
 )
 async def create_in_store_order(
     body: InStoreOrderCreate,
@@ -188,3 +195,33 @@ async def create_in_store_order(
 ):
     service = OrderService(db)
     return await service.create_in_store_order(staff_user=current_user, data=body)
+
+
+@router.post(
+    "/admin/orders/{order_id}/confirm-in-store-payment",
+    response_model=OrderResponse,
+    summary="Confirm in-store payment (admin/staff)",
+    description="Marks an in-store order as paid and delivered. Staff can only confirm orders they created.",
+)
+async def confirm_in_store_payment(
+    order_id: uuid.UUID,
+    current_user: User = Depends(require_any_role("admin", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    return await service.confirm_in_store_payment(order_id=order_id, actor=current_user)
+
+
+@router.post(
+    "/admin/orders/in-store/cleanup-pending",
+    response_model=InStoreCleanupResponse,
+    summary="Cleanup stale pending in-store orders (admin)",
+    description="Cancels unpaid in-store orders from previous days and restores stock quantities.",
+)
+async def cleanup_pending_in_store_orders(
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    service = OrderService(db)
+    cancelled_count = await service.cleanup_pending_in_store_orders_eod()
+    return InStoreCleanupResponse(cancelled_count=cancelled_count)

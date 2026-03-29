@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +9,7 @@ from app.core.config import settings
 from app.core.security import hash_password
 from app.core.exceptions import NotFoundError, ValidationError
 from app.db.models.role import Role, UserRole
+from app.db.models.order import Order, PaymentStatus
 from app.db.models.user import User
 from app.db.repositories.token_repo import TokenRepository
 from app.db.repositories.user_repo import UserRepository
@@ -130,3 +132,96 @@ class AdminService:
             raise NotFoundError("User not found")
 
         await self.user_repo.update_by_id(user_id, is_active=True)
+
+    async def get_staff_user(self, user_id: uuid.UUID) -> User:
+        users = await self.list_users_by_role_names(["staff", "rider"])
+        user = next((u for u in users if u.id == user_id), None)
+        if not user:
+            raise NotFoundError("Staff user not found")
+        return user
+
+    async def get_staff_performance(self, user_id: uuid.UUID) -> dict:
+        user = await self.get_staff_user(user_id)
+
+        result = await self.session.execute(
+            select(Order)
+            .where(Order.user_id == user_id)
+            .order_by(Order.created_at.desc())
+            .options(selectinload(Order.items))
+        )
+        all_orders = list(result.scalars().all())
+        in_store_orders = [
+            o for o in all_orders if (o.delivery_address or {}).get("order_channel") == "in_store"
+        ]
+
+        total_orders = len(in_store_orders)
+        if total_orders == 0:
+            return {
+                "user": user,
+                "metrics": {
+                    "total_orders": 0,
+                    "paid_orders": 0,
+                    "pending_orders": 0,
+                    "total_items": 0,
+                    "total_revenue_ngn": 0.0,
+                    "avg_time_per_item_minutes": 0.0,
+                    "avg_order_processing_minutes": 0.0,
+                    "avg_daily_orders": 0.0,
+                    "avg_daily_revenue_ngn": 0.0,
+                    "first_order_at": None,
+                    "last_order_at": None,
+                },
+                "recent_orders": [],
+            }
+
+        paid_orders = [o for o in in_store_orders if o.payment_status == PaymentStatus.paid]
+        pending_orders = [o for o in in_store_orders if o.payment_status != PaymentStatus.paid]
+        total_items = sum(sum(item.qty for item in o.items) for o in in_store_orders)
+        total_revenue = sum(Decimal(str(o.total_ngn)) for o in paid_orders)
+
+        order_minutes: list[float] = []
+        per_item_minutes: list[float] = []
+        for order in paid_orders:
+            item_qty = sum(item.qty for item in order.items)
+            if item_qty <= 0:
+                continue
+            minutes = max((order.updated_at - order.created_at).total_seconds() / 60.0, 0.0)
+            order_minutes.append(minutes)
+            per_item_minutes.append(minutes / item_qty)
+
+        active_days = {o.created_at.date().isoformat() for o in in_store_orders}
+        days_count = max(len(active_days), 1)
+
+        recent_orders = []
+        for order in in_store_orders[:10]:
+            item_qty = sum(item.qty for item in order.items)
+            processing_minutes = max((order.updated_at - order.created_at).total_seconds() / 60.0, 0.0)
+            recent_orders.append(
+                {
+                    "id": order.id,
+                    "status": order.status,
+                    "payment_status": order.payment_status,
+                    "total_ngn": float(Decimal(str(order.total_ngn))),
+                    "item_count": item_qty,
+                    "created_at": order.created_at,
+                    "processing_minutes": processing_minutes,
+                }
+            )
+
+        return {
+            "user": user,
+            "metrics": {
+                "total_orders": total_orders,
+                "paid_orders": len(paid_orders),
+                "pending_orders": len(pending_orders),
+                "total_items": total_items,
+                "total_revenue_ngn": float(total_revenue),
+                "avg_time_per_item_minutes": float(sum(per_item_minutes) / len(per_item_minutes)) if per_item_minutes else 0.0,
+                "avg_order_processing_minutes": float(sum(order_minutes) / len(order_minutes)) if order_minutes else 0.0,
+                "avg_daily_orders": float(total_orders / days_count),
+                "avg_daily_revenue_ngn": float(total_revenue / days_count),
+                "first_order_at": in_store_orders[-1].created_at,
+                "last_order_at": in_store_orders[0].created_at,
+            },
+            "recent_orders": recent_orders,
+        }

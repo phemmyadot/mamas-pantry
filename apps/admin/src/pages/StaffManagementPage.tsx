@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminUsers, ApiError, type AdminUser } from "@/lib/api";
 import Spinner from "@/components/Spinner";
@@ -124,6 +125,7 @@ export default function StaffManagementPage() {
                 <th className="px-5 py-3 font-medium">Staff</th>
                 <th className="px-5 py-3 font-medium">Rider</th>
                 <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">Detail</th>
               </tr>
             </thead>
             <tbody>
@@ -154,11 +156,20 @@ export default function StaffManagementPage() {
                       {u.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
+                  <td className="px-5 py-3">
+                    {hasRole(u, "staff") ? (
+                      <Link to={`/staff-access/${u.id}`} className="text-xs text-forest-light hover:underline">
+                        View performance
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-muted">-</span>
+                    )}
+                  </td>
                 </tr>
               ))}
               {managedUsers.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-5 py-10 text-center text-muted">No eligible users found.</td>
+                  <td colSpan={5} className="px-5 py-10 text-center text-muted">No eligible users found.</td>
                 </tr>
               )}
             </tbody>

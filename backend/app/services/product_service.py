@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
@@ -29,7 +29,13 @@ class ProductService:
         if mums_pick is not None:
             query = query.where(Product.is_mums_pick.is_(mums_pick))
         if search:
-            query = query.where(Product.name.ilike(f"%{search}%"))
+            query = query.where(
+                or_(
+                    Product.name.ilike(f"%{search}%"),
+                    Product.slug.ilike(f"%{search}%"),
+                    Product.sku.ilike(f"%{search}%"),
+                )
+            )
 
         count_q = select(func.count()).select_from(query.subquery())
         total = (await self.db.execute(count_q)).scalar_one()
@@ -71,8 +77,21 @@ class ProductService:
             raise NotFoundError("Product not found")
         return product
 
+    async def get_by_sku(self, sku: str, active_only: bool = True) -> Product:
+        query = select(Product).where(Product.sku == sku.strip().upper())
+        if active_only:
+            query = query.where(Product.is_active.is_(True))
+        result = await self.db.execute(query)
+        product = result.scalar_one_or_none()
+        if not product:
+            raise NotFoundError("Product not found")
+        return product
+
     async def create(self, data: ProductCreate) -> Product:
-        product = Product(**data.model_dump())
+        payload = data.model_dump()
+        if not payload.get("sku"):
+            payload["sku"] = await self._generate_next_sku()
+        product = Product(**payload)
         self.db.add(product)
         await self.db.flush()
         await self.db.refresh(product)
@@ -90,3 +109,19 @@ class ProductService:
         product = await self.get(product_id)
         await self.db.delete(product)
         await self.db.flush()
+
+    async def _generate_next_sku(self) -> str:
+        result = await self.db.execute(
+            select(Product.sku)
+            .where(Product.sku.ilike("SKU-%"))
+            .order_by(Product.sku.desc())
+            .limit(1)
+        )
+        latest = result.scalar_one_or_none()
+        if not latest:
+            return "SKU-000001"
+        try:
+            next_num = int(latest.split("-")[-1]) + 1
+        except ValueError:
+            next_num = 1
+        return f"SKU-{next_num:06d}"
