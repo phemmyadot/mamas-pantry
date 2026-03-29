@@ -100,6 +100,24 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       )}
 
+      {order.status === "out_for_delivery" && order.rider && (
+        <div className="bg-forest-mist rounded-2xl border border-forest-pale p-5 mb-4">
+          <h2 className="font-display text-base font-bold text-forest-deep mb-3">Driver details</h2>
+          <p className="font-ui text-sm text-ink">{order.rider.name}</p>
+          <p className="font-ui text-sm text-muted">{order.rider.phone}</p>
+          {order.rider.current_lat != null && order.rider.current_lng != null && (
+            <a
+              href={`https://maps.google.com/?q=${order.rider.current_lat},${order.rider.current_lng}`}
+              target="_blank"
+              rel="noreferrer"
+              className="font-ui text-xs text-forest-light hover:underline mt-2 inline-block"
+            >
+              View live location
+            </a>
+          )}
+        </div>
+      )}
+
       {/* Items */}
       <div className="bg-white rounded-2xl border border-cream-dark p-5 mb-4 space-y-3">
         <h2 className="font-display text-base font-bold text-forest-deep mb-3">Items</h2>

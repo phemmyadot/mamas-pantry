@@ -104,3 +104,80 @@ async def test_update_order_to_delivered_creates_loyalty_record(client, db_sessi
     assert tx is not None
     assert tx.user_id == uuid.UUID(customer["id"])
     assert tx.points >= 1
+
+
+@pytest.mark.asyncio
+async def test_customer_order_includes_rider_when_out_for_delivery(client, db_session):
+    admin = await create_test_user(client, email="admin3@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+    customer = await create_test_user(client, email="customer3@example.com")
+
+    admin_tokens = await login_user(client, email="admin3@example.com")
+    customer_tokens = await login_user(client, email="customer3@example.com")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Delivery Test Beans",
+            "slug": "delivery-test-beans",
+            "description": "Delivery test product",
+            "price_ngn": 3500,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+    product_id = product_resp.json()["id"]
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_id, "qty": 1}],
+            "delivery_address": {
+                "name": "Delivery Customer",
+                "phone": "08035550000",
+                "address": "2 Delivery Street",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 201, order_resp.text
+    order_id = order_resp.json()["id"]
+
+    rider_resp = await client.post(
+        "/api/v1/admin/riders",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"name": "Tunde Rider", "phone": "08039990000"},
+    )
+    assert rider_resp.status_code == 201, rider_resp.text
+    rider_id = rider_resp.json()["id"]
+
+    assign_resp = await client.post(
+        f"/api/v1/admin/orders/{order_id}/assign-rider",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"rider_id": rider_id},
+    )
+    assert assign_resp.status_code == 200, assign_resp.text
+
+    status_resp = await client.patch(
+        f"/api/v1/admin/orders/{order_id}/status",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={"status": "out_for_delivery"},
+    )
+    assert status_resp.status_code == 200, status_resp.text
+
+    my_order_resp = await client.get(
+        f"/api/v1/orders/me/{order_id}",
+        headers=auth_header(customer_tokens["access_token"]),
+    )
+    assert my_order_resp.status_code == 200, my_order_resp.text
+    data = my_order_resp.json()
+    assert data["status"] == "out_for_delivery"
+    assert data["rider_id"] == rider_id
+    assert data["rider"] is not None
+    assert data["rider"]["name"] == "Tunde Rider"
+    assert data["rider"]["phone"] == "08039990000"

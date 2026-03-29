@@ -49,6 +49,17 @@ class OrderItemResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class OrderRiderResponse(BaseModel):
+    id: uuid.UUID
+    name: str
+    phone: str
+    is_active: bool
+    current_lat: Decimal | None
+    current_lng: Decimal | None
+
+    model_config = {"from_attributes": True}
+
+
 class OrderResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
@@ -60,6 +71,7 @@ class OrderResponse(BaseModel):
     total_ngn: Decimal
     delivery_address: dict
     rider_id: uuid.UUID | None
+    rider: OrderRiderResponse | None = None
     notes: str | None
     items: list[OrderItemResponse]
     created_at: datetime

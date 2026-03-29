@@ -98,6 +98,15 @@ export interface OrderItem {
   unit_price_ngn: number;
 }
 
+export interface RiderInfo {
+  id: string;
+  name: string;
+  phone: string;
+  is_active: boolean;
+  current_lat: number | null;
+  current_lng: number | null;
+}
+
 export interface Order {
   id: string;
   user_id: string;
@@ -110,6 +119,7 @@ export interface Order {
   delivery_address: DeliveryAddress;
   items: OrderItem[];
   rider_id: string | null;
+  rider: RiderInfo | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

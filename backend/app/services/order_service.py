@@ -23,6 +23,10 @@ class OrderService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    @staticmethod
+    def _with_order_relations(query):
+        return query.options(selectinload(Order.items), selectinload(Order.rider))
+
     async def _apply_promo(self, code: str, subtotal: Decimal) -> tuple[PromoCode, Decimal]:
         from datetime import datetime, timezone
         result = await self.db.execute(select(PromoCode).where(PromoCode.code == code.upper()))
@@ -95,7 +99,7 @@ class OrderService:
         return order
 
     async def get_order(self, order_id: uuid.UUID, user_id: uuid.UUID | None = None) -> Order:
-        query = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+        query = self._with_order_relations(select(Order)).where(Order.id == order_id)
         if user_id:
             query = query.where(Order.user_id == user_id)
         result = await self.db.execute(query)
@@ -106,8 +110,7 @@ class OrderService:
 
     async def list_user_orders(self, user_id: uuid.UUID, offset: int = 0, limit: int = 20) -> list[Order]:
         result = await self.db.execute(
-            select(Order)
-            .options(selectinload(Order.items))
+            self._with_order_relations(select(Order))
             .where(Order.user_id == user_id)
             .order_by(Order.created_at.desc())
             .offset(offset)
@@ -121,7 +124,7 @@ class OrderService:
         offset: int = 0,
         limit: int = 50,
     ) -> list[Order]:
-        query = select(Order).options(selectinload(Order.items))
+        query = self._with_order_relations(select(Order))
         if status:
             query = query.where(Order.status == status)
         query = query.order_by(Order.created_at.desc()).offset(offset).limit(limit)
@@ -131,7 +134,7 @@ class OrderService:
     async def update_status(self, order_id: uuid.UUID, data: OrderStatusUpdate) -> Order:
         from decimal import Decimal
         result = await self.db.execute(
-            select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+            self._with_order_relations(select(Order)).where(Order.id == order_id)
         )
         order = result.scalar_one_or_none()
         if not order:
@@ -171,7 +174,7 @@ class OrderService:
     async def track_order(self, order_id: uuid.UUID, phone: str) -> Order:
         """Public tracking: verify order exists and phone matches delivery address."""
         result = await self.db.execute(
-            select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+            self._with_order_relations(select(Order)).where(Order.id == order_id)
         )
         order = result.scalar_one_or_none()
         if not order:
@@ -189,7 +192,7 @@ class OrderService:
         result = await self.db.execute(
             select(Order)
             .where(Order.id == order_id, Order.user_id == user_id)
-            .options(selectinload(Order.items))
+            .options(selectinload(Order.items), selectinload(Order.rider))
         )
         order = result.scalar_one_or_none()
         if not order:
