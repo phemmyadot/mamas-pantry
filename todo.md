@@ -217,7 +217,7 @@ BUGS Phase 2
 [x]  customer count in admin home shouldn't include admin and staffs
 [x] when i edit an invetory, i had to refresh to show effect. should update state
 [x] updating order to delivered fails
-[ ] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
+[x] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
 
 
 Features

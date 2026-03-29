@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.db.models.order import OrderStatus, PaymentStatus
 
@@ -12,6 +12,19 @@ class DeliveryAddress(BaseModel):
     phone: str = Field(..., min_length=7, max_length=20)
     address: str = Field(..., min_length=5, max_length=300)
     city: str = Field(..., min_length=1, max_length=100)
+
+    @field_validator("phone")
+    @classmethod
+    def validate_nigerian_phone(cls, value: str) -> str:
+        compact = value.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+        if compact.startswith("+234"):
+            compact = f"0{compact[4:]}"
+        elif compact.startswith("234"):
+            compact = f"0{compact[3:]}"
+
+        if not (compact.isdigit() and len(compact) == 11 and compact.startswith("0") and compact[1] in {"7", "8", "9"}):
+            raise ValueError("Phone must be a valid Nigerian number (e.g. 08012345678 or +2348012345678)")
+        return compact
 
 
 class OrderItemCreate(BaseModel):

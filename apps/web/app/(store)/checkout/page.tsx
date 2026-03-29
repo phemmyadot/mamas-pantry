@@ -54,6 +54,17 @@ function formatNGN(n: number) {
   }).format(n);
 }
 
+function normalizeNigerianPhone(value: string): string | null {
+  let compact = value.trim().replace(/\s+/g, "").replace(/-/g, "").replace(/[()]/g, "");
+  if (compact.startsWith("+234")) {
+    compact = `0${compact.slice(4)}`;
+  } else if (compact.startsWith("234")) {
+    compact = `0${compact.slice(3)}`;
+  }
+  if (!/^0[789]\d{9}$/.test(compact)) return null;
+  return compact;
+}
+
 type Step = 1 | 2 | 3;
 
 export default function CheckoutPage({
@@ -140,15 +151,21 @@ export default function CheckoutPage({
 
   // ─── Step 1: validate address ────────────────────────────────────────────────
   function handleStep1Next() {
+    const normalizedPhone = normalizeNigerianPhone(addressForm.phone);
+    if (!normalizedPhone) {
+      setError("Please enter a valid Nigerian phone number (e.g. 08012345678).");
+      return;
+    }
+
     if (isAuthenticated && !useNewAddress && savedAddresses.length > 0) {
       if (!selectedAddressId) { setError("Please select a delivery address."); return; }
-      if (!addressForm.phone) { setError("Please enter your phone number."); return; }
     } else {
-      if (!addressForm.name || !addressForm.phone || !addressForm.address) {
+      if (!addressForm.name || !addressForm.address) {
         setError("Please fill in all required fields.");
         return;
       }
     }
+    setAddressForm((f) => ({ ...f, phone: normalizedPhone }));
     setError("");
     setStep(2);
   }
@@ -295,6 +312,8 @@ export default function CheckoutPage({
                     <input
                       type="tel"
                       required
+                      inputMode="numeric"
+                      autoComplete="tel"
                       value={addressForm.phone}
                       onChange={(e) => setAddressForm((f) => ({ ...f, phone: e.target.value }))}
                       placeholder="e.g. 0812 345 6789"
@@ -328,6 +347,8 @@ export default function CheckoutPage({
                         <input
                           type={type}
                           required
+                          inputMode={name === "phone" ? "numeric" : undefined}
+                          autoComplete={name === "phone" ? "tel" : undefined}
                           value={addressForm[name]}
                           onChange={(e) => setAddressForm((f) => ({ ...f, [name]: e.target.value }))}
                           placeholder={placeholder}

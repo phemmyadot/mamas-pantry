@@ -308,3 +308,44 @@ async def test_delivered_status_requires_assigned_rider(client, db_session):
         json={"status": "delivered"},
     )
     assert status_resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_order_rejects_non_nigerian_phone(client, db_session):
+    customer = await create_test_user(client, email="customer6@example.com")
+    admin = await create_test_user(client, email="admin6@example.com")
+    await _assign_role(db_session, admin["id"], "admin")
+
+    admin_tokens = await login_user(client, email="admin6@example.com")
+    customer_tokens = await login_user(client, email="customer6@example.com")
+
+    product_resp = await client.post(
+        "/api/v1/admin/products",
+        headers=auth_header(admin_tokens["access_token"]),
+        json={
+            "name": "Phone Validation Product",
+            "slug": "phone-validation-product",
+            "description": "Phone validation test product",
+            "price_ngn": 1500,
+            "category": "local",
+            "is_mums_pick": False,
+            "stock_qty": 10,
+            "is_active": True,
+        },
+    )
+    assert product_resp.status_code == 201, product_resp.text
+
+    order_resp = await client.post(
+        "/api/v1/orders",
+        headers=auth_header(customer_tokens["access_token"]),
+        json={
+            "items": [{"product_id": product_resp.json()["id"], "qty": 1}],
+            "delivery_address": {
+                "name": "Phone Test Customer",
+                "phone": "08AB123CD67",
+                "address": "6 Validation Road",
+                "city": "Lagos",
+            },
+        },
+    )
+    assert order_resp.status_code == 422
