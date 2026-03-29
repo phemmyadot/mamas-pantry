@@ -10,9 +10,9 @@ from app.db.base import Base
 
 
 class LoyaltyTransactionType(str, enum.Enum):
-    earn = "EARN"
-    redeem = "REDEEM"
-    expire = "EXPIRE"
+    EARN = "EARN"
+    REDEEM = "REDEEM"
+    EXPIRE = "EXPIRE"
 
 
 class LoyaltyTransaction(Base):

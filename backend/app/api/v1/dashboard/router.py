@@ -71,9 +71,16 @@ async def dashboard(
     )
     low_stock = int(low_stock_row.scalar_one())
 
-    # New customers today
+    # New customers today (exclude admin/staff users)
+    staff_user_ids = select(UserRole.c.user_id).join(
+        Role, Role.id == UserRole.c.role_id
+    ).where(Role.name.in_(["admin", "super_admin", "staff"]))
+
     new_customers_row = await db.execute(
-        select(func.count(User.id)).where(User.created_at >= today_start)
+        select(func.count(User.id)).where(
+            User.created_at >= today_start,
+            User.id.not_in(staff_user_ids),
+        )
     )
     new_customers = int(new_customers_row.scalar_one())
 

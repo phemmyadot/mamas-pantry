@@ -22,7 +22,7 @@ class LoyaltyService:
             user_id=user_id,
             order_id=order_id,
             points=points,
-            type=LoyaltyTransactionType.earn,
+            type=LoyaltyTransactionType.EARN,
             description=f"Earned from order delivery (+{points} pts)",
         )
         self.db.add(tx)
@@ -36,9 +36,9 @@ class LoyaltyService:
             .where(
                 LoyaltyTransaction.user_id == user_id,
                 LoyaltyTransaction.type.in_([
-                    LoyaltyTransactionType.earn,
-                    LoyaltyTransactionType.redeem,
-                    LoyaltyTransactionType.expire,
+                    LoyaltyTransactionType.EARN,
+                    LoyaltyTransactionType.REDEEM,
+                    LoyaltyTransactionType.EXPIRE,
                 ]),
             )
         )

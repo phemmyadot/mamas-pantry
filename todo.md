@@ -214,9 +214,9 @@ BUGS
 
 
 BUGS Phase 2
-[ ]  customer count in admin home shouldn't include admin and staffs
-[ ] when i edit an invetory, i had to refresh to show effect. should update state
-[ ] updating order to delivered fails
+[x]  customer count in admin home shouldn't include admin and staffs
+[x] when i edit an invetory, i had to refresh to show effect. should update state
+[x] updating order to delivered fails
 
 
 Features

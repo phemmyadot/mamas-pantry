@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { products, type ProductCreate, type ProductCategory } from "@/lib/api";
 import { slugify } from "@/lib/utils";
 import Spinner from "@/components/Spinner";
@@ -20,6 +20,7 @@ export default function ProductFormPage() {
   const { id } = useParams<{ id: string }>();
   const isNew = !id || id === "new";
   const navigate = useNavigate();
+  const qc = useQueryClient();
 
   const [form, setForm] = useState<ProductCreate>(EMPTY);
   const [slugManual, setSlugManual] = useState(false);
@@ -62,13 +63,20 @@ export default function ProductFormPage() {
 
   const createMutation = useMutation({
     mutationFn: () => products.create(form),
-    onSuccess: () => navigate("/inventory"),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["products"] });
+      navigate("/inventory");
+    },
     onError: (e: Error) => setError(e.message),
   });
 
   const updateMutation = useMutation({
     mutationFn: () => products.update(id!, form),
-    onSuccess: () => navigate("/inventory"),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["product", id] });
+      await qc.invalidateQueries({ queryKey: ["products"] });
+      navigate("/inventory");
+    },
     onError: (e: Error) => setError(e.message),
   });
 
