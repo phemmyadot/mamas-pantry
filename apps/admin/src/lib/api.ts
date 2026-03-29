@@ -76,7 +76,13 @@ export async function apiFetch<T>(
   if (res.status === 204) return undefined as unknown as T;
 
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new ApiError(res.status, body?.detail ?? res.statusText);
+  if (!res.ok) {
+    const raw = body?.detail ?? res.statusText;
+    const detail = Array.isArray(raw)
+      ? raw.map((e: { msg?: string; loc?: string[] }) => `${e.loc?.slice(1).join(".") ?? "field"}: ${e.msg ?? "invalid"}`).join("; ")
+      : String(raw);
+    throw new ApiError(res.status, detail);
+  }
   return body as T;
 }
 

@@ -41,9 +41,9 @@ interface Slot {
 
 const SLOTS: Slot[] = [
   { id: "today_afternoon", label: "Today, 2 – 6 pm", sub: "Order by 1:30 pm", cutoff: 13, isToday: true },
-  { id: "today_evening",   label: "Today, 6 – 9 pm", sub: "Order by 5:30 pm", cutoff: 17, isToday: true },
-  { id: "tmrw_morning",    label: "Tomorrow, 9 am – 1 pm", sub: "Order anytime today", cutoff: 99, isToday: false },
-  { id: "tmrw_afternoon",  label: "Tomorrow, 2 – 6 pm",    sub: "Order anytime today", cutoff: 99, isToday: false },
+  { id: "today_evening", label: "Today, 6 – 9 pm", sub: "Order by 5:30 pm", cutoff: 17, isToday: true },
+  { id: "tmrw_morning", label: "Tomorrow, 9 am – 1 pm", sub: "Order anytime today", cutoff: 99, isToday: false },
+  { id: "tmrw_afternoon", label: "Tomorrow, 2 – 6 pm", sub: "Order anytime today", cutoff: 99, isToday: false },
 ];
 
 function formatNGN(n: number) {
@@ -94,7 +94,7 @@ export default function CheckoutPage({
       setSavedAddresses(list);
       const def = list.find((a) => a.is_default) ?? list[0];
       if (def) setSelectedAddressId(def.id);
-    }).catch(() => {});
+    }).catch(() => { });
   }, [isAuthenticated]);
 
   // Inject Paystack script
@@ -102,7 +102,7 @@ export default function CheckoutPage({
     if (document.getElementById("paystack-js")) return;
     const script = document.createElement("script");
     script.id = "paystack-js";
-    script.src = "https://js.paystack.co/v1/inline.js";
+    script.src = "https://js.paystack.co/v2/inline.js";
     script.async = true;
     document.body.appendChild(script);
   }, []);
@@ -203,26 +203,24 @@ export default function CheckoutPage({
       return;
     }
 
-    const handler = window.PaystackPop.setup({
+    const paystack = new window.PaystackPop();
+    paystack.newTransaction({
       key: paystackKey,
       email: user?.email ?? "guest@mamaspantry.ng",
       amount: totalNgn * 100, // Paystack uses kobo
       currency: "NGN",
       ref: orderId,
       metadata: { order_id: orderId, slot },
-      onSuccess: async () => {
+      onSuccess: () => {
         track(Events.ORDER_PLACED, { order_id: orderId, total_ngn: totalNgn });
-        try { await orders.confirmPayment(orderId); } catch { /* webhook will handle it */ }
         clearCart();
-        window.location.href = `/checkout/confirmation?order=${orderId}`;
+        window.location.href = `/checkout/confirmation?order=${orderId}&paid=1`;
       },
       onCancel: () => {
         setPlacing(false);
         setError("Payment was cancelled. Your order has been saved — you can retry payment from your order history.");
       },
     });
-
-    handler.openIframe();
     setPlacing(false);
   }
 
@@ -386,7 +384,7 @@ export default function CheckoutPage({
                       className={`flex items-center gap-3 p-4 rounded-2xl border transition-colors
                         ${disabled ? "opacity-40 cursor-not-allowed bg-cream border-cream-dark" :
                           slot === s.id ? "border-forest-deep bg-forest-mist cursor-pointer" :
-                          "border-cream-dark bg-white hover:border-forest-light cursor-pointer"}`}
+                            "border-cream-dark bg-white hover:border-forest-light cursor-pointer"}`}
                     >
                       <input
                         type="radio"

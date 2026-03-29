@@ -202,3 +202,32 @@
 - [x] Seed product catalogue — 20 products: 6 Imported, 5 Local, 4 Chilled, 5 Household; 6 with `is_mums_pick=true`; all with ₦ prices, slugs, origin fields (`app/scripts/seed_catalogue.py`)
 - [x] Create at least one test shipment — "April 2026 USA Haul" (upcoming, arrives 2026-04-14)
 - [ ] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
+
+BUGS
+
+[x] on payment success, app stays in checkout. should go home/my orders
+[x] on payment success, order status wasnt updated
+[x] cart wasnt cleared on payment success
+[x] when i update status of order in admin, i have to refresh page to show new status in list.
+[x] customer list and count in admin shouldn't include admin and staffs
+[x] when i uncheck active on admin inventor, it disappears from list.
+
+
+BUGS Phase 2
+[ ]  customer count in admin home shouldn't include admin and staffs
+[ ] when i edit an invetory, i had to refresh to show effect. should update state
+[ ] updating order to delivered fails
+
+
+Features
+[ ] allow admin create staff account for users and manage staffs
+[ ] send order status change email to customer
+[ ] admin inventory image should allow uploading. Create plan for uploading images.
+[ ] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
+[ ] authntication state is not properly done, sometimes it shows signin and then username on refresh
+
+
+Future
+[ ] in store interface - STAFF
+[ ] Rider app - RIDER
+[ ] Cutomer mobile

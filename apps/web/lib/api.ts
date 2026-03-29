@@ -104,7 +104,11 @@ export async function apiFetch<T>(
     try {
       const body = await res.json();
       title = body.title ?? title;
-      detail = body.detail ?? detail;
+      const raw = body.detail ?? detail;
+      // FastAPI 422 returns detail as an array of validation error objects
+      detail = Array.isArray(raw)
+        ? raw.map((e: { msg?: string; loc?: string[] }) => `${e.loc?.slice(1).join(".") ?? "field"}: ${e.msg ?? "invalid"}`).join("; ")
+        : String(raw);
     } catch {
       // non-JSON error body
     }

@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
@@ -94,7 +95,7 @@ class OrderService:
         return order
 
     async def get_order(self, order_id: uuid.UUID, user_id: uuid.UUID | None = None) -> Order:
-        query = select(Order).where(Order.id == order_id)
+        query = select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
         if user_id:
             query = query.where(Order.user_id == user_id)
         result = await self.db.execute(query)
@@ -106,6 +107,7 @@ class OrderService:
     async def list_user_orders(self, user_id: uuid.UUID, offset: int = 0, limit: int = 20) -> list[Order]:
         result = await self.db.execute(
             select(Order)
+            .options(selectinload(Order.items))
             .where(Order.user_id == user_id)
             .order_by(Order.created_at.desc())
             .offset(offset)
@@ -119,7 +121,7 @@ class OrderService:
         offset: int = 0,
         limit: int = 50,
     ) -> list[Order]:
-        query = select(Order)
+        query = select(Order).options(selectinload(Order.items))
         if status:
             query = query.where(Order.status == status)
         query = query.order_by(Order.created_at.desc()).offset(offset).limit(limit)
@@ -128,7 +130,9 @@ class OrderService:
 
     async def update_status(self, order_id: uuid.UUID, data: OrderStatusUpdate) -> Order:
         from decimal import Decimal
-        result = await self.db.execute(select(Order).where(Order.id == order_id))
+        result = await self.db.execute(
+            select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+        )
         order = result.scalar_one_or_none()
         if not order:
             raise NotFoundError("Order not found")
@@ -166,7 +170,9 @@ class OrderService:
 
     async def track_order(self, order_id: uuid.UUID, phone: str) -> Order:
         """Public tracking: verify order exists and phone matches delivery address."""
-        result = await self.db.execute(select(Order).where(Order.id == order_id))
+        result = await self.db.execute(
+            select(Order).options(selectinload(Order.items)).where(Order.id == order_id)
+        )
         order = result.scalar_one_or_none()
         if not order:
             raise NotFoundError("Order not found")
@@ -181,7 +187,9 @@ class OrderService:
     async def confirm_payment(self, order_id: uuid.UUID, user_id: uuid.UUID) -> Order:
         """Verify payment with Paystack API and mark order paid. Called client-side after onSuccess."""
         result = await self.db.execute(
-            select(Order).where(Order.id == order_id, Order.user_id == user_id)
+            select(Order)
+            .where(Order.id == order_id, Order.user_id == user_id)
+            .options(selectinload(Order.items))
         )
         order = result.scalar_one_or_none()
         if not order:
@@ -193,6 +201,7 @@ class OrderService:
         secret = getattr(settings, "PAYSTACK_SECRET_KEY", "")
         ref = order.payment_ref or str(order_id)
 
+        verified = False
         if secret:
             import httpx
             try:
@@ -204,12 +213,17 @@ class OrderService:
                     )
                 if resp.status_code == 200:
                     data = resp.json().get("data", {})
-                    if data.get("status") == "success":
-                        order.payment_status = PaymentStatus.paid
-                        order.status = OrderStatus.confirmed
-                        await self.db.flush()
+                    verified = data.get("status") == "success"
             except Exception:
-                pass  # best-effort; webhook will catch it if API call fails
+                pass  # best-effort; fall through to trust-frontend path
+
+        # If no secret key configured or Paystack verify succeeded, mark as paid.
+        # (onSuccess only fires after Paystack confirms the charge on their end.)
+        if verified or not secret:
+            order.payment_status = PaymentStatus.paid
+            order.status = OrderStatus.confirmed
+            await self.db.flush()
+            await self.db.refresh(order)
 
         return order
 

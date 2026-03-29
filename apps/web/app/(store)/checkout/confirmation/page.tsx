@@ -15,9 +15,9 @@ const STATUS_LABELS: Record<string, string> = {
 export default function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ order?: string }>;
+  searchParams: Promise<{ order?: string; paid?: string }>;
 }) {
-  const { order: orderId } = use(searchParams);
+  const { order: orderId, paid } = use(searchParams);
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,12 +26,20 @@ export default function ConfirmationPage({
       setLoading(false);
       return;
     }
-    orders
-      .myOrder(orderId)
-      .then(setOrder)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [orderId]);
+    const load = async () => {
+      if (paid === "1") {
+        try { await orders.confirmPayment(orderId); } catch { /* best-effort */ }
+      }
+      try {
+        setOrder(await orders.myOrder(orderId));
+      } catch {
+        // order not found
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [orderId, paid]);
 
   if (loading) {
     return (
