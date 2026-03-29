@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { inStoreOrders, products, type Product, type Order, ApiError } from "@/lib/api";
 import { useAuth } from "@/contexts/auth-context";
@@ -58,8 +58,11 @@ function SimpleModal({
 }
 
 export default function InStorePurchasePage() {
+  const DUPLICATE_SCAN_WINDOW_MS = 500;
   const qc = useQueryClient();
   const { user, isAdmin } = useAuth();
+  const skuInputRef = useRef<HTMLInputElement | null>(null);
+  const lastScanRef = useRef<{ sku: string; ts: number } | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [notes, setNotes] = useState("");
   const [skuInput, setSkuInput] = useState("");
@@ -90,6 +93,7 @@ export default function InStorePurchasePage() {
     onSuccess: (product) => {
       if (product.stock_qty <= 0) {
         setError(`${product.name} is out of stock.`);
+        focusSkuInput();
         return;
       }
 
@@ -114,6 +118,7 @@ export default function InStorePurchasePage() {
       setSkuInput("");
       setError("");
       setMessage("");
+      focusSkuInput();
     },
     onError: (e: unknown) => {
       if (e instanceof ApiError) {
@@ -124,6 +129,7 @@ export default function InStorePurchasePage() {
         setError("Failed to add item by SKU.");
       }
       setMessage("");
+      focusSkuInput();
     },
   });
 
@@ -144,10 +150,12 @@ export default function InStorePurchasePage() {
       setSelectedItems([]);
       setSkuInput("");
       await qc.invalidateQueries({ queryKey: ["orders"] });
+      focusSkuInput();
     },
     onError: (e: unknown) => {
       setError(e instanceof ApiError ? e.detail : "Failed to create in-store order.");
       setMessage("");
+      focusSkuInput();
     },
   });
 
@@ -160,9 +168,11 @@ export default function InStorePurchasePage() {
       setMessage(`Payment confirmed for order #${order.id.slice(0, 8).toUpperCase()}.`);
       await qc.invalidateQueries({ queryKey: ["orders"] });
       await qc.invalidateQueries({ queryKey: ["order", order.id] });
+      focusSkuInput();
     },
     onError: (e: unknown) => {
       setError(e instanceof ApiError ? e.detail : "Failed to confirm payment.");
+      focusSkuInput();
     },
   });
 
@@ -171,15 +181,45 @@ export default function InStorePurchasePage() {
     onSuccess: (data) => {
       setError("");
       setMessage(`Cleanup complete. Cancelled ${data.cancelled_count} pending in-store order(s).`);
+      focusSkuInput();
     },
     onError: (e: unknown) => {
       setError(e instanceof ApiError ? e.detail : "Failed to clean pending orders.");
+      focusSkuInput();
     },
   });
 
+  useEffect(() => {
+    skuInputRef.current?.focus();
+  }, []);
+
+  function focusSkuInput() {
+    setTimeout(() => {
+      skuInputRef.current?.focus();
+    }, 0);
+  }
+
   function handleAddBySku() {
     setError("");
-    lookupSkuMutation.mutate(skuInput);
+    const normalized = skuInput.trim().toUpperCase();
+    if (!normalized) {
+      setError("Enter a product SKU.");
+      focusSkuInput();
+      return;
+    }
+
+    const now = Date.now();
+    if (
+      lastScanRef.current &&
+      lastScanRef.current.sku === normalized &&
+      now - lastScanRef.current.ts <= DUPLICATE_SCAN_WINDOW_MS
+    ) {
+      focusSkuInput();
+      return;
+    }
+
+    lastScanRef.current = { sku: normalized, ts: now };
+    lookupSkuMutation.mutate(normalized);
   }
 
   function setQty(productId: string, qty: number) {
@@ -235,6 +275,7 @@ export default function InStorePurchasePage() {
 
           <div className="flex gap-2">
             <input
+              ref={skuInputRef}
               type="text"
               placeholder="Enter or scan SKU"
               value={skuInput}

@@ -221,7 +221,7 @@
 ## Features
 [x] allow admin create staff account for users and manage staffs/rider. staff can see orders, inventory (view only), riders(view only), in store purchase(make basic for now). rider only see assigned
 [x] in-store staff purchase flow: pick items, select cash/card, confirm payment, save as paid+delivered order with in-store channel and attending staff username
-[ ] in store purchase to support bar code scaning (products to store sku)
+[x] in store purchase to support bar code scaning (products to store sku)
 [x] send order status change email to customer
 [ ] admin inventory image should allow uploading. Create plan for uploading images.
 [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
@@ -238,6 +238,5 @@
 [x] average daily revenue for staff
 
 ## Future
-[ ] in store interface - STAFF
 [ ] Rider app - RIDER
 [ ] Cutomer mobile
