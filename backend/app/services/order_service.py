@@ -303,14 +303,6 @@ class OrderService:
                 total_ngn=Decimal(str(order.total_ngn)),
             )
 
-        # Send push notification on status change
-        try:
-            from app.services.notification_service import NotificationService
-            ns = NotificationService(self.db)
-            await ns.notify_order_status(order)
-        except Exception:
-            pass  # Notifications are best-effort
-
         # Send email notification on status change
         try:
             from app.core.email import send_order_status_email

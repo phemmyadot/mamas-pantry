@@ -28,7 +28,6 @@ mamas-pantry/
 | Auth | JWT (access + refresh), email verification |
 | Payments | Paystack inline SDK |
 | Image storage | Cloudflare R2 (S3-compatible via boto3) |
-| Push notifications | Firebase FCM |
 | Analytics | Mixpanel + Vercel Analytics |
 | Package manager | pnpm workspaces |
 
@@ -119,8 +118,6 @@ pnpm --filter @mamas-pantry/admin test
 | `SMTP_HOST/PORT/USER/PASSWORD` | Gmail SMTP for transactional email |
 | `EMAIL_FROM` | From address for system emails |
 | `PAYSTACK_SECRET_KEY` | Paystack secret key (webhook HMAC verification) |
-| `FIREBASE_PROJECT_ID` | Firebase project ID |
-| `FIREBASE_SERVICE_ACCOUNT_JSON` | Service account JSON (single-line string) for FCM v1 auth |
 | `R2_ACCOUNT_ID` | Cloudflare account ID |
 | `R2_ACCESS_KEY_ID` | R2 API token access key |
 | `R2_SECRET_ACCESS_KEY` | R2 API token secret |
@@ -133,7 +130,6 @@ pnpm --filter @mamas-pantry/admin test
 | Variable | Description |
 |---|---|
 | `NEXT_PUBLIC_PAYSTACK_KEY` | Paystack public key (inline popup) |
-| `NEXT_PUBLIC_FIREBASE_*` | Firebase config for push notification registration |
 
 ---
 
@@ -159,7 +155,6 @@ pnpm --filter @mamas-pantry/admin test
 - Loyalty points (1 pt per ₦100 on delivery)
 - Promo codes (percentage or fixed discount)
 - Order status emails to customers (via Gmail SMTP)
-- Push notifications via Firebase FCM
 - Product image upload to Cloudflare R2
 - SEO: `generateMetadata`, JSON-LD structured data, sitemap, robots.txt
 - Public order tracking (no login — order ID + phone)

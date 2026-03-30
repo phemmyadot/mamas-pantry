@@ -13,7 +13,6 @@ import ShipmentsPage from "@/pages/ShipmentsPage";
 import CustomersPage from "@/pages/CustomersPage";
 import AnalyticsPage from "@/pages/AnalyticsPage";
 import PromosPage from "@/pages/PromosPage";
-import NotificationsPage from "@/pages/NotificationsPage";
 import DeliveryFeesPage from "@/pages/DeliveryFeesPage";
 import StaffManagementPage from "@/pages/StaffManagementPage";
 import StaffDetailPage from "@/pages/StaffDetailPage";
@@ -60,7 +59,6 @@ export default function App() {
             <Route path="staff-access/:id" element={<RoleRoute allow={["admin"]}><StaffDetailPage /></RoleRoute>} />
             <Route path="promos" element={<RoleRoute allow={["admin"]}><PromosPage /></RoleRoute>} />
             <Route path="delivery-fees" element={<RoleRoute allow={["admin"]}><DeliveryFeesPage /></RoleRoute>} />
-            <Route path="notifications" element={<RoleRoute allow={["admin"]}><NotificationsPage /></RoleRoute>} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

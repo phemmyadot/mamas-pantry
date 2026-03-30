@@ -8,7 +8,6 @@ from app.db.models.shipment import Shipment, ShipmentStatus
 from app.db.models.pre_order import PreOrder, PreOrderStatus
 from app.db.models.loyalty import LoyaltyTransaction, LoyaltyTransactionType
 from app.db.models.promo_code import PromoCode, DiscountType
-from app.db.models.fcm_token import FcmToken
 from app.db.models.delivery_zone_fee import DeliveryZoneFee
 
 __all__ = [
@@ -21,7 +20,6 @@ __all__ = [
     "PreOrder", "PreOrderStatus",
     "LoyaltyTransaction", "LoyaltyTransactionType",
     "PromoCode", "DiscountType",
-    "FcmToken",
     "DeliveryZoneFee",
 ]
 

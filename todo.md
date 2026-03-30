@@ -8,6 +8,23 @@
 
 ---
 
+## Future Features
+
+### Push Notifications (Firebase FCM)
+- [ ] Backend: `FcmToken` model + migration
+- [ ] Backend: `NotificationService` using FCM HTTP v1 API (service account OAuth2 via `google-auth`)
+- [ ] Backend: `POST /notifications/subscribe` — register device token
+- [ ] Backend: `POST /admin/notifications/broadcast` — send to all subscribers
+- [ ] Backend: call `notify_order_status()` on order status change in `OrderService`
+- [ ] Backend: `FIREBASE_PROJECT_ID` + `FIREBASE_SERVICE_ACCOUNT_JSON` env vars
+- [ ] Web: Firebase SDK + service worker (`firebase-messaging-sw.js`)
+- [ ] Web: `PushNotificationToggle` component in `/account`
+- [ ] Web: `NEXT_PUBLIC_FIREBASE_*` env vars (apiKey, authDomain, projectId, etc.) + VAPID key
+- [ ] Admin: Notifications page — broadcast form (title + body)
+- [ ] Mobile (Rider + Customer): FCM token registration on login, deep-link from notification tap
+
+---
+
 ## Rider App — React Native
 
 ### Setup
