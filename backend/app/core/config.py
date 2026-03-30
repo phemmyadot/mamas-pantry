@@ -40,7 +40,11 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "change_me_in_production"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: str = "http://localhost:3000"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ORIGINS.split(",")]
 
     # Feature flags
     ENABLE_EMAIL_VERIFICATION: bool = False
