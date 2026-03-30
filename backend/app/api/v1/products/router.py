@@ -1,9 +1,11 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.auth.dependencies import get_current_user, require_any_role, require_role
+from app.core.config import settings
 from app.db.base import get_db
 from app.db.models.product import ProductCategory
 from app.db.models.user import User
@@ -11,6 +13,91 @@ from app.schemas.product import CategoryStat, ProductCreate, ProductResponse, Pr
 from app.services.product_service import ProductService
 
 router = APIRouter(tags=["products"])
+
+ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+
+class ImageUploadResponse(BaseModel):
+    public_url: str
+
+
+class DeleteImageRequest(BaseModel):
+    image_url: str
+
+
+def _r2_key_from_url(image_url: str) -> str | None:
+    """Extract the R2 object key from a public URL, e.g. .../products/uuid.jpg → products/uuid.jpg"""
+    base = settings.R2_PUBLIC_URL.rstrip("/")
+    if base and image_url.startswith(base + "/"):
+        return image_url[len(base) + 1:]
+    return None
+
+
+def _s3_client():
+    import boto3
+    from botocore.config import Config
+    return boto3.client(
+        "s3",
+        endpoint_url=f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+        aws_access_key_id=settings.R2_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
+        config=Config(signature_version="s3v4"),
+        region_name="auto",
+    )
+
+
+@router.post(
+    "/admin/products/delete-image",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a product image from Cloudflare R2",
+)
+async def delete_product_image(
+    body: DeleteImageRequest,
+    current_user: User = Depends(require_any_role("admin", "super_admin", "staff")),
+):
+    if not all([settings.R2_ACCOUNT_ID, settings.R2_ACCESS_KEY_ID, settings.R2_SECRET_ACCESS_KEY, settings.R2_BUCKET_NAME, settings.R2_PUBLIC_URL]):
+        return  # R2 not configured — nothing to delete
+
+    key = _r2_key_from_url(body.image_url)
+    if not key:
+        return  # Not an R2 URL (e.g. external URL) — ignore
+
+    try:
+        _s3_client().delete_object(Bucket=settings.R2_BUCKET_NAME, Key=key)
+    except Exception:
+        pass  # best-effort
+
+
+@router.post(
+    "/admin/products/upload-image",
+    response_model=ImageUploadResponse,
+    summary="Upload product image to Cloudflare R2",
+)
+async def upload_product_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(require_any_role("admin", "super_admin", "staff")),
+):
+    if not all([settings.R2_ACCOUNT_ID, settings.R2_ACCESS_KEY_ID, settings.R2_SECRET_ACCESS_KEY, settings.R2_BUCKET_NAME, settings.R2_PUBLIC_URL]):
+        raise HTTPException(status_code=503, detail="Image upload is not configured")
+
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}")
+
+    ext = (file.filename or "image").rsplit(".", 1)[-1].lower()
+    key = f"products/{uuid.uuid4()}.{ext}"
+
+    try:
+        import io
+        contents = await file.read()
+        _s3_client().upload_fileobj(
+            io.BytesIO(contents), settings.R2_BUCKET_NAME, key,
+            ExtraArgs={"ContentType": file.content_type},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+
+    public_url = f"{settings.R2_PUBLIC_URL.rstrip('/')}/{key}"
+    return ImageUploadResponse(public_url=public_url)
 
 
 @router.get(
@@ -178,4 +265,14 @@ async def delete_product(
     db: AsyncSession = Depends(get_db),
 ):
     service = ProductService(db)
+    product = await service.get(product_id)
+    image_url = product.image_url
     await service.delete(product_id)
+    # Clean up R2 image after successful DB delete
+    if image_url:
+        key = _r2_key_from_url(image_url)
+        if key:
+            try:
+                _s3_client().delete_object(Bucket=settings.R2_BUCKET_NAME, Key=key)
+            except Exception:
+                pass  # best-effort

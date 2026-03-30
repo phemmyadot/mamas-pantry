@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { products, type ProductCreate, type ProductCategory } from "@/lib/api";
@@ -27,6 +27,15 @@ export default function ProductFormPage() {
   const [slugManual, setSlugManual] = useState(false);
   const [error, setError] = useState("");
 
+  // Pending file: selected but not yet uploaded — uploaded on save
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+
+  // The R2 URL that was on the product when the form loaded — delete from R2 if replaced
+  const originalImageUrl = useRef<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { data: existing, isLoading } = useQuery({
     queryKey: ["product", id],
     queryFn: () => products.get(id!),
@@ -51,9 +60,22 @@ export default function ProductFormPage() {
         stock_qty: existing.stock_qty,
         is_active: existing.is_active,
       });
+      originalImageUrl.current = existing.image_url ?? null;
       setSlugManual(true);
     }
   }, [existing]);
+
+  function handleFileSelect(file: File) {
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+  }
+
+  function handleRemoveImage() {
+    setPendingFile(null);
+    setPendingPreview(null);
+    set("image_url", null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
 
   function set<K extends keyof ProductCreate>(k: K, v: ProductCreate[K]) {
     setForm((f) => {
@@ -64,7 +86,13 @@ export default function ProductFormPage() {
   }
 
   const createMutation = useMutation({
-    mutationFn: () => products.create(form),
+    mutationFn: async () => {
+      let imageUrl = form.image_url;
+      if (pendingFile) {
+        imageUrl = await products.uploadImage(pendingFile);
+      }
+      return products.create({ ...form, image_url: imageUrl });
+    },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["products"] });
       navigate("/inventory");
@@ -73,7 +101,21 @@ export default function ProductFormPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: () => products.update(id!, form),
+    mutationFn: async () => {
+      let imageUrl = form.image_url;
+      if (pendingFile) {
+        // Upload new image
+        imageUrl = await products.uploadImage(pendingFile);
+        // Delete old R2 image if it was one we uploaded (not an external URL)
+        if (originalImageUrl.current && originalImageUrl.current !== imageUrl) {
+          try { await products.deleteImage(originalImageUrl.current); } catch { /* best-effort */ }
+        }
+      } else if (form.image_url === null && originalImageUrl.current) {
+        // User cleared the image
+        try { await products.deleteImage(originalImageUrl.current); } catch { /* best-effort */ }
+      }
+      return products.update(id!, { ...form, image_url: imageUrl });
+    },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["product", id] });
       await qc.invalidateQueries({ queryKey: ["products"] });
@@ -90,6 +132,8 @@ export default function ProductFormPage() {
     if (isNew) createMutation.mutate();
     else updateMutation.mutate();
   }
+
+  const previewSrc = pendingPreview ?? form.image_url;
 
   if (!isNew && isLoading) return <div className="flex justify-center py-20"><Spinner className="w-8 h-8" /></div>;
 
@@ -199,16 +243,52 @@ export default function ProductFormPage() {
           </div>
         </div>
 
-        {/* Image URL */}
+        {/* Image upload */}
         <div>
-          <label className="block text-xs font-medium text-muted mb-1">Image URL</label>
-          <input
-            type="url"
-            value={form.image_url ?? ""}
-            onChange={(e) => set("image_url", e.target.value || null)}
-            placeholder="https://…"
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
-          />
+          <label className="block text-xs font-medium text-muted mb-1">Product image</label>
+          <div className="flex gap-3 items-start">
+            {/* Preview */}
+            <div
+              className="w-20 h-20 flex-shrink-0 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-forest-light transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {previewSrc ? (
+                <img src={previewSrc} alt="Product" className="w-full h-full object-cover" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 19.5h16.5M13.5 3.75h.008v.008H13.5V3.75Z" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full px-3 py-2 border border-dashed border-gray-300 rounded-lg text-xs text-muted hover:border-forest-light hover:text-forest-deep transition-colors"
+              >
+                {pendingFile ? pendingFile.name : "Click to select image"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }}
+              />
+              {pendingFile && (
+                <p className="text-xs text-forest-light">Image will be uploaded when you save.</p>
+              )}
+              {previewSrc && (
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="text-xs text-spice hover:underline"
+                >
+                  Remove image
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Badge */}
@@ -262,7 +342,7 @@ export default function ProductFormPage() {
             disabled={saving}
             className="flex-1 bg-forest-deep text-cream font-medium text-sm py-2.5 rounded-lg hover:bg-forest-mid disabled:opacity-60 transition-colors"
           >
-            {saving ? "Saving…" : isNew ? "Create product" : "Save changes"}
+            {saving ? (pendingFile ? "Uploading & saving…" : "Saving…") : isNew ? "Create product" : "Save changes"}
           </button>
           <button
             type="button"

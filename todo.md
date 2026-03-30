@@ -203,27 +203,21 @@
 - [x] Create at least one test shipment — "April 2026 USA Haul" (upcoming, arrives 2026-04-14)
 - [x] Add `NEXT_PUBLIC_PAYSTACK_KEY` to frontend `.env.local`
 
-## BUGS
+## Rider app - React Native
+- [ ] see list of assigned deliveries
+- [ ] mark as delivered only
+- [ ] navigation to address
+- [ ] customer security
 
-- [x] on payment success, app stays in checkout. should go home/my orders
-- [x] on payment success, order status wasnt updated
-- [x] cart wasnt cleared on payment success
-- [x] when i update status of order in admin, i have to refresh page to show new status in list.
-- [x] customer list and count in admin shouldn't include admin and staffs
-- [x] when i uncheck active on admin inventor, it disappears from list.
-- [x]  customer count in admin home shouldn't include admin and staffs
-- [x] when i edit an invetory, i had to refresh to show effect. should update state
-- [x] updating order to delivered fails
-- [x] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
-- [x] ready to pickup filter in orders is lagging, opthers are instant
+## Cutomer mobile app - React Native
+- [ ] same features as customer web 
 
-
-## Features
+## New Features
 - [x] allow admin create staff account for users and manage staffs/rider. staff can see orders, inventory (view only), riders(view only), in store purchase(make basic for now). rider only see assigned
 - [x] in-store staff purchase flow: pick items, select cash/card, confirm payment, save as paid+delivered order with in-store channel and attending staff username
 - [x] in store purchase to support bar code scaning (products to store sku)
 - [x] send order status change email to customer
-[ ] admin inventory image should allow uploading. Create plan for uploading images.
+- [x] admin inventory image should allow uploading. Create plan for uploading images.
 - [x] when order is assigned to driver and out for delivery, it should appear in customer order with driver's info
 - [x] authntication state is not properly done, sometimes it shows signin and then username on refresh
 - [x] Add pickup option in Review & pay. if pickup in admin, it shoud show "ready for pickup option and not out for delivery"
@@ -238,12 +232,16 @@
 - [x] average daily orders for staff 
 - [x] average daily revenue for staff
 
-## Rider app - React Native
-- [ ] see list of assigned deliveries
-- [ ] mark as delivered only
-- [ ] navigation to address
-- [ ] customer security
+## BUGS
+- [x] on payment success, app stays in checkout. should go home/my orders
+- [x] on payment success, order status wasnt updated
+- [x] cart wasnt cleared on payment success
+- [x] when i update status of order in admin, i have to refresh page to show new status in list.
+- [x] customer list and count in admin shouldn't include admin and staffs
+- [x] when i uncheck active on admin inventor, it disappears from list.
+- [x]  customer count in admin home shouldn't include admin and staffs
+- [x] when i edit an invetory, i had to refresh to show effect. should update state
+- [x] updating order to delivered fails
+- [x] Phone number in check accepts alphabet. ensure validation fro Nigeria phone number
+- [x] ready to pickup filter in orders is lagging, opthers are instant
 
-
-## Cutomer mobile app - React Native
-- [ ] same features as customer web 

@@ -9,6 +9,10 @@ vi.mock("react-router", () => ({
   useNavigate: () => vi.fn(),
 }));
 
+vi.mock("@/contexts/auth-context", () => ({
+  useAuth: () => ({ isAdmin: true, isStaff: true, user: { email: "admin@test.com" } }),
+}));
+
 const { mockGet, mockUpdateStatus, mockAssignRider, mockRidersList } = vi.hoisted(() => ({
   mockGet: vi.fn(),
   mockUpdateStatus: vi.fn(),

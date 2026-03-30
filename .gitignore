@@ -47,3 +47,6 @@ backend/**/__pycache__/
 backend/.venv/
 backend/*.egg-info/
 backend/.pytest_cache/
+
+CLUADE.md
+AGENTS.md

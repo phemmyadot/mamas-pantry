@@ -64,29 +64,29 @@ describe("OrdersPage", () => {
     );
   });
 
-  it("filters by status when tab is clicked", async () => {
+  it("filters by status client-side when tab is clicked", async () => {
     const user = userEvent.setup();
     renderWithQuery();
     await waitFor(() => expect(screen.getAllByText(/#AABBCCDD/i).length).toBeGreaterThan(0));
 
+    // Both rows visible initially
+    expect(screen.getAllByRole("row")).toHaveLength(3); // header + 2 rows
+
+    // Filter to "Pending" — only the pending order should show
     await user.click(screen.getByRole("button", { name: "Pending" }));
     await waitFor(() => {
-      expect(mockOrdersList).toHaveBeenCalledWith(
-        expect.objectContaining({ status: "pending" })
-      );
+      expect(screen.getAllByRole("row")).toHaveLength(2); // header + 1 row
     });
   });
 
-  it("resets to page 0 when status filter changes", async () => {
+  it("shows only matching orders after status filter", async () => {
     const user = userEvent.setup();
     renderWithQuery();
     await waitFor(() => expect(screen.getAllByText(/#AABBCCDD/i).length).toBeGreaterThan(0));
 
     await user.click(screen.getByRole("button", { name: "Delivered" }));
     await waitFor(() => {
-      expect(mockOrdersList).toHaveBeenCalledWith(
-        expect.objectContaining({ status: "delivered", offset: 0 })
-      );
+      expect(screen.getAllByRole("row")).toHaveLength(2); // header + 1 delivered row
     });
   });
 });

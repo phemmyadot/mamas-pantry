@@ -219,6 +219,27 @@ export const products = {
     apiFetch<Product>(`/admin/products/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
   delete: (id: string) => apiFetch<void>(`/admin/products/${id}`, { method: "DELETE" }),
   lowStock: (threshold = 5) => apiFetch<Product[]>(`/admin/inventory/low-stock?threshold=${threshold}`),
+  deleteImage: (imageUrl: string) =>
+    apiFetch<void>("/admin/products/delete-image", {
+      method: "POST",
+      body: JSON.stringify({ image_url: imageUrl }),
+    }),
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    // apiFetch sets Content-Type: application/json — bypass it for multipart
+    const res = await fetch(`/api/v1/admin/products/upload-image`, {
+      method: "POST",
+      headers: tokens.access ? { Authorization: `Bearer ${tokens.access}` } : {},
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new ApiError(res.status, body?.detail ?? res.statusText);
+    }
+    const data = await res.json();
+    return data.public_url as string;
+  },
 };
 
 // ── orders ─────────────────────────────────────────────────────────────────────

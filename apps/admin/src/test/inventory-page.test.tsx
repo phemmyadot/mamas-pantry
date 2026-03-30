@@ -8,6 +8,10 @@ vi.mock("react-router", () => ({
   Link: ({ to, children }: { to: string; children: React.ReactNode }) => <a href={to}>{children}</a>,
 }));
 
+vi.mock("@/contexts/auth-context", () => ({
+  useAuth: () => ({ isAdmin: true, isStaff: true, user: { email: "admin@test.com" } }),
+}));
+
 const { mockList, mockUpdate } = vi.hoisted(() => ({
   mockList: vi.fn(),
   mockUpdate: vi.fn(),
@@ -86,11 +90,10 @@ describe("InventoryPage", () => {
     renderWithQuery();
     await waitFor(() => screen.getByText("Tomatoes"));
 
-    // Toggle buttons are the rounded-full buttons without text
-    const toggles = screen.getAllByRole("button").filter((b) =>
-      b.className.includes("rounded-full") && !b.textContent
-    );
-    await user.click(toggles[0]);
+    // Find the row for "Tomatoes" (p1, is_active=true) and click its toggle
+    const tomatoRow = screen.getByText("Tomatoes").closest("tr")!;
+    const toggle = tomatoRow.querySelector("button[class*='rounded-full']") as HTMLElement;
+    await user.click(toggle);
 
     await waitFor(() =>
       expect(mockUpdate).toHaveBeenCalledWith("p1", { is_active: false })

@@ -71,6 +71,13 @@ class Settings(BaseSettings):
     # Frontend base URL (used in email links)
     FRONTEND_URL: str = "http://localhost:3000"
 
+    # Cloudflare R2 (image uploads — uses S3-compatible API via boto3)
+    R2_ACCOUNT_ID: str = ""
+    R2_ACCESS_KEY_ID: str = ""      # R2 API token → Access Key ID
+    R2_SECRET_ACCESS_KEY: str = ""  # R2 API token → Secret Access Key
+    R2_BUCKET_NAME: str = ""
+    R2_PUBLIC_URL: str = ""  # e.g. https://pub-xxx.r2.dev or custom domain
+
     # Seed admin (app/scripts/seed_admin.py)
     ADMIN_EMAIL: str = "admin@mamaspantry.ng"
     ADMIN_PASSWORD: str = "Admin1234!"
