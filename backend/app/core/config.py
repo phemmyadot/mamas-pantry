@@ -34,6 +34,7 @@ class Settings(BaseSettings):
 
     # Core
     PROJECT_NAME: str = "my_project"
+    DEBUG: bool = False  # set to true in local dev; disables API docs in prod
     AUTH_TIER: AuthTier = AuthTier.BASIC
     DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/dbname"
     JWT_SECRET: str = "change_me_in_production"

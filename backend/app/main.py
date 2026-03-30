@@ -14,8 +14,9 @@ from app.core.rate_limit import limiter
 def create_app() -> FastAPI:
     application = FastAPI(
         title=settings.PROJECT_NAME,
-        docs_url="/docs",
-        redoc_url="/redoc",
+        docs_url="/docs" if settings.DEBUG else None,
+        redoc_url="/redoc" if settings.DEBUG else None,
+        openapi_url="/openapi.json" if settings.DEBUG else None,
     )
 
     # Rate limiting
