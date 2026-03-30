@@ -37,7 +37,7 @@ export default function TrackOrderPage({ params }: { params: Promise<{ id: strin
   }
 
   const statusSteps = order?.delivery_address?.fulfillment_type === "pickup" ? PICKUP_STATUS_STEPS : DELIVERY_STATUS_STEPS;
-  const stepIndex = order ? statusSteps.indexOf(order.status as typeof statusSteps[number]) : -1;
+  const stepIndex = order ? (statusSteps as readonly string[]).indexOf(order.status) : -1;
 
   return (
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-10">

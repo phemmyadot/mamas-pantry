@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { shipments, type ShipmentCreate, type ShipmentStatus } from "@/lib/api";
+import { shipments, type Shipment, type ShipmentCreate, type ShipmentStatus } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
 import Spinner from "@/components/Spinner";
@@ -44,7 +44,7 @@ export default function ShipmentsPage() {
     setError("");
   }
 
-  function startEdit(s: typeof data extends (infer T)[] ? T : never) {
+  function startEdit(s: Shipment) {
     if (!s) return;
     setEditId(s.id);
     setForm({
@@ -92,7 +92,7 @@ export default function ShipmentsPage() {
                 <input
                   required
                   type="text"
-                  value={(form as Record<string, string>)[key]}
+                  value={(form as unknown as Record<string, string>)[key]}
                   onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
                   placeholder={placeholder}
                   className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"

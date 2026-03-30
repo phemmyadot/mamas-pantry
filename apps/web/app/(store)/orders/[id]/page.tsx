@@ -50,7 +50,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
   const isPickup = order.delivery_address?.fulfillment_type === "pickup";
   const statusSteps = isPickup ? PICKUP_STATUS_STEPS : DELIVERY_STATUS_STEPS;
-  const stepIndex = statusSteps.indexOf(order.status as typeof statusSteps[number]);
+  const stepIndex = (statusSteps as readonly string[]).indexOf(order.status);
   const isCancelled = order.status === "cancelled";
   const payment = PAYMENT_LABELS[order.payment_status] ?? { label: order.payment_status, color: "bg-cream-dark text-muted" };
 
