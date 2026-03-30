@@ -65,8 +65,9 @@ class Settings(BaseSettings):
     # Paystack
     PAYSTACK_SECRET_KEY: str = ""
 
-    # Firebase Cloud Messaging (push notifications)
-    FCM_SERVER_KEY: str = ""
+    # Firebase Cloud Messaging v1 (push notifications)
+    FIREBASE_PROJECT_ID: str = ""
+    FIREBASE_SERVICE_ACCOUNT_JSON: str = ""  # full service account JSON as a string
 
     # Frontend base URL (used in email links)
     FRONTEND_URL: str = "http://localhost:3000"

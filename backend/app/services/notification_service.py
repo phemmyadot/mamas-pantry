@@ -1,4 +1,6 @@
 """Push notification service using Firebase Cloud Messaging (FCM) HTTP v1 API."""
+import asyncio
+import json
 import logging
 import uuid
 
@@ -12,7 +14,7 @@ from app.db.models.order import Order
 
 logger = logging.getLogger(__name__)
 
-FCM_SEND_URL = "https://fcm.googleapis.com/fcm/send"
+FCM_SCOPES = ["https://www.googleapis.com/auth/firebase.messaging"]
 
 ORDER_STATUS_MESSAGES: dict[str, tuple[str, str]] = {
     "confirmed":        ("Order confirmed ✓", "Your order has been confirmed and will be packed soon."),
@@ -22,6 +24,22 @@ ORDER_STATUS_MESSAGES: dict[str, tuple[str, str]] = {
     "delivered":        ("Delivered ✓", "Your order has been delivered. Enjoy your groceries!"),
     "cancelled":        ("Order cancelled", "Your order has been cancelled. Contact us if you have questions."),
 }
+
+
+def _is_configured() -> bool:
+    return bool(settings.FIREBASE_PROJECT_ID and settings.FIREBASE_SERVICE_ACCOUNT_JSON)
+
+
+def _get_access_token() -> str:
+    """Obtain a short-lived OAuth2 access token from the service account credentials.
+    Runs synchronously — called via asyncio.to_thread to avoid blocking the event loop."""
+    from google.auth.transport.requests import Request
+    from google.oauth2 import service_account
+
+    info = json.loads(settings.FIREBASE_SERVICE_ACCOUNT_JSON)
+    creds = service_account.Credentials.from_service_account_info(info, scopes=FCM_SCOPES)
+    creds.refresh(Request())
+    return creds.token  # type: ignore[return-value]
 
 
 class NotificationService:
@@ -52,26 +70,38 @@ class NotificationService:
         return list(result.scalars().all())
 
     async def _send(self, tokens: list[str], title: str, body: str) -> None:
-        """Send FCM notification via legacy HTTP API. No-op if key not configured."""
-        key = getattr(settings, "FCM_SERVER_KEY", "")
-        if not key or not tokens:
+        """Send FCM notifications via the HTTP v1 API. No-op if not configured."""
+        if not _is_configured() or not tokens:
             return
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                payload = {
-                    "registration_ids": tokens,
-                    "notification": {"title": title, "body": body},
-                    "priority": "high",
-                }
-                resp = await client.post(
-                    FCM_SEND_URL,
-                    json=payload,
-                    headers={"Authorization": f"key={key}", "Content-Type": "application/json"},
-                )
-                if resp.status_code != 200:
-                    logger.warning("FCM send failed: %s %s", resp.status_code, resp.text)
+            access_token = await asyncio.to_thread(_get_access_token)
         except Exception as exc:
-            logger.warning("FCM send error: %s", exc)
+            logger.warning("FCM token fetch failed: %s", exc)
+            return
+
+        url = f"https://fcm.googleapis.com/v1/projects/{settings.FIREBASE_PROJECT_ID}/messages:send"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        }
+
+        async def _send_one(client: httpx.AsyncClient, device_token: str) -> None:
+            payload = {
+                "message": {
+                    "token": device_token,
+                    "notification": {"title": title, "body": body},
+                }
+            }
+            try:
+                resp = await client.post(url, json=payload, headers=headers)
+                if resp.status_code != 200:
+                    logger.warning("FCM send failed for token %s…: %s %s",
+                                   device_token[:8], resp.status_code, resp.text)
+            except Exception as exc:
+                logger.warning("FCM send error for token %s…: %s", device_token[:8], exc)
+
+        async with httpx.AsyncClient(timeout=10) as client:
+            await asyncio.gather(*(_send_one(client, t) for t in tokens))
 
     async def notify_order_status(self, order: Order) -> None:
         """Send push notification to order owner when status changes."""

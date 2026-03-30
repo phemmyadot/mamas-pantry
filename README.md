@@ -119,7 +119,8 @@ pnpm --filter @mamas-pantry/admin test
 | `SMTP_HOST/PORT/USER/PASSWORD` | Gmail SMTP for transactional email |
 | `EMAIL_FROM` | From address for system emails |
 | `PAYSTACK_SECRET_KEY` | Paystack secret key (webhook HMAC verification) |
-| `FCM_SERVER_KEY` | Firebase server key for push notifications |
+| `FIREBASE_PROJECT_ID` | Firebase project ID |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Service account JSON (single-line string) for FCM v1 auth |
 | `R2_ACCOUNT_ID` | Cloudflare account ID |
 | `R2_ACCESS_KEY_ID` | R2 API token access key |
 | `R2_SECRET_ACCESS_KEY` | R2 API token secret |
