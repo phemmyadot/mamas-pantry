@@ -103,7 +103,7 @@ async def login(
             session_token = await totp_service.create_session_token(user.id)
             return TOTPChallengeResponse(session_token=session_token).model_dump()
 
-    emit_audit_log("login_success", user_id=user.id if user else None, ip_address=ip, user_agent=ua)
+    emit_audit_log(AuditEventType.LOGIN_SUCCESS, user_id=user.id if user else None, ip_address=ip, user_agent=ua)
     return result
 
 
