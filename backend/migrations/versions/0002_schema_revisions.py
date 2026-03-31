@@ -217,8 +217,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index("ix_audit_logs_event_type", "audit_logs", ["event_type"])
-    op.create_index("ix_audit_logs_user_id", "audit_logs", ["user_id"]) 
+    op.create_index("ix_audit_logs_user_id", "audit_logs", ["user_id"])
+    
 
     # ── promo_codes ───────────────────────────────────────────────────────────
     op.execute("CREATE TYPE discounttype AS ENUM ('PERCENTAGE', 'FIXED')")
@@ -253,6 +253,10 @@ def downgrade() -> None:
     op.drop_index("ix_loyalty_transactions_user_id", "loyalty_transactions")
     op.drop_table("loyalty_transactions")
     op.execute("DROP TYPE IF EXISTS loyaltytransactiontype")
+
+    op.drop_index("ix_audit_logs_user_id", "audit_logs")
+    op.drop_table("audit_logs")
+    op.execute("DROP TYPE auditeventtype")
 
     op.drop_index("ix_pre_orders_shipment_id", "pre_orders")
     op.drop_index("ix_pre_orders_user_id", "pre_orders")
