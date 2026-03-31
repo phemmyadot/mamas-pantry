@@ -1,4 +1,8 @@
+import logging
+
 from fastapi import APIRouter, Depends, Request, status
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.auth.dependencies import get_current_user
@@ -56,7 +60,7 @@ async def register(
             ev_service = EmailVerificationService(db)
             await ev_service.send_verification(user_id=user.id, email=user.email)
         except Exception:
-            pass  # best-effort — user can request a resend
+            logger.warning("Failed to send verification email to %s", user.email, exc_info=True)
 
     return user
 

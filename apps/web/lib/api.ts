@@ -53,7 +53,8 @@ function getCookie(name: string): string | null {
 }
 
 export function setCookie(name: string, value: string, maxAgeSecs: number) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSecs}; SameSite=Lax`;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSecs}; SameSite=Lax${secure}`;
 }
 
 export function deleteCookie(name: string) {

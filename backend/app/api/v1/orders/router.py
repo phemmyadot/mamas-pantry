@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query, Request, status
+from app.core.rate_limit import limiter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.auth.dependencies import get_current_user, require_any_role, require_role
@@ -73,7 +74,9 @@ async def get_my_order(
     summary="Public order tracking",
     description="Lets anyone track an order by ID + phone number. No auth required.",
 )
+@limiter.limit("20/minute")
 async def track_order(
+    request: Request,
     order_id: uuid.UUID,
     phone: str = Query(..., description="Phone number used on the order"),
     db: AsyncSession = Depends(get_db),

@@ -1,8 +1,33 @@
+import io
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
+
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
+
+# Magic-byte signatures for allowed image types
+_MAGIC: list[tuple[bytes, str]] = [
+    (b"\xff\xd8\xff", "image/jpeg"),
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+    (b"RIFF", "image/webp"),   # also verify bytes 8-11 == b"WEBP"
+    (b"GIF87a", "image/gif"),
+    (b"GIF89a", "image/gif"),
+]
+
+
+def _detect_mime(data: bytes) -> str | None:
+    """Return detected MIME type from magic bytes, or None if unrecognised."""
+    for magic, mime in _MAGIC:
+        if data[:len(magic)] == magic:
+            if mime == "image/webp" and data[8:12] != b"WEBP":
+                continue
+            return mime
+    return None
 
 from app.api.v1.auth.dependencies import get_current_user, require_any_role, require_role
 from app.core.config import settings
@@ -80,21 +105,26 @@ async def upload_product_image(
     if not all([settings.R2_ACCOUNT_ID, settings.R2_ACCESS_KEY_ID, settings.R2_SECRET_ACCESS_KEY, settings.R2_BUCKET_NAME, settings.R2_PUBLIC_URL]):
         raise HTTPException(status_code=503, detail="Image upload is not configured")
 
-    if file.content_type not in ALLOWED_IMAGE_TYPES:
-        raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}")
+    contents = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="Image must be 5 MB or smaller")
 
-    ext = (file.filename or "image").rsplit(".", 1)[-1].lower()
+    detected = _detect_mime(contents)
+    if detected not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail="Unsupported file type")
+
+    ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+    ext = ext_map[detected]  # type: ignore[index]
     key = f"products/{uuid.uuid4()}.{ext}"
 
     try:
-        import io
-        contents = await file.read()
         _s3_client().upload_fileobj(
             io.BytesIO(contents), settings.R2_BUCKET_NAME, key,
-            ExtraArgs={"ContentType": file.content_type},
+            ExtraArgs={"ContentType": detected},
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {e}")
+    except Exception:
+        logger.exception("R2 upload failed for key %s", key)
+        raise HTTPException(status_code=500, detail="Image upload failed")
 
     public_url = f"{settings.R2_PUBLIC_URL.rstrip('/')}/{key}"
     return ImageUploadResponse(public_url=public_url)

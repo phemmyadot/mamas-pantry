@@ -405,13 +405,19 @@ class OrderService:
 
     async def process_paystack_webhook(self, payload: bytes, signature: str) -> None:
         """Verify HMAC-SHA512 signature and update payment status."""
+        import json
         secret = getattr(settings, "PAYSTACK_SECRET_KEY", "")
+        if not secret:
+            raise ValidationError("Webhook not configured")
         expected = hmac.new(secret.encode(), payload, hashlib.sha512).hexdigest()
         if not hmac.compare_digest(expected, signature):
             raise ValidationError("Invalid webhook signature")
 
-        import json
-        event = json.loads(payload)
+        try:
+            event = json.loads(payload)
+        except json.JSONDecodeError:
+            return  # malformed payload — ignore silently
+
         if event.get("event") != "charge.success":
             return
 
