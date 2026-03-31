@@ -1,16 +1,7 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
+import { PrimaryButton } from '@/atoms/Button';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -28,11 +19,10 @@ export default function LoginScreen() {
     try {
       await login(trimmedEmail, password);
     } catch (err: any) {
-      const detail =
-        err?.message ||
-        err?.response?.data?.detail ||
-        'Invalid email or password. Please try again.';
-      Alert.alert('Login failed', detail);
+      Alert.alert(
+        'Login failed',
+        err?.message ?? err?.response?.data?.detail ?? 'Invalid email or password.',
+      );
     } finally {
       setLoading(false);
     }
@@ -43,14 +33,12 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Header band */}
       <View style={styles.header}>
         <Text style={styles.logo}>Mama's Pantry</Text>
         <View style={styles.divider} />
         <Text style={styles.tagline}>Rider Portal</Text>
       </View>
 
-      {/* Form card */}
       <View style={styles.card}>
         <TextInput
           style={styles.input}
@@ -74,18 +62,7 @@ export default function LoginScreen() {
           onChangeText={setPassword}
           editable={!loading}
         />
-
-        <Pressable
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FEFAE0" />
-          ) : (
-            <Text style={styles.buttonText}>Sign in</Text>
-          )}
-        </Pressable>
+        <PrimaryButton label="Sign in" onPress={handleLogin} loading={loading} />
       </View>
     </KeyboardAvoidingView>
   );
@@ -98,25 +75,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    gap: 0,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 28,
-    gap: 8,
-  },
-  logo: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#FEFAE0',
-    letterSpacing: -0.5,
-  },
-  divider: {
-    width: 36,
-    height: 1.5,
-    backgroundColor: '#D4A017',
-    opacity: 0.8,
-  },
+  header: { alignItems: 'center', marginBottom: 28, gap: 8 },
+  logo: { fontSize: 30, fontWeight: '800', color: '#FEFAE0', letterSpacing: -0.5 },
+  divider: { width: 36, height: 1.5, backgroundColor: '#D4A017', opacity: 0.8 },
   tagline: {
     fontSize: 12,
     color: '#B7E4C7',
@@ -143,19 +105,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1B1B1B',
     backgroundColor: '#fff',
-  },
-  button: {
-    height: 48,
-    backgroundColor: '#1B4332',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: {
-    color: '#FEFAE0',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

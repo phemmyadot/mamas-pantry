@@ -1,8 +1,21 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import DeliveryIcon from "../components/DeliveryIcon";
 import ProfileIcon from "../components/ProfileIcon";
 
 export default function AppLayout() {
+  const { isLoading, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) SplashScreen.hideAsync();
+  }, [isLoading]);
+
+  if (isLoading) return null;
+
+  if (!isAuthenticated) return <Redirect href="/(auth)/login" />;
+
   return (
     <Tabs
       screenOptions={{

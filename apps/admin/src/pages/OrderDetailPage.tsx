@@ -135,8 +135,8 @@ export default function OrderDetailPage() {
                 statusMutation.mutate(nextStatus);
               }
             }}
-            disabled={statusMutation.isPending}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
+            disabled={statusMutation.isPending || order.status === "delivered" || order.status === "cancelled"}
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {[...statusFlow, "cancelled"].map((s) => (
               <option key={s} value={s} disabled={s === "delivered" && !canMarkDelivered}>
@@ -144,6 +144,11 @@ export default function OrderDetailPage() {
               </option>
             ))}
           </select>
+          {(order.status === "delivered" || order.status === "cancelled") && (
+            <p className="text-xs text-muted">
+              This order is <span className="font-semibold">{STATUS_LABELS[order.status]}</span> and cannot be changed.
+            </p>
+          )}
           {statusMutation.isPending && (
             <p className="text-xs text-muted inline-flex items-center gap-2">
               <Spinner className="w-3.5 h-3.5" />
@@ -159,7 +164,7 @@ export default function OrderDetailPage() {
           <select
             value={order.rider_id ?? ""}
             onChange={(e) => e.target.value && riderMutation.mutate(e.target.value)}
-            disabled={riderMutation.isPending || !canAssignRider}
+            disabled={riderMutation.isPending || !canAssignRider || order.status === "delivered" || order.status === "cancelled"}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
           >
             <option value="">— Select rider —</option>
