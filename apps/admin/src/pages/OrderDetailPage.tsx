@@ -7,11 +7,28 @@ import { formatNGN, formatDateTime } from "@/lib/utils";
 import StatusBadge from "@/components/StatusBadge";
 import Spinner from "@/components/Spinner";
 
-const DELIVERY_STATUS_FLOW: OrderStatus[] = ["pending", "confirmed", "packed", "out_for_delivery", "delivered"];
-const PICKUP_STATUS_FLOW: OrderStatus[] = ["pending", "confirmed", "packed", "ready_for_pickup", "delivered"];
+const DELIVERY_STATUS_FLOW: OrderStatus[] = [
+  "pending",
+  "confirmed",
+  "packed",
+  "out_for_delivery",
+  "delivered",
+];
+const PICKUP_STATUS_FLOW: OrderStatus[] = [
+  "pending",
+  "confirmed",
+  "packed",
+  "ready_for_pickup",
+  "delivered",
+];
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Pending", confirmed: "Confirmed", packed: "Packed",
-  ready_for_pickup: "Ready for pickup", out_for_delivery: "Out for delivery", delivered: "Delivered", cancelled: "Cancelled",
+  pending: "Pending",
+  confirmed: "Confirmed",
+  packed: "Packed",
+  ready_for_pickup: "Ready for pickup",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
 };
 
 export default function OrderDetailPage() {
@@ -63,16 +80,28 @@ export default function OrderDetailPage() {
     },
   });
 
-  if (isLoading) return <div className="flex justify-center py-20"><Spinner className="w-8 h-8" /></div>;
-  if (!order) return <p className="text-sm text-spice py-10">Order not found.</p>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center py-20">
+        <Spinner className="w-8 h-8" />
+      </div>
+    );
+  if (!order)
+    return <p className="text-sm text-spice py-10">Order not found.</p>;
 
   const isPickup = order.delivery_address?.fulfillment_type === "pickup";
   const isInStore = order.delivery_address?.order_channel === "in_store";
-  const fulfillmentLabel = isInStore ? "In-store" : isPickup ? "Pickup" : "Delivery";
+  const fulfillmentLabel = isInStore
+    ? "In-store"
+    : isPickup
+      ? "Pickup"
+      : "Delivery";
   const statusFlow = isPickup ? PICKUP_STATUS_FLOW : DELIVERY_STATUS_FLOW;
   const currentIdx = statusFlow.indexOf(order.status as OrderStatus);
   const canAssignRider = !isPickup && order.status === "out_for_delivery";
-  const canMarkDelivered = isPickup ? order.status === "ready_for_pickup" : Boolean(order.rider_id);
+  const canMarkDelivered = isPickup
+    ? order.status === "ready_for_pickup"
+    : Boolean(order.rider_id);
   const attendedById = order.delivery_address?.attended_by_staff_id ?? null;
   const canConfirmInStorePayment =
     isInStore &&
@@ -83,11 +112,18 @@ export default function OrderDetailPage() {
     <div className="max-w-3xl space-y-5">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="text-sm text-muted hover:text-forest-deep">← Back</button>
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm text-muted hover:text-forest-deep"
+        >
+          ← Back
+        </button>
         <h1 className="text-xl font-bold text-forest-deep">
           Order #{order.id.slice(0, 8).toUpperCase()}
         </h1>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isInStore ? "bg-amber-100 text-amber-800" : isPickup ? "bg-cyan-100 text-cyan-800" : "bg-slate-100 text-slate-700"}`}>
+        <span
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${isInStore ? "bg-amber-100 text-amber-800" : isPickup ? "bg-cyan-100 text-cyan-800" : "bg-slate-100 text-slate-700"}`}
+        >
           {fulfillmentLabel}
         </span>
         <StatusBadge status={order.status} />
@@ -97,22 +133,33 @@ export default function OrderDetailPage() {
       {/* Status timeline */}
       {order.status !== "cancelled" && (
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-forest-deep mb-4">Status timeline</h2>
+          <h2 className="text-sm font-semibold text-forest-deep mb-4">
+            Status timeline
+          </h2>
           <div className="flex gap-0">
             {statusFlow.map((s, i) => {
               const done = i <= currentIdx;
               const active = i === currentIdx;
               return (
-                <div key={s} className="flex-1 flex flex-col items-center gap-1 relative">
+                <div
+                  key={s}
+                  className="flex-1 flex flex-col items-center gap-1 relative"
+                >
                   {i > 0 && (
-                    <div className={`absolute top-3.5 right-1/2 w-full h-0.5 -translate-y-1/2 ${i <= currentIdx ? "bg-forest-deep" : "bg-gray-200"}`} />
+                    <div
+                      className={`absolute top-3.5 right-1/2 w-full h-0.5 -translate-y-1/2 ${i <= currentIdx ? "bg-forest-deep" : "bg-gray-200"}`}
+                    />
                   )}
-                  <div className={`relative z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2
+                  <div
+                    className={`relative z-10 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2
                     ${done ? "bg-forest-deep border-forest-deep text-cream" : "bg-white border-gray-200 text-muted"}
-                    ${active ? "ring-2 ring-forest-light ring-offset-1" : ""}`}>
+                    ${active ? "ring-2 ring-forest-light ring-offset-1" : ""}`}
+                  >
                     {done && !active ? "✓" : i + 1}
                   </div>
-                  <span className={`text-[9px] text-center leading-tight ${active ? "font-semibold text-forest-deep" : "text-muted"}`}>
+                  <span
+                    className={`text-[9px] text-center leading-tight ${active ? "font-semibold text-forest-deep" : "text-muted"}`}
+                  >
                     {STATUS_LABELS[s]}
                   </span>
                 </div>
@@ -123,77 +170,120 @@ export default function OrderDetailPage() {
       )}
 
       {isAdmin && !isInStore && (
-      <div className={`grid gap-4 ${isPickup ? "sm:grid-cols-1" : "sm:grid-cols-2"}`}>
-        {/* Status update */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-forest-deep">Update status</h2>
-          <select
-            value={pendingStatus ?? order.status}
-            onChange={(e) => {
-              const nextStatus = e.target.value;
-              if (nextStatus !== order.status) {
-                statusMutation.mutate(nextStatus);
+        <div
+          className={`grid gap-4 ${isPickup ? "sm:grid-cols-1" : "sm:grid-cols-2"}`}
+        >
+          {/* Status update */}
+          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+            <h2 className="text-sm font-semibold text-forest-deep">
+              Update status
+            </h2>
+            <select
+              value={pendingStatus ?? order.status}
+              onChange={(e) => {
+                const nextStatus = e.target.value;
+                if (nextStatus !== order.status) {
+                  statusMutation.mutate(nextStatus);
+                }
+              }}
+              disabled={
+                statusMutation.isPending ||
+                order.status === "delivered" ||
+                order.status === "cancelled"
               }
-            }}
-            disabled={statusMutation.isPending || order.status === "delivered" || order.status === "cancelled"}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {[...statusFlow, "cancelled"].map((s) => (
-              <option key={s} value={s} disabled={s === "delivered" && !canMarkDelivered}>
-                {STATUS_LABELS[s] ?? s}
-              </option>
-            ))}
-          </select>
-          {(order.status === "delivered" || order.status === "cancelled") && (
-            <p className="text-xs text-muted">
-              This order is <span className="font-semibold">{STATUS_LABELS[order.status]}</span> and cannot be changed.
-            </p>
-          )}
-          {statusMutation.isPending && (
-            <p className="text-xs text-muted inline-flex items-center gap-2">
-              <Spinner className="w-3.5 h-3.5" />
-              Updating status...
-            </p>
-          )}
-          {statusMutation.isError && <p className="text-xs text-spice">Failed to update status.</p>}
-        </div>
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {[...statusFlow, "cancelled"].map((s) => (
+                <option
+                  key={s}
+                  value={s}
+                  disabled={s === "delivered" && !canMarkDelivered}
+                >
+                  {STATUS_LABELS[s] ?? s}
+                </option>
+              ))}
+            </select>
+            {(order.status === "delivered" || order.status === "cancelled") && (
+              <p className="text-xs text-muted">
+                This order is{" "}
+                <span className="font-semibold">
+                  {STATUS_LABELS[order.status]}
+                </span>{" "}
+                and cannot be changed.
+              </p>
+            )}
+            {statusMutation.isPending && (
+              <p className="text-xs text-muted inline-flex items-center gap-2">
+                <Spinner className="w-3.5 h-3.5" />
+                Updating status...
+              </p>
+            )}
+            {statusMutation.isError && (
+              <p className="text-xs text-spice">Failed to update status.</p>
+            )}
+          </div>
 
-        {/* Rider assign */}
-        {!isPickup && <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-forest-deep">Assign rider</h2>
-          <select
-            value={order.rider_id ?? ""}
-            onChange={(e) => e.target.value && riderMutation.mutate(e.target.value)}
-            disabled={riderMutation.isPending || !canAssignRider || order.status === "delivered" || order.status === "cancelled"}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light"
-          >
-            <option value="">— Select rider —</option>
-            {(riderList ?? []).filter((r) => r.is_active).map((r) => (
-              <option key={r.id} value={r.id}>{r.name} · {r.phone}</option>
-            ))}
-          </select>
-          {riderMutation.isError && <p className="text-xs text-spice">Failed to assign rider.</p>}
-        </div>}
-      </div>
+          {/* Rider assign */}
+          {!isPickup && (
+            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+              <h2 className="text-sm font-semibold text-forest-deep">
+                Assign rider
+              </h2>
+              <select
+                value={order.rider_id ?? ""}
+                onChange={(e) =>
+                  e.target.value && riderMutation.mutate(e.target.value)
+                }
+                disabled={
+                  riderMutation.isPending ||
+                  !canAssignRider ||
+                  order.status === "delivered" ||
+                  order.status === "cancelled"
+                }
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-forest-light  disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">— Select rider —</option>
+                {(riderList ?? [])
+                  .filter((r) => r.is_active)
+                  .map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} · {r.phone}
+                    </option>
+                  ))}
+              </select>
+              {riderMutation.isError && (
+                <p className="text-xs text-spice">Failed to assign rider.</p>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {isInStore && order.payment_status === "unpaid" && (
         <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-forest-deep">In-store payment</h2>
+          <h2 className="text-sm font-semibold text-forest-deep">
+            In-store payment
+          </h2>
           <p className="text-xs text-muted">
             Confirm payment only after customer payment succeeds.
           </p>
           <button
             type="button"
             onClick={() => confirmInStorePaymentMutation.mutate()}
-            disabled={!canConfirmInStorePayment || confirmInStorePaymentMutation.isPending}
+            disabled={
+              !canConfirmInStorePayment ||
+              confirmInStorePaymentMutation.isPending
+            }
             className="px-4 py-2 rounded-lg bg-forest-deep text-cream text-sm font-medium disabled:opacity-60"
           >
-            {confirmInStorePaymentMutation.isPending ? "Confirming..." : "Mark as paid"}
+            {confirmInStorePaymentMutation.isPending
+              ? "Confirming..."
+              : "Mark as paid"}
           </button>
           {!canConfirmInStorePayment && (
             <p className="text-xs text-muted">
-              Only admin or the staff who created this in-store order can mark it as paid.
+              Only admin or the staff who created this in-store order can mark
+              it as paid.
             </p>
           )}
           {confirmInStorePaymentMutation.isError && (
@@ -204,25 +294,34 @@ export default function OrderDetailPage() {
 
       {/* Delivery address */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-2">
-        <h2 className="text-sm font-semibold text-forest-deep mb-3">Delivery details</h2>
+        <h2 className="text-sm font-semibold text-forest-deep mb-3">
+          Delivery details
+        </h2>
         {[
           ["Name", order.delivery_address.name],
           ["Phone", order.delivery_address.phone],
           ["Address", order.delivery_address.address],
           ["City", order.delivery_address.city],
           ["Channel", fulfillmentLabel],
-          ["Attended by", order.delivery_address.attended_by_staff_username ?? "-"],
+          [
+            "Attended by",
+            order.delivery_address.attended_by_staff_username ?? "-",
+          ],
           ["Placed", formatDateTime(order.created_at)],
         ].map(([label, val]) => (
           <div key={label} className="flex justify-between text-sm">
             <span className="text-muted">{label}</span>
-            <span className="text-ink font-medium text-right max-w-[60%]">{val}</span>
+            <span className="text-ink font-medium text-right max-w-[60%]">
+              {val}
+            </span>
           </div>
         ))}
         {order.notes && (
           <div className="flex justify-between text-sm">
             <span className="text-muted">Notes</span>
-            <span className="text-ink text-right max-w-[60%] italic">{order.notes}</span>
+            <span className="text-ink text-right max-w-[60%] italic">
+              {order.notes}
+            </span>
           </div>
         )}
       </div>
@@ -244,9 +343,13 @@ export default function OrderDetailPage() {
           <tbody>
             {order.items.map((item) => (
               <tr key={item.id} className="border-b border-gray-50">
-                <td className="px-5 py-3 font-medium text-ink">{item.product_name}</td>
+                <td className="px-5 py-3 font-medium text-ink">
+                  {item.product_name}
+                </td>
                 <td className="px-5 py-3 text-center text-muted">{item.qty}</td>
-                <td className="px-5 py-3 text-right text-muted">{formatNGN(item.unit_price_ngn)}</td>
+                <td className="px-5 py-3 text-right text-muted">
+                  {formatNGN(item.unit_price_ngn)}
+                </td>
                 <td className="px-5 py-3 text-right font-semibold text-forest-deep">
                   {formatNGN(item.unit_price_ngn * item.qty)}
                 </td>
@@ -255,16 +358,28 @@ export default function OrderDetailPage() {
           </tbody>
           <tfoot className="border-t border-gray-200 text-sm">
             <tr>
-              <td colSpan={3} className="px-5 py-2 text-right text-muted">Subtotal</td>
-              <td className="px-5 py-2 text-right">{formatNGN(order.subtotal_ngn)}</td>
+              <td colSpan={3} className="px-5 py-2 text-right text-muted">
+                Subtotal
+              </td>
+              <td className="px-5 py-2 text-right">
+                {formatNGN(order.subtotal_ngn)}
+              </td>
             </tr>
             <tr>
-              <td colSpan={3} className="px-5 py-2 text-right text-muted">Delivery fee</td>
-              <td className="px-5 py-2 text-right">{formatNGN(order.delivery_fee_ngn)}</td>
+              <td colSpan={3} className="px-5 py-2 text-right text-muted">
+                Delivery fee
+              </td>
+              <td className="px-5 py-2 text-right">
+                {formatNGN(order.delivery_fee_ngn)}
+              </td>
             </tr>
             <tr className="font-bold">
-              <td colSpan={3} className="px-5 py-3 text-right text-forest-deep">Total</td>
-              <td className="px-5 py-3 text-right text-forest-deep">{formatNGN(order.total_ngn)}</td>
+              <td colSpan={3} className="px-5 py-3 text-right text-forest-deep">
+                Total
+              </td>
+              <td className="px-5 py-3 text-right text-forest-deep">
+                {formatNGN(order.total_ngn)}
+              </td>
             </tr>
           </tfoot>
         </table>
@@ -273,7 +388,9 @@ export default function OrderDetailPage() {
       {showPaidModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-5 space-y-4">
-            <h3 className="text-base font-semibold text-forest-deep">Payment Confirmed</h3>
+            <h3 className="text-base font-semibold text-forest-deep">
+              Payment Confirmed
+            </h3>
             <p className="text-sm text-muted">
               Order #{order.id.slice(0, 8).toUpperCase()} is now marked as paid.
             </p>
