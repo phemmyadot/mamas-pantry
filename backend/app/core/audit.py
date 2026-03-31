@@ -47,7 +47,6 @@ def emit_audit_log(
     """Fire-and-forget audit log. Safe to call from sync context within an async event loop."""
     if not settings.ENABLE_AUDIT_LOGGING:
         return
-    print(f"Emitting audit log: {event_type} for user_id={user_id} ip={ip_address} ua={user_agent} metadata={metadata}")
     asyncio.create_task(
         _write_audit_log(
             event_type=event_type,
