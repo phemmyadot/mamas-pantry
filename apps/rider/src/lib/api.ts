@@ -10,7 +10,7 @@ function createApiClient(): AxiosInstance {
   const client = axios.create({
     baseURL: `${BASE_URL}/api/v1`,
     headers: { 'Content-Type': 'application/json' },
-    timeout: 15000,
+    timeout: 8000,
   });
 
   // Attach access token to every request

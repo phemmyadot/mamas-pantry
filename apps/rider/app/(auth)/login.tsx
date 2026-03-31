@@ -27,10 +27,11 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(trimmedEmail, password);
-      // Navigation handled by root layout reacting to isAuthenticated
     } catch (err: any) {
       const detail =
-        err?.response?.data?.detail ?? 'Invalid email or password. Please try again.';
+        err?.message ||
+        err?.response?.data?.detail ||
+        'Invalid email or password. Please try again.';
       Alert.alert('Login failed', detail);
     } finally {
       setLoading(false);
@@ -42,14 +43,19 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.card}>
+      {/* Header band */}
+      <View style={styles.header}>
         <Text style={styles.logo}>Mama's Pantry</Text>
-        <Text style={styles.subtitle}>Rider Portal</Text>
+        <View style={styles.divider} />
+        <Text style={styles.tagline}>Rider Portal</Text>
+      </View>
 
+      {/* Form card */}
+      <View style={styles.card}>
         <TextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor="#9CA3AF"
           autoCapitalize="none"
           keyboardType="email-address"
           returnKeyType="next"
@@ -60,7 +66,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#9ca3af"
+          placeholderTextColor="#9CA3AF"
           secureTextEntry
           returnKeyType="done"
           onSubmitEditing={handleLogin}
@@ -75,7 +81,7 @@ export default function LoginScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FEFAE0" />
           ) : (
             <Text style={styles.buttonText}>Sign in</Text>
           )}
@@ -88,54 +94,67 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a472a',
+    backgroundColor: '#1B4332',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+    gap: 0,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 28,
+    gap: 8,
+  },
+  logo: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#FEFAE0',
+    letterSpacing: -0.5,
+  },
+  divider: {
+    width: 36,
+    height: 1.5,
+    backgroundColor: '#D4A017',
+    opacity: 0.8,
+  },
+  tagline: {
+    fontSize: 12,
+    color: '#B7E4C7',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    fontWeight: '500',
   },
   card: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFAE0',
     borderRadius: 16,
-    padding: 28,
-    gap: 14,
-  },
-  logo: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1a472a',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 6,
+    padding: 24,
+    gap: 12,
+    borderWidth: 0.5,
+    borderColor: '#F4EAC8',
   },
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#F4EAC8',
     borderRadius: 10,
     paddingHorizontal: 14,
     fontSize: 15,
-    color: '#111827',
-    backgroundColor: '#f9fafb',
+    color: '#1B1B1B',
+    backgroundColor: '#fff',
   },
   button: {
     height: 48,
-    backgroundColor: '#1a472a',
+    backgroundColor: '#1B4332',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 4,
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
+  buttonDisabled: { opacity: 0.6 },
   buttonText: {
-    color: '#fff',
+    color: '#FEFAE0',
     fontSize: 16,
     fontWeight: '700',
   },

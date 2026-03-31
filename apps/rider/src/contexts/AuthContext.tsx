@@ -26,11 +26,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loadProfile = useCallback(async () => {
     try {
-      const { data } = await api.get<RiderProfile>('/users/me');
+      // Rider app expects rider user role; other users should not pass this guard.
+      const { data } = await api.get<RiderProfile>('/riders/me');
+      console.debug('[AuthContext] loaded rider profile', { riderId: data?.id });
       setState({ isLoading: false, isAuthenticated: true, rider: data });
-    } catch {
+      return data;
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const detail = err?.response?.data?.detail;
+
+      console.debug('[AuthContext] failed to load rider profile', {
+        message: err?.message,
+        status,
+        data: err?.response?.data,
+      });
+
       await storage.clearTokens();
       setState({ isLoading: false, isAuthenticated: false, rider: null });
+
+      if (status === 403 && detail?.includes("Role 'rider' required")) {
+        throw new Error('Access denied: rider role required. Please log in with a rider account.');
+      }
+
+      throw err;
     }
   }, []);
 
@@ -52,7 +70,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { email, password },
     );
     await storage.saveTokens(data.access_token, data.refresh_token);
-    await loadProfile();
+
+    try {
+      await loadProfile();
+    } catch (err) {
+      // Ensure login failure due to wrong role bubbles up (e.g. not a rider)
+      await storage.clearTokens();
+      setState({ isLoading: false, isAuthenticated: false, rider: null });
+      throw err;
+    }
   }, [loadProfile]);
 
   const logout = useCallback(async () => {

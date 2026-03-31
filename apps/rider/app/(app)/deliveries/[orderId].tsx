@@ -21,7 +21,6 @@ function formatCurrency(amount: string): string {
 }
 
 function maskPhone(phone: string): string {
-  // Show last 4 digits only
   return `***${phone.slice(-4)}`;
 }
 
@@ -44,7 +43,6 @@ export default function OrderDetailScreen() {
   const { data: order, isLoading, isError } = useQuery<Order>({
     queryKey: ['order', orderId],
     queryFn: async () => {
-      // Fetch from the rider's assigned orders and find the one we need
       const { data } = await api.get<Order[]>('/riders/me/orders');
       const found = data.find((o) => o.id === orderId);
       if (!found) throw new Error('Order not found');
@@ -76,7 +74,7 @@ export default function OrderDetailScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#1a472a" />
+        <ActivityIndicator size="large" color="#1B4332" />
       </View>
     );
   }
@@ -107,7 +105,7 @@ export default function OrderDetailScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Order ID */}
+        {/* Order ID + status */}
         <View style={styles.section}>
           <Text style={styles.orderId}>#{order.id.slice(0, 8).toUpperCase()}</Text>
           <View style={styles.statusBadge}>
@@ -169,7 +167,7 @@ export default function OrderDetailScreen() {
           disabled={isMarking}
         >
           {isMarking ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FEFAE0" />
           ) : (
             <Text style={styles.deliverButtonText}>Mark as Delivered</Text>
           )}
@@ -182,7 +180,7 @@ export default function OrderDetailScreen() {
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Confirm Delivery</Text>
             <Text style={styles.modalBody}>
-              Please verify the customer's identity — their phone ends in{' '}
+              Verify the customer — their phone ends in{' '}
               <Text style={styles.phoneHighlight}>{maskPhone(addr.phone)}</Text>.
             </Text>
             <Text style={styles.modalBody}>
@@ -210,106 +208,113 @@ export default function OrderDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  container: { flex: 1, backgroundColor: '#FEFAE0' },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12, backgroundColor: '#FEFAE0' },
   headerBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1a472a',
+    backgroundColor: '#1B4332',
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
   backBtn: { width: 60 },
-  backBtnText: { color: '#86efac', fontSize: 16 },
-  headerTitle: { fontSize: 17, fontWeight: '700', color: '#fff' },
+  backBtnText: { color: '#B7E4C7', fontSize: 16 },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: '#FEFAE0' },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   section: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  orderId: { fontSize: 18, fontWeight: '800', color: '#111827', fontFamily: 'monospace', flex: 1 },
+  orderId: { fontSize: 18, fontWeight: '800', color: '#1B1B1B', fontFamily: 'monospace', flex: 1 },
   statusBadge: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#FEFAE0',
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 4,
+    borderWidth: 0.5,
+    borderColor: '#F4EAC8',
   },
-  statusText: { fontSize: 12, fontWeight: '600', color: '#92400e' },
+  statusText: { fontSize: 12, fontWeight: '600', color: '#7a5500' },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     gap: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 0.5,
+    borderColor: '#F4EAC8',
   },
-  sectionLabel: { fontSize: 12, fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: 0.5 },
-  customerName: { fontSize: 16, fontWeight: '600', color: '#111827' },
-  customerPhone: { fontSize: 14, color: '#6b7280' },
-  addressText: { fontSize: 14, color: '#374151', lineHeight: 20 },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#5C5C5C',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+  customerName: { fontSize: 16, fontWeight: '600', color: '#1B1B1B' },
+  customerPhone: { fontSize: 14, color: '#5C5C5C' },
+  addressText: { fontSize: 14, color: '#1B1B1B', lineHeight: 20 },
   navigateButton: {
     marginTop: 8,
-    backgroundColor: '#1a472a',
+    backgroundColor: '#1B4332',
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
   },
-  navigateButtonText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  navigateButtonText: { color: '#FEFAE0', fontWeight: '600', fontSize: 14 },
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   itemLeft: { flexDirection: 'row', gap: 8, flex: 1 },
-  itemQty: { fontSize: 14, fontWeight: '700', color: '#1a472a', minWidth: 28 },
-  itemName: { fontSize: 14, color: '#374151', flex: 1 },
-  itemPrice: { fontSize: 14, color: '#374151', fontWeight: '500' },
-  divider: { height: 1, backgroundColor: '#e5e7eb', marginVertical: 8 },
-  totalLabel: { fontSize: 15, fontWeight: '700', color: '#111827' },
-  totalAmount: { fontSize: 15, fontWeight: '700', color: '#1a472a' },
-  notesText: { fontSize: 14, color: '#374151', lineHeight: 20 },
+  itemQty: { fontSize: 14, fontWeight: '700', color: '#1B4332', minWidth: 28 },
+  itemName: { fontSize: 14, color: '#1B1B1B', flex: 1 },
+  itemPrice: { fontSize: 14, color: '#1B1B1B', fontWeight: '500' },
+  divider: { height: 1, backgroundColor: '#F4EAC8', marginVertical: 8 },
+  totalLabel: { fontSize: 15, fontWeight: '700', color: '#1B1B1B' },
+  totalAmount: { fontSize: 15, fontWeight: '700', color: '#1B4332' },
+  notesText: { fontSize: 14, color: '#1B1B1B', lineHeight: 20 },
   footer: {
     padding: 16,
     backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
+    borderTopWidth: 0.5,
+    borderTopColor: '#F4EAC8',
   },
   deliverButton: {
-    backgroundColor: '#16a34a',
+    backgroundColor: '#2D6A4F',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
   },
   buttonDisabled: { opacity: 0.6 },
-  deliverButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  errorText: { fontSize: 15, color: '#ef4444' },
+  deliverButtonText: { color: '#FEFAE0', fontSize: 16, fontWeight: '700' },
+  errorText: { fontSize: 15, color: '#C4622D' },
   backButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#1a472a',
+    backgroundColor: '#1B4332',
     borderRadius: 8,
   },
-  backButtonText: { color: '#fff', fontWeight: '600' },
-  // Modal
+  backButtonText: { color: '#FEFAE0', fontWeight: '600' },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(27,27,27,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   modal: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFAE0',
     borderRadius: 16,
     padding: 24,
     width: '100%',
     gap: 12,
+    borderWidth: 0.5,
+    borderColor: '#F4EAC8',
   },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#111827' },
-  modalBody: { fontSize: 14, color: '#374151', lineHeight: 20 },
-  phoneHighlight: { fontWeight: '700', color: '#1a472a' },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1B1B1B' },
+  modalBody: { fontSize: 14, color: '#1B1B1B', lineHeight: 20 },
+  phoneHighlight: { fontWeight: '700', color: '#1B4332' },
   bold: { fontWeight: '700' },
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
   modalBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, alignItems: 'center' },
-  modalBtnCancel: { backgroundColor: '#f3f4f6' },
-  modalBtnCancelText: { fontWeight: '600', color: '#374151' },
-  modalBtnConfirm: { backgroundColor: '#16a34a' },
-  modalBtnConfirmText: { fontWeight: '700', color: '#fff' },
+  modalBtnCancel: { backgroundColor: '#F4EAC8' },
+  modalBtnCancelText: { fontWeight: '600', color: '#5C5C5C' },
+  modalBtnConfirm: { backgroundColor: '#2D6A4F' },
+  modalBtnConfirmText: { fontWeight: '700', color: '#FEFAE0' },
 });

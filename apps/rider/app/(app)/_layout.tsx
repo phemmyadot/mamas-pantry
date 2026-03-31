@@ -1,24 +1,21 @@
 import { Tabs } from "expo-router";
-import { Pressable, StyleSheet, Text } from "react-native";
-
-function TabIcon({ label, focused }: { label: string; focused: boolean }) {
-  return (
-    <Text style={[styles.icon, focused && styles.iconFocused]}>
-      {label === "Deliveries" ? "📦" : "👤"}
-    </Text>
-  );
-}
+import DeliveryIcon from "../components/DeliveryIcon";
+import ProfileIcon from "../components/ProfileIcon";
 
 export default function AppLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: "#1a472a" },
-        headerTintColor: "#fff",
+        headerStyle: { backgroundColor: "#1B4332" },
+        headerTintColor: "#FEFAE0",
         headerTitleStyle: { fontWeight: "700" },
-        tabBarActiveTintColor: "#1a472a",
-        tabBarInactiveTintColor: "#9ca3af",
-        tabBarStyle: { borderTopColor: "#e5e7eb" },
+        tabBarActiveTintColor: "#1B4332",
+        tabBarInactiveTintColor: "#5C5C5C",
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopColor: "#F4EAC8",
+          borderTopWidth: 0.5,
+        },
       }}
     >
       <Tabs.Screen
@@ -27,7 +24,10 @@ export default function AppLayout() {
           title: "Deliveries",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="Deliveries" focused={focused} />
+            <DeliveryIcon
+              color={focused ? "#1B4332" : "#5C5C5C"}
+              size={22}
+            />
           ),
         }}
       />
@@ -36,15 +36,13 @@ export default function AppLayout() {
         options={{
           title: "Profile",
           tabBarIcon: ({ focused }) => (
-            <TabIcon label="Profile" focused={focused} />
+            <ProfileIcon
+              color={focused ? "#1B4332" : "#5C5C5C"}
+              size={22}
+            />
           ),
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  icon: { fontSize: 22, opacity: 0.5 },
-  iconFocused: { opacity: 1 },
-});
