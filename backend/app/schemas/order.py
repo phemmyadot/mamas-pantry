@@ -89,11 +89,9 @@ class OrderItemResponse(BaseModel):
 
 class OrderRiderResponse(BaseModel):
     id: uuid.UUID
-    name: str
-    phone: str
+    username: str | None
+    phone: str | None
     is_active: bool
-    current_lat: Decimal | None
-    current_lng: Decimal | None
 
     model_config = {"from_attributes": True}
 

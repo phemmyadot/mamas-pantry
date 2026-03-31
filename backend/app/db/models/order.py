@@ -41,14 +41,14 @@ class Order(Base):
     delivery_fee_ngn: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     total_ngn: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     delivery_address: Mapped[dict] = mapped_column(JSONB, nullable=False)
-    rider_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("riders.id", ondelete="SET NULL"), nullable=True)
+    rider_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order", lazy="selectin", cascade="all, delete-orphan")
-    user: Mapped["User"] = relationship("User", lazy="noload")
-    rider: Mapped["Rider | None"] = relationship("Rider", lazy="noload")
+    user: Mapped["User"] = relationship("User", foreign_keys="[Order.user_id]", lazy="noload")
+    rider: Mapped["User | None"] = relationship("User", foreign_keys="[Order.rider_id]", lazy="noload")
 
 
 class OrderItem(Base):

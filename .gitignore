@@ -24,6 +24,7 @@ dist/
 
 # Env files
 .env*
+/.venv
 
 # OS / misc
 .DS_Store
