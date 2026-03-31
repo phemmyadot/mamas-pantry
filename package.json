@@ -5,6 +5,9 @@
   "scripts": {
     "dev:web": "pnpm --filter @mamas-pantry/web dev",
     "dev:admin": "pnpm --filter @mamas-pantry/admin dev",
+    "dev:rider": "pnpm --filter @mamas-pantry/rider start",
+    "dev:rider:ios": "pnpm --filter @mamas-pantry/rider ios",
+    "dev:rider:android": "pnpm --filter @mamas-pantry/rider android",
     "build:web": "pnpm --filter @mamas-pantry/web build",
     "build:admin": "pnpm --filter @mamas-pantry/admin build",
     "typecheck": "pnpm -r typecheck",

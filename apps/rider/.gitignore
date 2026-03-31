@@ -10,3 +10,4 @@ web-build/
 *.orig.*
 .env
 .env.local
+/ios
