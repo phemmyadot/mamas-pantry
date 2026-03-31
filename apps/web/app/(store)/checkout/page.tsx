@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
-import { orders, addresses, deliveryZones, type Address, type DeliveryAddress, type FulfillmentType, ApiError } from "@/lib/api";
+import { orders, addresses, deliveryZones, type Address, type DeliveryAddress, type DeliveryZone, type FulfillmentType, ApiError } from "@/lib/api";
 import { track, Events } from "@/lib/analytics";
 
 declare global {
@@ -14,8 +14,6 @@ declare global {
     PaystackPop: any;
   }
 }
-
-const DELIVERY_FEE = 500;
 
 const DEFAULT_AREA_OPTIONS = ["Magodo Phase 1", "Magodo Phase 2", "Alapere", "Ketu", "Ojota"];
 
@@ -84,6 +82,7 @@ export default function CheckoutPage({
   const [slot, setSlot] = useState<string>("");
   const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>("delivery");
   const [areaOptions, setAreaOptions] = useState<string[]>(DEFAULT_AREA_OPTIONS);
+  const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [promoCode, setPromoCode] = useState(initialPromo);
   const [discount, setDiscount] = useState(0);
   const [promoError, setPromoError] = useState("");
@@ -106,8 +105,9 @@ export default function CheckoutPage({
   useEffect(() => {
     deliveryZones
       .list()
-      .then((zones) => {
-        const options = zones.map((z) => z.area);
+      .then((list) => {
+        setZones(list);
+        const options = list.map((z) => z.area);
         if (options.length > 0) {
           setAreaOptions(options);
           setAddressForm((f) => ({ ...f, area: options.includes(f.area) ? f.area : options[0] }));
@@ -274,7 +274,12 @@ function handleStep1Next() {
   }
 
   const subtotal = totalPrice;
-  const effectiveDeliveryFee = fulfillmentType === "pickup" ? 0 : DELIVERY_FEE;
+  const selectedArea = isAuthenticated && !useNewAddress && selectedAddressId
+    ? (savedAddresses.find((x) => x.id === selectedAddressId)?.area ?? addressForm.area)
+    : addressForm.area;
+  const effectiveDeliveryFee = fulfillmentType === "pickup"
+    ? 0
+    : (zones.find((z) => z.area === selectedArea)?.fee_ngn ?? 0);
   const estimatedTotal = subtotal + effectiveDeliveryFee - discount;
 
   // ─── Render ───────────────────────────────────────────────────────────────────
