@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/lib/api";
+import { API_BASE } from "@/lib/api";
 import AddToCartSection from "./_components/AddToCartSection";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const CATEGORY_LABELS: Record<string, string> = {
   mums_pick: "Mum's Pick",

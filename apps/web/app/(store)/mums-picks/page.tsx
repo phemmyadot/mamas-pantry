@@ -1,8 +1,8 @@
 import type { Product, Shipment } from "@/lib/api";
+import { API_BASE } from "@/lib/api";
 import ProductCard from "../_components/ProductCard";
 import ShipmentCountdown from "../_components/ShipmentCountdown";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function getMumsPicks(): Promise<Product[]> {
   try {

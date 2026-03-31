@@ -27,7 +27,12 @@ export type {
   PreOrder,
 } from "@mamas-pantry/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// Server-side: use internal Docker URL. Client-side: use relative URLs so
+// Next.js rewrites (/api/*) proxy to the backend — works in any environment.
+export const API_BASE =
+  typeof window === "undefined"
+    ? (process.env.API_URL ?? "http://localhost:8000")
+    : "";
 
 export class ApiError extends Error {
   constructor(

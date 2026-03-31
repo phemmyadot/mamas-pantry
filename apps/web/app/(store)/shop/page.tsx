@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import type { Product } from "@/lib/api";
+import { API_BASE } from "@/lib/api";
 import ProductCard from "../_components/ProductCard";
 import ShopFilters from "./_components/ShopFilters";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 const CATEGORY_NAMES: Record<string, string> = {
   imported: "Imported Goods",
