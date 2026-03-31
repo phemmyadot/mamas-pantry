@@ -35,13 +35,13 @@ services:
       dockerfile: apps/web/Dockerfile
       args:
         API_URL: http://backend:8000
-        NEXT_PUBLIC_API_URL: http://localhost:8003
+        NEXT_PUBLIC_API_URL: https://mamaspantryapi.babafemicodes.dev
     restart: always
     ports:
       - "3003:3000"
     environment:
       API_URL: http://backend:8000
-      NEXT_PUBLIC_API_URL: http://localhost:8003
+      NEXT_PUBLIC_API_URL: https://mamaspantryapi.babafemicodes.dev
       AUTH_TRUST_HOST: "true"
     depends_on:
       - backend
@@ -53,7 +53,7 @@ services:
       context: .
       dockerfile: apps/admin/Dockerfile
       args:
-        VITE_API_URL: http://localhost:8003
+        VITE_API_URL: https://mamaspantryapi.babafemicodes.dev
     restart: always
     ports:
       - "3004:5173"
