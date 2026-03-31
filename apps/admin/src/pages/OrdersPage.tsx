@@ -19,12 +19,13 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
 
 const PAGE_SIZE = 25;
 const FETCH_PAGE_SIZE = 100;
+const MAX_FETCH_RECORDS = 2000;
 
 async function fetchAllOrders() {
   const all: Order[] = [];
   let offset = 0;
 
-  while (true) {
+  while (all.length < MAX_FETCH_RECORDS) {
     const chunk = await orders.list({ offset, limit: FETCH_PAGE_SIZE });
     all.push(...chunk);
     if (chunk.length < FETCH_PAGE_SIZE) break;

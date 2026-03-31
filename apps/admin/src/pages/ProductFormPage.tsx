@@ -36,10 +36,11 @@ export default function ProductFormPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: existing, isLoading } = useQuery({
+  const { data: existing, isLoading, isError: queryError } = useQuery({
     queryKey: ["product", id],
     queryFn: () => products.get(id!),
     enabled: !isNew,
+    retry: false,
   });
 
   useEffect(() => {
@@ -65,7 +66,14 @@ export default function ProductFormPage() {
     }
   }, [existing]);
 
+  const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5 MB
+
   function handleFileSelect(file: File) {
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError("Image must be 5 MB or smaller");
+      return;
+    }
+    setError("");
     setPendingFile(file);
     setPendingPreview(URL.createObjectURL(file));
   }
@@ -136,6 +144,12 @@ export default function ProductFormPage() {
   const previewSrc = pendingPreview ?? form.image_url;
 
   if (!isNew && isLoading) return <div className="flex justify-center py-20"><Spinner className="w-8 h-8" /></div>;
+  if (!isNew && queryError) return (
+    <div className="max-w-2xl space-y-4">
+      <button onClick={() => navigate(-1)} className="text-sm text-muted hover:text-forest-deep">← Back</button>
+      <p className="text-spice text-sm">Product not found or could not be loaded.</p>
+    </div>
+  );
 
   return (
     <div className="max-w-2xl space-y-6">

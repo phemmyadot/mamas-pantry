@@ -133,11 +133,14 @@ class AuthService:
 
         return TokenResponse(access_token=access_token, refresh_token=new_raw)
 
-    async def logout(self, refresh_token: str) -> None:
+    async def logout(self, refresh_token: str) -> "uuid.UUID | None":
         token_hash = hash_token(refresh_token)
         stored = await self.token_repo.get_by_token_hash(token_hash)
         if stored:
+            user_id = stored.user_id
             await self.token_repo.revoke(stored.id)
+            return user_id
+        return None
 
     async def logout_all(self, user_id: uuid.UUID) -> None:
         await self.token_repo.revoke_all_for_user(user_id)
@@ -156,7 +159,7 @@ class AuthService:
         )
         await send_password_reset_email(to=user.email, reset_token=token)
 
-    async def confirm_password_reset(self, token: str, new_password: str) -> None:
+    async def confirm_password_reset(self, token: str, new_password: str) -> "uuid.UUID":
         try:
             payload = decode_signed_token(token, expected_purpose="password_reset")
         except Exception:
@@ -170,3 +173,4 @@ class AuthService:
         await self.user_repo.update_by_id(user_id, hashed_password=hash_password(new_password))
         # Invalidate all refresh tokens on password change
         await self.token_repo.revoke_all_for_user(user_id)
+        return user_id

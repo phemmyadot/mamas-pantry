@@ -61,24 +61,68 @@ export function deleteCookie(name: string) {
   document.cookie = `${name}=; path=/; max-age=0`;
 }
 
+// Cross-tab token refresh coordination via BroadcastChannel + short-lived lock cookie.
+const _authChannel =
+  typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("web_auth") : null;
+const _refreshWaiters: Array<(token: string | null) => void> = [];
+
+if (_authChannel) {
+  _authChannel.onmessage = (ev) => {
+    const waiters = _refreshWaiters.splice(0);
+    if (ev.data?.type === "token_refreshed") {
+      setCookie("mp_access", ev.data.access, 15 * 60);
+      waiters.forEach((r) => r(ev.data.access as string));
+    } else {
+      waiters.forEach((r) => r(null));
+    }
+  };
+}
+
+let refreshPromise: Promise<string | null> | null = null;
+
 /** Attempt one silent token refresh. Returns the new access token or null. */
 async function tryRefresh(): Promise<string | null> {
   const refreshToken = getCookie("mp_refresh");
   if (!refreshToken) return null;
-  try {
-    const res = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    setCookie("mp_access", data.access_token, 15 * 60);
-    setCookie("mp_refresh", data.refresh_token, 7 * 24 * 60 * 60);
-    return data.access_token as string;
-  } catch {
-    return null;
+
+  // Within-tab deduplication
+  if (refreshPromise) return refreshPromise;
+
+  // Cross-tab lock: if another tab is already refreshing, wait for its broadcast
+  const lockVal = getCookie("mp_refresh_lock");
+  if (lockVal && Date.now() - Number(lockVal) < 15_000) {
+    return new Promise<string | null>((resolve) => { _refreshWaiters.push(resolve); });
   }
+
+  setCookie("mp_refresh_lock", String(Date.now()), 15);
+
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (!res.ok) {
+        _authChannel?.postMessage({ type: "token_refresh_failed" });
+        return null;
+      }
+      const data = await res.json();
+      setCookie("mp_access", data.access_token, 15 * 60);
+      setCookie("mp_refresh", data.refresh_token, 7 * 24 * 60 * 60);
+      _authChannel?.postMessage({ type: "token_refreshed", access: data.access_token });
+      return data.access_token as string;
+    } catch {
+      _authChannel?.postMessage({ type: "token_refresh_failed" });
+      return null;
+    } finally {
+      deleteCookie("mp_refresh_lock");
+      refreshPromise = null;
+      _refreshWaiters.splice(0).forEach((r) => r(null));
+    }
+  })();
+
+  return refreshPromise;
 }
 
 /** Core fetch wrapper with automatic token refresh on 401. */
@@ -184,7 +228,7 @@ export const auth = {
     }),
 
   verifyEmail: (token: string) =>
-    apiFetch<{ detail: string }>(`/api/v1/auth/email/verify?token=${encodeURIComponent(token)}`),
+    apiFetch<void>(`/api/v1/auth/email/verify?token=${encodeURIComponent(token)}`),
 };
 
 // ---------------------------------------------------------------------------

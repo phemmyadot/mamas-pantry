@@ -143,8 +143,8 @@ async def logout(
     db: AsyncSession = Depends(get_db),
 ):
     service = AuthService(db)
-    await service.logout(refresh_token=body.refresh_token)
-    emit_audit_log(AuditEventType.LOGOUT)
+    user_id = await service.logout(refresh_token=body.refresh_token)
+    emit_audit_log(AuditEventType.LOGOUT, user_id=user_id)
 
 
 @router.post(
@@ -194,8 +194,8 @@ async def password_reset_confirm(
     db: AsyncSession = Depends(get_db),
 ):
     service = AuthService(db)
-    await service.confirm_password_reset(token=body.token, new_password=body.new_password)
-    emit_audit_log(AuditEventType.PASSWORD_RESET_CONFIRM)
+    user_id = await service.confirm_password_reset(token=body.token, new_password=body.new_password)
+    emit_audit_log(AuditEventType.PASSWORD_RESET_CONFIRM, user_id=user_id)
 
 
 # --- Email Verification (Standard tier, ENABLE_EMAIL_VERIFICATION) ---

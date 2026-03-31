@@ -1,10 +1,13 @@
 from __future__ import annotations
 import hashlib
 import hmac
+import logging
 import uuid
 from datetime import datetime, time, timezone
 from decimal import Decimal
 from zoneinfo import ZoneInfo
+
+logger = logging.getLogger(__name__)
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +25,17 @@ from app.schemas.order import InStoreOrderCreate, OrderCreate, OrderStatusUpdate
 
 # ₦500 flat delivery fee — adjust per zone if needed
 DELIVERY_FEE_NGN = Decimal("500.00")
+
+# Forward-only status transitions. cancelled is reachable from any non-terminal state.
+_ALLOWED_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
+    OrderStatus.pending: {OrderStatus.confirmed, OrderStatus.cancelled},
+    OrderStatus.confirmed: {OrderStatus.packed, OrderStatus.cancelled},
+    OrderStatus.packed: {OrderStatus.ready_for_pickup, OrderStatus.out_for_delivery, OrderStatus.cancelled},
+    OrderStatus.ready_for_pickup: {OrderStatus.delivered, OrderStatus.cancelled},
+    OrderStatus.out_for_delivery: {OrderStatus.delivered, OrderStatus.cancelled},
+    OrderStatus.delivered: set(),
+    OrderStatus.cancelled: set(),
+}
 
 
 class OrderService:
@@ -278,6 +292,12 @@ class OrderService:
 
         is_pickup = self._is_pickup(order)
 
+        allowed = _ALLOWED_TRANSITIONS.get(order.status, set())
+        if data.status not in allowed:
+            raise ValidationError(
+                f"Cannot transition order from '{order.status.value}' to '{data.status.value}'"
+            )
+
         if is_pickup and data.status == OrderStatus.out_for_delivery:
             raise ValidationError("Pickup orders should use ready_for_pickup instead of out_for_delivery")
 
@@ -319,7 +339,7 @@ class OrderService:
                     customer_name=customer_name,
                 )
         except Exception:
-            pass  # Email is best-effort
+            logger.warning("Failed to send order status email for order %s", order_id, exc_info=True)
 
         await self.db.refresh(order)
         return order

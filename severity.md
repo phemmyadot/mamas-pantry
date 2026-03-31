@@ -21,18 +21,18 @@
 
 ## Medium Severity
 
-- [ ] **No React error boundaries in admin app** — any unhandled query error renders a blank screen. Add an `ErrorBoundary` wrapper around page routes. | `apps/admin/src/`
-- [ ] **`OrdersPage` loads all orders into memory** — paginated fetch loop has no hard cap; crashes on large datasets. Add a max-records guard. | `apps/admin/src/pages/OrdersPage.tsx:23`
-- [ ] **Order status transitions have no state machine** — any status can transition to any other (e.g. `delivered → pending`). Enforce forward-only transitions in `OrderService`. | `backend/app/api/v1/orders/router.py:150`
-- [ ] **Silent `except: pass` on order status change email** — failure is never logged; customer misses critical status updates. | `backend/app/services/order_service.py:322`
-- [ ] **Missing DB indexes on high-traffic foreign keys** — `Order.user_id`, `Product.category`, `AuditLog.user_id` have no explicit indexes. Add via Alembic migration. | `backend/app/db/models/`
-- [ ] **`ProductFormPage` shows no error when product 404s** — form renders silently empty/broken. Handle query error state. | `apps/admin/src/pages/ProductFormPage.tsx:40`
-- [ ] **No client-side file size check before upload** — large files are sent to the server unnecessarily. Validate `file.size` before calling `uploadImage`. | `apps/admin/src/lib/api.ts`
-- [ ] **Delivery address `area` is optional but controls fee** — `NULL` area silently bypasses zone fee lookup. Make `area` required for delivery orders. | `backend/app/schemas/order.py:20`
-- [ ] **Token refresh not safe across browser tabs** — parallel tabs can race on refresh and desync stored tokens. Use `BroadcastChannel` or a shared lock. | `apps/web/lib/api.ts` · `apps/admin/src/lib/api.ts`
-- [ ] **Some `emit_audit_log()` calls omit `user_id`** — incomplete audit trail makes incident investigation harder. | `backend/app/api/v1/auth/router.py:143,194`
-- [ ] **No global error boundary in customer web app** — unhandled render errors crash the whole page. | `apps/web/`
-- [ ] **`verifyEmail` returns `{ detail: string }`** — inconsistent with the rest of the API response shapes; tighten the type. | `apps/web/lib/api.ts:185`
-- [ ] **No prominent error state on `createMutation` / `updateMutation` failure in `ProductFormPage`** — errors silently fail without visible feedback. | `apps/admin/src/pages/ProductFormPage.tsx`
-- [ ] **Race condition on auth token refresh across browser tabs** — same issue as web, affects admin SPA independently. | `apps/admin/src/lib/api.ts:42`
-- [ ] **No forward-only status validation on customer-facing order updates** — service layer allows arbitrary status jumps. | `backend/app/services/order_service.py`
+- [x] **No React error boundaries in admin app** — fixed: `ErrorBoundary` class component wraps `AdminLayout` in `App.tsx`. | `apps/admin/src/components/ErrorBoundary.tsx`
+- [x] **`OrdersPage` loads all orders into memory** — fixed: `MAX_FETCH_RECORDS = 2000` guard added to fetch loop. | `apps/admin/src/pages/OrdersPage.tsx`
+- [x] **Order status transitions have no state machine** — fixed: `_ALLOWED_TRANSITIONS` map enforced in `update_status` before any other checks. | `backend/app/services/order_service.py`
+- [x] **Silent `except: pass` on order status change email** — fixed: logs warning with stack trace via `logger.warning(..., exc_info=True)`. | `backend/app/services/order_service.py`
+- [x] **Missing DB indexes on high-traffic foreign keys** — not an issue: `index=True` already declared on all three columns and created in migration 0001. | `backend/app/db/models/`
+- [x] **`ProductFormPage` shows no error when product 404s** — fixed: `isError` from `useQuery` renders a friendly error state; `retry: false` prevents unnecessary retries. | `apps/admin/src/pages/ProductFormPage.tsx`
+- [x] **No client-side file size check before upload** — fixed: `handleFileSelect` rejects files > 5 MB before any upload. | `apps/admin/src/pages/ProductFormPage.tsx`
+- [x] **Delivery address `area` is optional but controls fee** — fixed: `model_validator` on `OrderCreate` raises if `fulfillment_type == delivery` and `area` is absent. | `backend/app/schemas/order.py`
+- [x] **Token refresh not safe across browser tabs** — fixed: `BroadcastChannel("web_auth")` + lock cookie in web; `BroadcastChannel("admin_auth")` + localStorage lock in admin. Within-tab `refreshPromise` deduplication added to web. | `apps/web/lib/api.ts` · `apps/admin/src/lib/api.ts`
+- [x] **Some `emit_audit_log()` calls omit `user_id`** — fixed: `logout` and `confirm_password_reset` now return `user_id`; audit calls updated. | `backend/app/api/v1/auth/router.py` · `backend/app/services/auth_service.py`
+- [x] **No global error boundary in customer web app** — fixed: `apps/web/app/error.tsx` added as Next.js root error boundary. | `apps/web/app/error.tsx`
+- [x] **`verifyEmail` returns `{ detail: string }`** — fixed: changed to `apiFetch<void>` to match API contract. | `apps/web/lib/api.ts`
+- [x] **No prominent error state on `createMutation` / `updateMutation` failure in `ProductFormPage`** — not an issue: `onError: (e) => setError(e.message)` already wired; error displays below form. | `apps/admin/src/pages/ProductFormPage.tsx`
+- [x] **Race condition on auth token refresh across browser tabs** — fixed: same `BroadcastChannel` + lock fix above covers admin SPA. | `apps/admin/src/lib/api.ts`
+- [x] **No forward-only status validation on customer-facing order updates** — fixed: same `_ALLOWED_TRANSITIONS` enforcement covers all callers of `update_status`. | `backend/app/services/order_service.py`

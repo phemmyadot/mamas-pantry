@@ -39,19 +39,47 @@ export class ApiError extends Error {
 
 // ── fetch wrapper ──────────────────────────────────────────────────────────────
 
+// Cross-tab token refresh coordination via BroadcastChannel + localStorage lock.
+const _authChannel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("admin_auth") : null;
+const _refreshWaiters: Array<() => void> = [];
+const REFRESH_LOCK = "admin_refresh_lock";
+
+if (_authChannel) {
+  _authChannel.onmessage = (ev) => {
+    if (ev.data?.type === "tokens_refreshed") tokens.set(ev.data.access, ev.data.refresh);
+    if (ev.data?.type === "tokens_cleared") tokens.clear();
+    _refreshWaiters.splice(0).forEach((r) => r());
+  };
+}
+
 let refreshPromise: Promise<void> | null = null;
 
 async function doRefresh(): Promise<void> {
+  const lock = localStorage.getItem(REFRESH_LOCK);
+  if (lock && Date.now() - Number(lock) < 15_000) {
+    return new Promise<void>((resolve) => { _refreshWaiters.push(resolve); });
+  }
+  localStorage.setItem(REFRESH_LOCK, String(Date.now()));
   const rt = tokens.refresh;
-  if (!rt) throw new ApiError(401, "No refresh token");
-  const res = await fetch("/api/v1/auth/refresh", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: rt }),
-  });
-  if (!res.ok) { tokens.clear(); throw new ApiError(401, "Session expired"); }
-  const data = await res.json();
-  tokens.set(data.access_token, data.refresh_token ?? rt);
+  if (!rt) { localStorage.removeItem(REFRESH_LOCK); throw new ApiError(401, "No refresh token"); }
+  try {
+    const res = await fetch("/api/v1/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: rt }),
+    });
+    if (!res.ok) {
+      tokens.clear();
+      _authChannel?.postMessage({ type: "tokens_cleared" });
+      throw new ApiError(401, "Session expired");
+    }
+    const data = await res.json();
+    tokens.set(data.access_token, data.refresh_token ?? rt);
+    _authChannel?.postMessage({ type: "tokens_refreshed", access: data.access_token, refresh: data.refresh_token ?? rt });
+  } finally {
+    localStorage.removeItem(REFRESH_LOCK);
+    _refreshWaiters.splice(0).forEach((r) => r());
+  }
 }
 
 export async function apiFetch<T>(

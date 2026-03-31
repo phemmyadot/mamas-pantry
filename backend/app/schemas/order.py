@@ -3,7 +3,7 @@ from enum import Enum
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.db.models.order import OrderStatus, PaymentStatus
 
@@ -45,6 +45,12 @@ class OrderCreate(BaseModel):
     fulfillment_type: FulfillmentType = FulfillmentType.delivery
     promo_code: str | None = None
     notes: str | None = None
+
+    @model_validator(mode="after")
+    def area_required_for_delivery(self) -> "OrderCreate":
+        if self.fulfillment_type == FulfillmentType.delivery and not self.delivery_address.area:
+            raise ValueError("delivery_address.area is required for delivery orders")
+        return self
 
 
 class OrderStatusUpdate(BaseModel):
