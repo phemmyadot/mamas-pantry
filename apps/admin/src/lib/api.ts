@@ -400,3 +400,35 @@ export const deliveryFees = {
   save: (rows: { area: string; fee_ngn: number }[]) =>
     apiFetch<DeliveryFee[]>("/admin/delivery-fees", { method: "PUT", body: JSON.stringify(rows) }),
 };
+
+// ── audit logs ────────────────────────────────────────────────────────────────
+
+export interface AuditLog {
+  id: string;
+  user_id: string | null;
+  event_type: string;
+  ip_address: string;
+  user_agent: string;
+  metadata_: Record<string, unknown>;
+  created_at: string;
+}
+
+export const auditLogs = {
+  list: (params?: {
+    user_id?: string;
+    event_type?: string;
+    start_date?: string;
+    end_date?: string;
+    offset?: number;
+    limit?: number;
+  }) => {
+    const qs = new URLSearchParams();
+    if (params?.user_id) qs.set("user_id", params.user_id);
+    if (params?.event_type) qs.set("event_type", params.event_type);
+    if (params?.start_date) qs.set("start_date", params.start_date);
+    if (params?.end_date) qs.set("end_date", params.end_date);
+    if (params?.offset != null) qs.set("offset", String(params.offset));
+    if (params?.limit != null) qs.set("limit", String(params.limit));
+    return apiFetch<AuditLog[]>(`/admin/audit-logs?${qs}`);
+  },
+};

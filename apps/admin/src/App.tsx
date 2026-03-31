@@ -18,6 +18,7 @@ import DeliveryFeesPage from "@/pages/DeliveryFeesPage";
 import StaffManagementPage from "@/pages/StaffManagementPage";
 import StaffDetailPage from "@/pages/StaffDetailPage";
 import InStorePurchasePage from "@/pages/InStorePurchasePage";
+import AuditLogsPage from "@/pages/AuditLogsPage";
 import { useAuth } from "@/contexts/auth-context";
 
 function HomeRedirect() {
@@ -62,6 +63,7 @@ export default function App() {
             <Route path="staff-access/:id" element={<RoleRoute allow={["admin"]}><StaffDetailPage /></RoleRoute>} />
             <Route path="promos" element={<RoleRoute allow={["admin"]}><PromosPage /></RoleRoute>} />
             <Route path="delivery-fees" element={<RoleRoute allow={["admin"]}><DeliveryFeesPage /></RoleRoute>} />
+            <Route path="audit-logs" element={<RoleRoute allow={["admin"]}><AuditLogsPage /></RoleRoute>} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -7,7 +7,7 @@ import { orders } from "@/lib/api";
 interface NavItem {
   to: string;
   label: string;
-  iconName: "dashboard" | "orders" | "inventory" | "in_store" | "shipments" | "customers" | "staff_access" | "promos" | "delivery_fees" | "analytics";
+  iconName: "dashboard" | "orders" | "inventory" | "in_store" | "shipments" | "customers" | "staff_access" | "promos" | "delivery_fees" | "analytics" | "audit_logs";
   adminOnly?: boolean;
   hideForRider?: boolean;
 }
@@ -23,6 +23,7 @@ const NAV: NavItem[] = [
   { to: "/promos", label: "Promos", iconName: "promos", adminOnly: true, hideForRider: true },
   { to: "/delivery-fees", label: "Delivery fees", iconName: "delivery_fees", adminOnly: true, hideForRider: true },
   { to: "/analytics", label: "Analytics", iconName: "analytics", adminOnly: true, hideForRider: true },
+  { to: "/audit-logs", label: "Audit logs", iconName: "audit_logs", adminOnly: true, hideForRider: true },
 ];
 
 function SideIcon({ name }: { name: NavItem["iconName"] }) {
@@ -37,6 +38,7 @@ function SideIcon({ name }: { name: NavItem["iconName"] }) {
     promos: "M20 12a2 2 0 0 0 0-4h-2V6a2 2 0 0 0-2-2H4v4a2 2 0 1 1 0 4v4h12a2 2 0 0 0 2-2v-2h2Z",
     delivery_fees: "M3 6h13v9H3V6Zm13 3h5l-2-3h-3v3Zm-10 9a2 2 0 1 0 0 .01V18Zm11 0a2 2 0 1 0 0 .01V18Z",
     analytics: "M4 19h16v2H4v-2Zm2-2V9h2v8H6Zm5 0V5h2v12h-2Zm5 0v-6h2v6h-2Z",
+    audit_logs: "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9 2 2 4-4",
   };
   return (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
