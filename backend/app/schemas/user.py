@@ -13,8 +13,11 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     email: EmailStr
     username: str | None
+    phone: str | None = None
     is_active: bool
     is_verified: bool
+    current_lat: float | None = None
+    current_lng: float | None = None
     created_at: datetime
     updated_at: datetime
     roles: list[RoleSlim] = []

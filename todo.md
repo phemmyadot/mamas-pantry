@@ -11,6 +11,7 @@
 ## Future Features
 
 ### Push Notifications (Firebase FCM)
+
 - [ ] Backend: `FcmToken` model + migration
 - [ ] Backend: `NotificationService` using FCM HTTP v1 API (service account OAuth2 via `google-auth`)
 - [ ] Backend: `POST /notifications/subscribe` — register device token
@@ -28,48 +29,56 @@
 ## Rider App — React Native
 
 ### Setup
-- [ ] Init Expo project (`apps/rider/`) — React Native + TypeScript + Expo Router
-- [ ] Add to pnpm workspace
-- [ ] Configure API client (shared base URL, JWT bearer, auto-refresh on 401)
-- [ ] Auth context — store access/refresh tokens in SecureStore
-- [ ] Protect all routes — redirect to login if unauthenticated
+
+- [x] Init Expo project (`apps/rider/`) — React Native + TypeScript + Expo Router
+- [x] Add to pnpm workspace
+- [x] Configure API client (shared base URL, JWT bearer, auto-refresh on 401)
+- [x] Auth context — store access/refresh tokens in SecureStore
+- [x] Protect all routes — redirect to login if unauthenticated
 
 ### Auth
-- [ ] Login screen — email + password (rider accounts created by admin)
-- [ ] Auto-refresh token on app foreground
+
+- [x] Login screen — email + password (rider accounts created by admin)
+- [x] Auto-refresh token on app foreground
 
 ### Deliveries
-- [ ] Deliveries list screen — show assigned orders (status: out_for_delivery)
-  - [ ] Order card: order ID, customer name, delivery address, time assigned
-  - [ ] Pull-to-refresh
-- [ ] Order detail screen
-  - [ ] Items list with quantities
-  - [ ] Customer name and delivery address
-  - [ ] "Mark as Delivered" button (single allowed action)
-  - [ ] Confirmation modal before marking delivered
-- [ ] Mark as delivered — `PATCH /api/v1/admin/orders/{id}/status` → `delivered`
+
+- [x] Deliveries list screen — show assigned orders (status: out_for_delivery)
+  - [x] Order card: order ID, customer name, delivery address, time assigned
+  - [x] Pull-to-refresh
+- [x] Order detail screen
+  - [x] Items list with quantities
+  - [x] Customer name and delivery address
+  - [x] "Mark as Delivered" button (single allowed action)
+  - [x] Confirmation modal before marking delivered
+- [x] Mark as delivered — `PATCH /api/v1/riders/me/orders/{id}/delivered`
 
 ### Navigation
-- [ ] "Navigate" button on order detail — opens Google Maps / Apple Maps with delivery address
+
+- [x] "Navigate" button on order detail — opens Google Maps / Apple Maps with delivery address
 - [ ] Deep link from notification to order detail
 
 ### Push Notifications
+
 - [ ] Register FCM token on login (`POST /notifications/subscribe`)
 - [ ] Receive push when new delivery is assigned
 - [ ] Tap notification → open relevant order detail
 
 ### Customer Verification
-- [ ] On arrival screen — show last 4 digits of customer phone for verbal confirmation
+
+- [x] On arrival screen — show last 4 digits of customer phone for verbal confirmation
 
 ### Profile
-- [ ] Profile screen — name, phone, logout button
-- [ ] Active/inactive status display
+
+- [x] Profile screen — name, phone, logout button
+- [x] Active/inactive status display
 
 ---
 
 ## Customer Mobile App — React Native
 
 ### Setup
+
 - [ ] Init Expo project (`apps/customer/`) — React Native + TypeScript + Expo Router
 - [ ] Add to pnpm workspace
 - [ ] Configure API client (shared base URL, JWT bearer, auto-refresh on 401)
@@ -77,6 +86,7 @@
 - [ ] Protect account/checkout/orders routes
 
 ### Auth
+
 - [ ] Register screen — name, email, password, phone
 - [ ] Login screen — email + password
 - [ ] Email verification screen — prompt after register, resend link
@@ -84,6 +94,7 @@
 - [ ] Persistent login — restore session from SecureStore on app launch
 
 ### Storefront
+
 - [ ] Home screen
   - [ ] Hero banner with shipment teaser (when active US haul in transit)
   - [ ] Mum's Picks horizontal scroll (gold badge, "View all" CTA)
@@ -101,11 +112,13 @@
 - [ ] Pre-order screen — upcoming shipment products, place pre-order
 
 ### Cart
+
 - [ ] Persistent cart (AsyncStorage)
 - [ ] Cart screen — line items, qty controls, promo code input, delivery fee, order total
 - [ ] Cart badge on tab bar showing item count
 
 ### Checkout (3-step)
+
 - [ ] Step 1: Address selector — saved addresses or new address form
 - [ ] Step 2: Delivery time slot picker (Today 2–6 pm, Today 6–9 pm, Tomorrow AM, Tomorrow PM)
 - [ ] Step 3: Order summary + promo code + Paystack payment
@@ -115,11 +128,13 @@
 - [ ] Confirmation screen — order ID, estimated delivery, CTA to track
 
 ### Orders
+
 - [ ] Order history screen — list with status badges
 - [ ] Order detail screen — items, totals, status timeline, rider info (when out for delivery)
 - [ ] Public order tracking screen — order ID + phone lookup (no login)
 
 ### Account
+
 - [ ] Profile screen — name, email, edit profile
 - [ ] Saved addresses — list, add new, set default, delete
 - [ ] Order history (account-scoped)
@@ -129,11 +144,13 @@
 - [ ] Logout
 
 ### Push Notifications
+
 - [ ] Register FCM token on login
 - [ ] Receive order status change notifications
 - [ ] Tap notification → open relevant order detail
 
 ### Delivery Info
+
 - [ ] Static delivery info screen — zones, cut-off times, fees
 
 ---

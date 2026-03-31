@@ -2,7 +2,6 @@ from app.db.models.user import User
 from app.db.models.token import RefreshToken
 from app.db.models.product import Product, ProductCategory
 from app.db.models.order import Order, OrderItem, OrderStatus, PaymentStatus
-from app.db.models.rider import Rider
 from app.db.models.address import Address
 from app.db.models.shipment import Shipment, ShipmentStatus
 from app.db.models.pre_order import PreOrder, PreOrderStatus
@@ -14,7 +13,6 @@ __all__ = [
     "User", "RefreshToken",
     "Product", "ProductCategory",
     "Order", "OrderItem", "OrderStatus", "PaymentStatus",
-    "Rider",
     "Address",
     "Shipment", "ShipmentStatus",
     "PreOrder", "PreOrderStatus",

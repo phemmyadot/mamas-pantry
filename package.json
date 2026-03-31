@@ -8,7 +8,10 @@
     "build:web": "pnpm --filter @mamas-pantry/web build",
     "build:admin": "pnpm --filter @mamas-pantry/admin build",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "dev:rider": "pnpm --filter @mamas-pantry/rider start",
+    "dev:rider:ios": "pnpm --filter @mamas-pantry/rider ios",
+    "dev:rider:android": "pnpm --filter @mamas-pantry/rider android"
   },
   "devDependencies": {
     "typescript": "^5"

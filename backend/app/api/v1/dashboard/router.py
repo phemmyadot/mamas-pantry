@@ -2,7 +2,7 @@
 from datetime import date, datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,12 +12,12 @@ from app.db.models.delivery_zone_fee import DeliveryZoneFee
 from app.db.models.order import Order, OrderStatus, PaymentStatus
 from app.db.models.product import Product
 from app.db.models.promo_code import PromoCode
-from app.db.models.rider import Rider
 from app.db.models.role import Role, UserRole
 from app.db.models.user import User
 from app.schemas.delivery_zone import DeliveryZoneFeeInput, DeliveryZoneFeeResponse
 from app.schemas.promo_code import PromoCodeCreate, PromoCodeResponse
-from app.schemas.rider import RiderCreate, RiderResponse, RiderUpdate
+from app.schemas.user import UserResponse
+from app.services.admin_service import AdminService
 
 router = APIRouter(tags=["admin-dashboard"])
 
@@ -76,7 +76,7 @@ async def dashboard(
     # New customers today (exclude admin/staff users)
     staff_user_ids = select(UserRole.c.user_id).join(
         Role, Role.id == UserRole.c.role_id
-    ).where(Role.name.in_(["admin", "super_admin", "staff"]))
+    ).where(Role.name.in_(["admin", "super_admin", "staff", "rider"]))
 
     new_customers_row = await db.execute(
         select(func.count(User.id)).where(
@@ -153,7 +153,7 @@ async def list_customers(
     # Exclude users that have any staff/admin role
     staff_user_ids = select(UserRole.c.user_id).join(
         Role, Role.id == UserRole.c.role_id
-    ).where(Role.name.in_(["admin", "super_admin", "staff"]))
+    ).where(Role.name.in_(["admin", "super_admin", "staff", "rider"]))
 
     rows = await db.execute(
         select(
@@ -325,61 +325,19 @@ async def create_promo_code(
 
 # ── Riders ────────────────────────────────────────────────────────────────────
 
-@router.get(
-    "/admin/riders",
-    response_model=list[RiderResponse],
-    summary="List riders (admin)",
-)
-async def list_riders(
-    _current_user: User = Depends(require_any_role("admin", "staff")),
-    db: AsyncSession = Depends(get_db),
-):
-    result = await db.execute(
-        select(Rider).where(Rider.is_active.is_(True)).order_by(Rider.name)
-    )
-    return list(result.scalars().all())
+class RiderCreateBody(BaseModel):
+    email: str
+    password: str = Field(..., min_length=8)
+    username: str = Field(..., min_length=1, max_length=50)
+    phone: str = Field(..., min_length=7, max_length=20)
 
 
-@router.post(
-    "/admin/riders",
-    response_model=RiderResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create rider (admin)",
-)
-async def create_rider(
-    body: RiderCreate,
-    _current_user: User = Depends(require_role("admin")),
-    db: AsyncSession = Depends(get_db),
-):
-    rider = Rider(**body.model_dump())
-    db.add(rider)
-    await db.flush()
-    await db.refresh(rider)
-    return rider
-
-
-@router.patch(
-    "/admin/riders/{rider_id}",
-    response_model=RiderResponse,
-    summary="Update rider (admin)",
-)
-async def update_rider(
-    rider_id: str,
-    body: RiderUpdate,
-    _current_user: User = Depends(require_role("admin")),
-    db: AsyncSession = Depends(get_db),
-):
-    import uuid as _uuid
-    result = await db.execute(select(Rider).where(Rider.id == _uuid.UUID(rider_id)))
-    rider = result.scalar_one_or_none()
-    if not rider:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Rider not found")
-    for field, value in body.model_dump(exclude_unset=True).items():
-        setattr(rider, field, value)
-    await db.flush()
-    await db.refresh(rider)
-    return rider
+class RiderUpdateBody(BaseModel):
+    username: str | None = Field(None, min_length=1, max_length=50)
+    phone: str | None = Field(None, min_length=7, max_length=20)
+    is_active: bool | None = None
+    current_lat: float | None = None
+    current_lng: float | None = None
 
 
 class LocationUpdate(BaseModel):
@@ -387,11 +345,76 @@ class LocationUpdate(BaseModel):
     lng: float
 
 
+@router.get(
+    "/admin/riders",
+    response_model=list[UserResponse],
+    summary="List riders (admin)",
+)
+async def list_riders(
+    _current_user: User = Depends(require_any_role("admin", "staff")),
+    db: AsyncSession = Depends(get_db),
+):
+    svc = AdminService(db)
+    return await svc.list_users_by_role_names(["rider"])
+
+
+@router.post(
+    "/admin/riders",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create rider (admin)",
+)
+async def create_rider(
+    body: RiderCreateBody,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    from fastapi import HTTPException
+    svc = AdminService(db)
+    try:
+        user = await svc.create_user_with_role(
+            email=body.email,
+            password=body.password,
+            username=body.username,
+            role_name="rider",
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    user.phone = body.phone
+    await db.flush()
+    await db.refresh(user)
+    return user
+
+
+@router.patch(
+    "/admin/riders/{rider_id}",
+    response_model=UserResponse,
+    summary="Update rider (admin)",
+)
+async def update_rider(
+    rider_id: str,
+    body: RiderUpdateBody,
+    _current_user: User = Depends(require_role("admin")),
+    db: AsyncSession = Depends(get_db),
+):
+    import uuid as _uuid
+    from fastapi import HTTPException
+    result = await db.execute(select(User).where(User.id == _uuid.UUID(rider_id)))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Rider not found")
+    for field, value in body.model_dump(exclude_unset=True).items():
+        setattr(user, field, value)
+    await db.flush()
+    await db.refresh(user)
+    return user
+
+
 @router.patch(
     "/admin/riders/{rider_id}/location",
-    response_model=RiderResponse,
+    response_model=UserResponse,
     summary="Update rider location",
-    description="Updates a rider's current GPS coordinates. Can be called by a WhatsApp bot or mobile app.",
+    description="Updates a rider's current GPS coordinates.",
 )
 async def update_rider_location(
     rider_id: str,
@@ -400,16 +423,16 @@ async def update_rider_location(
     db: AsyncSession = Depends(get_db),
 ):
     import uuid as _uuid
-    result = await db.execute(select(Rider).where(Rider.id == _uuid.UUID(rider_id)))
-    rider = result.scalar_one_or_none()
-    if not rider:
-        from fastapi import HTTPException
+    from fastapi import HTTPException
+    result = await db.execute(select(User).where(User.id == _uuid.UUID(rider_id)))
+    user = result.scalar_one_or_none()
+    if not user:
         raise HTTPException(status_code=404, detail="Rider not found")
-    rider.current_lat = body.lat
-    rider.current_lng = body.lng
+    user.current_lat = body.lat
+    user.current_lng = body.lng
     await db.flush()
-    await db.refresh(rider)
-    return rider
+    await db.refresh(user)
+    return user
 
 
 @router.get(
